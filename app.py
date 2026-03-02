@@ -210,7 +210,7 @@ def run_analysis(ticker: str, expiry: str, spot: float, r: float, dte: float):
     mp = max_pain(calls, puts)
     iv_df = iv_smile(calls, puts, spot)
 
-    hist_days = max(int(dte), 30)
+    hist_days = min(max(int(dte), 30), 60)
     history = m.historical_prices(hist_days)
 
     return dist, em, probs, pctiles, mp, iv_df, calls, puts, history
