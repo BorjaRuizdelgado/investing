@@ -16,7 +16,7 @@ from analysis import (
     max_pain,
     iv_smile,
 )
-from charts import build_forecast_chart, build_iv_smile_chart, build_oi_chart
+from charts import build_forecast_chart, build_distribution_chart, build_iv_smile_chart, build_oi_chart
 
 # ======================================================================
 # Theme
@@ -97,9 +97,6 @@ with st.sidebar:
     ).strip().upper()
 
     analyse_btn = st.button("Analyse", use_container_width=True)
-
-    st.divider()
-    st.caption("Built with yfinance · Breeden-Litzenberger method")
 
 
 # ======================================================================
@@ -279,6 +276,24 @@ st.plotly_chart(
         puts=puts,
         history=history,
         days_to_expiry=dte,
+    ),
+    use_container_width=True,
+    config={"displayModeBar": True, "scrollZoom": True},
+)
+
+
+# ======================================================================
+# Distribution chart
+# ======================================================================
+
+st.plotly_chart(
+    build_distribution_chart(
+        dist=dist,
+        spot=spot,
+        pctiles=pctiles,
+        mp=mp,
+        calls=calls,
+        puts=puts,
     ),
     use_container_width=True,
     config={"displayModeBar": True, "scrollZoom": True},

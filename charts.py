@@ -106,12 +106,7 @@ def build_forecast_chart(
         future_dates = [anchor + timedelta(days=i+1) for i in range(max(dte_days, 2))]
 
     # ------------------------------------------------------------------
-    # 1) OPTIONS BARS — background heatmap of activity at each strike
-    # ------------------------------------------------------------------
-    _add_options_bars(fig, calls, puts, spot, future_dates)
-
-    # ------------------------------------------------------------------
-    # 2) PROJECTION FAN — percentile bands expanding from spot to expiry
+    # 1) PROJECTION FAN — percentile bands expanding from spot to expiry
     # ------------------------------------------------------------------
     _add_projection_fan(fig, dist, pctiles, spot, anchor, future_dates)
 
@@ -136,12 +131,7 @@ def build_forecast_chart(
         ))
 
     # ------------------------------------------------------------------
-    # 4) SIDEWAYS PDF at expiry
-    # ------------------------------------------------------------------
-    _add_pdf_at_expiry(fig, dist, future_dates, anchor)
-
-    # ------------------------------------------------------------------
-    # 5) KEY LEVELS — horizontal lines
+    # 3) KEY LEVELS — horizontal lines
     # ------------------------------------------------------------------
     all_dates = hist_dates + future_dates
     xmin = min(all_dates) if all_dates else anchor - timedelta(days=30)
@@ -402,6 +392,155 @@ def _add_pdf_at_expiry(fig, dist, future_dates, anchor):
         hoverinfo="skip",
         showlegend=True,
     ))
+
+
+# ======================================================================
+# Implied Distribution chart
+# ======================================================================
+
+def build_distribution_chart(
+    dist: dict,
+    spot: float,
+    pctiles: dict,
+    mp: float,
+    calls: pd.DataFrame,
+    puts: pd.DataFrame,
+) -> go.Figure:
+    """
+    Standalone chart showing the options-implied probability distribution.
+    X-axis: strike/price, Y-axis: probability density.
+    Shaded regions for percentile bands, with key levels marked.
+    """
+    fig = go.Figure()
+
+    K = dist["strikes"]
+    pdf = dist["pdf"]
+
+    if pdf.max() <= 0:
+        fig.add_annotation(text="No distribution data", xref="paper", yref="paper",
+                           x=0.5, y=0.5, showarrow=False,
+                           font=dict(size=14, color=THEME["text_muted"]))
+        fig.update_layout(**LAYOUT_DEFAULTS, height=340)
+        return fig
+
+    # Percentile values
+    p10 = pctiles.get(10, spot)
+    p25 = pctiles.get(25, spot)
+    p75 = pctiles.get(75, spot)
+    p90 = pctiles.get(90, spot)
+    mean = dist["mean"]
+
+    # ------------------------------------------------------------------
+    # Shaded bands under the PDF
+    # ------------------------------------------------------------------
+    # 10-90 band (outer) — light fill
+    mask_outer = (K >= p10) & (K <= p90)
+    K_outer = K[mask_outer]
+    pdf_outer = pdf[mask_outer]
+    if len(K_outer) > 0:
+        fig.add_trace(go.Scatter(
+            x=np.concatenate([[K_outer[0]], K_outer, [K_outer[-1]]]),
+            y=np.concatenate([[0], pdf_outer, [0]]),
+            fill="toself",
+            fillcolor="rgba(77,106,97,0.10)",
+            line=dict(width=0),
+            mode="lines",
+            name="80% range (10th–90th)",
+            hoverinfo="skip",
+        ))
+
+    # 25-75 band (inner) — darker fill
+    mask_inner = (K >= p25) & (K <= p75)
+    K_inner = K[mask_inner]
+    pdf_inner = pdf[mask_inner]
+    if len(K_inner) > 0:
+        fig.add_trace(go.Scatter(
+            x=np.concatenate([[K_inner[0]], K_inner, [K_inner[-1]]]),
+            y=np.concatenate([[0], pdf_inner, [0]]),
+            fill="toself",
+            fillcolor="rgba(77,106,97,0.20)",
+            line=dict(width=0),
+            mode="lines",
+            name="50% range (25th–75th)",
+            hoverinfo="skip",
+        ))
+
+    # ------------------------------------------------------------------
+    # PDF curve
+    # ------------------------------------------------------------------
+    fig.add_trace(go.Scatter(
+        x=K, y=pdf,
+        mode="lines",
+        line=dict(color=THEME["accent"], width=2),
+        name="Implied density",
+        hovertemplate="$%{x:,.2f}<br>Density: %{y:.4f}<extra></extra>",
+    ))
+
+    # ------------------------------------------------------------------
+    # Key levels as vertical lines
+    # ------------------------------------------------------------------
+    y_max = pdf.max()
+
+    # Spot
+    fig.add_vline(x=spot, line=dict(color=THEME["text"], width=1.5, dash="dash"), opacity=0.6)
+    fig.add_annotation(text=f"Spot ${spot:,.2f}", x=spot, y=y_max * 1.08,
+                       xref="x", yref="y", showarrow=False,
+                       font=dict(size=11, color=THEME["text"]))
+
+    # Mean
+    fig.add_vline(x=mean, line=dict(color=THEME["accent"], width=1.5, dash="dashdot"), opacity=0.5)
+    fig.add_annotation(text=f"Mean ${mean:,.2f}", x=mean, y=y_max * 0.98,
+                       xref="x", yref="y", showarrow=False,
+                       font=dict(size=10, color=THEME["accent"]))
+
+    # Max pain
+    if not np.isnan(mp) and abs(mp - spot) / spot < 0.25:
+        fig.add_vline(x=mp, line=dict(color=THEME["accent_warm"], width=1, dash="dot"), opacity=0.4)
+        fig.add_annotation(text=f"Max Pain ${mp:,.2f}", x=mp, y=y_max * 0.88,
+                           xref="x", yref="y", showarrow=False,
+                           font=dict(size=10, color=THEME["accent_warm"]))
+
+    # Percentile markers at the bottom
+    for label, val, colour in [
+        ("10th", p10, THEME["red"]),
+        ("25th", p25, THEME["accent_warm"]),
+        ("75th", p75, THEME["accent"]),
+        ("90th", p90, THEME["green"]),
+    ]:
+        fig.add_annotation(
+            text=f"{label}<br>${val:,.0f}",
+            x=val, y=0,
+            xref="x", yref="y",
+            showarrow=True,
+            arrowhead=0, arrowwidth=1, arrowcolor=colour,
+            ax=0, ay=30,
+            font=dict(size=10, color=colour),
+        )
+
+    # ------------------------------------------------------------------
+    # Layout
+    # ------------------------------------------------------------------
+    cdf = dist["cdf"]
+    lo_01 = K[np.searchsorted(cdf, 0.01)]
+    hi_99 = K[min(np.searchsorted(cdf, 0.99), len(K) - 1)]
+
+    _sm_layout = {**LAYOUT_DEFAULTS, "margin": dict(l=65, r=30, t=55, b=55)}
+    fig.update_layout(
+        **_sm_layout,
+        title=dict(text="<b>Implied Price Distribution</b>",
+                   font=dict(size=15, color=THEME["text"]), x=0.01),
+        xaxis=dict(**_axis_style(), title="Price ($)", tickprefix="$",
+                   range=[lo_01 * 0.98, hi_99 * 1.02]),
+        yaxis=dict(**_axis_style(), title="Probability Density",
+                   showticklabels=False),
+        showlegend=True,
+        legend=dict(bgcolor="rgba(247,245,240,0.90)", bordercolor=THEME["border_light"],
+                    borderwidth=1, font=dict(size=12)),
+        height=340,
+        hovermode="x unified",
+    )
+
+    return fig
 
 
 # ======================================================================
