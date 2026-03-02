@@ -166,12 +166,7 @@ def build_forecast_chart(
     # ------------------------------------------------------------------
     # Layout
     # ------------------------------------------------------------------
-    # Y-axis range to include distribution tails + history
-    K, cdf = dist["strikes"], dist["cdf"]
-    lo_99 = K[np.searchsorted(cdf, 0.01)]
-    hi_99 = K[min(np.searchsorted(cdf, 0.99), len(K) - 1)]
-    price_lo = min(lo_99, min(hist_prices) if hist_prices else spot * 0.85) * 0.97
-    price_hi = max(hi_99, max(hist_prices) if hist_prices else spot * 1.15) * 1.03
+    # Let Plotly autoscale the Y-axis (avoid custom data scaling)
 
     fig.update_layout(
         **LAYOUT_DEFAULTS,
@@ -179,7 +174,7 @@ def build_forecast_chart(
                    font=dict(size=17, color=THEME["text"]), x=0.01),
         xaxis=dict(**_axis_style(), title=""),
         yaxis=dict(**_axis_style(), title="Price ($)", tickprefix="$",
-                   range=[price_lo, price_hi]),
+               autorange=True),
         showlegend=True,
         legend=dict(
             bgcolor="rgba(247,245,240,0.90)",
@@ -512,19 +507,14 @@ def build_distribution_chart(
         )
 
     # ------------------------------------------------------------------
-    # Layout
+    # Layout — allow Plotly to autoscale the X-axis (no custom scaling)
     # ------------------------------------------------------------------
-    cdf = dist["cdf"]
-    lo_01 = K[np.searchsorted(cdf, 0.01)]
-    hi_99 = K[min(np.searchsorted(cdf, 0.99), len(K) - 1)]
-
     _sm_layout = {**LAYOUT_DEFAULTS, "margin": dict(l=65, r=30, t=80, b=65)}
     fig.update_layout(
         **_sm_layout,
         title=dict(text="<b>Implied Price Distribution</b>",
                    font=dict(size=16, color=THEME["text"]), x=0.01),
-        xaxis=dict(**_axis_style(), title="Price ($)", tickprefix="$",
-                   range=[lo_01 * 0.98, hi_99 * 1.02]),
+        xaxis=dict(**_axis_style(), title="Price ($)", tickprefix="$", autorange=True),
         yaxis=dict(**_axis_style(), title="Probability Density",
                    showticklabels=False),
         showlegend=True,
