@@ -7,7 +7,7 @@ Run with:
 
 import streamlit as st
 import numpy as np
-from data_fetcher import MarketData
+from data_fetcher import MarketData, get_market_data
 from analysis import (
     implied_distribution,
     expected_move,
@@ -30,6 +30,7 @@ RED = "#b05040"
 
 st.set_page_config(
     page_title="Options-Implied Forecast",
+    page_icon="favicon.png",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -92,11 +93,11 @@ with st.sidebar:
     ticker_input = st.text_input(
         "Ticker symbol",
         value="AAPL",
-        placeholder="e.g. AAPL, TSLA, SPY …",
-        help="Enter any US stock or ETF ticker symbol.",
+        placeholder="e.g. AAPL, TSLA, SPY, BTC, ETH …",
+        help="Enter any US stock/ETF ticker, or BTC / ETH for crypto options (via Deribit).",
     ).strip().upper()
 
-    analyse_btn = st.button("Analyse", use_container_width=True)
+    analyse_btn = st.button("Analyse", width="stretch")
 
 
 # ======================================================================
@@ -131,7 +132,7 @@ if not ticker_input:
 @st.cache_data(ttl=300, show_spinner=False)
 def fetch_data(ticker: str):
     """Fetch serializable market metadata for a ticker. Cached 5 min."""
-    market = MarketData(ticker)
+    market = get_market_data(ticker)
     spot = market.spot_price
     expirations = [e for e in market.expirations if market.days_to_expiry(e) >= 1]
     r = MarketData.risk_free_rate()
@@ -144,9 +145,22 @@ if analyse_btn or st.session_state.get("last_ticker") != ticker_input:
     try:
         with st.spinner(f"Fetching data for **{ticker_input}** …"):
             spot, expirations, r = fetch_data(ticker_input)
-            market = MarketData(ticker_input)  # lightweight; kept in session
+            market = get_market_data(ticker_input)  # lightweight; kept in session
         if not expirations:
-            st.error(f"No options data available for **{ticker_input}**.")
+            # Detect if this is a crypto symbol without options
+            from crypto_fetcher import CryptoMarketData, _LIKELY_CRYPTO
+            base = CryptoMarketData._strip_suffix(ticker_input)
+            if base in _LIKELY_CRYPTO:
+                supported = ", ".join(sorted(
+                    c for c in _LIKELY_CRYPTO
+                    if CryptoMarketData.is_crypto(c)
+                ))
+                st.error(
+                    f"No crypto options available for **{ticker_input}**. "
+                    f"Deribit currently lists options for: **{supported}**."
+                )
+            else:
+                st.error(f"No options data available for **{ticker_input}**.")
             st.stop()
         st.session_state["last_ticker"] = ticker_input
         st.session_state["market"] = market
@@ -198,7 +212,7 @@ with st.sidebar:
 @st.cache_data(ttl=300, show_spinner=False)
 def run_analysis(ticker: str, expiry: str, spot: float, r: float, dte: float):
     """Run the full analysis pipeline for one expiry."""
-    m = MarketData(ticker)
+    m = get_market_data(ticker)
     chain = m.options_chain(expiry)
     calls, puts = chain["calls"], chain["puts"]
 
@@ -277,7 +291,7 @@ st.plotly_chart(
         history=history,
         days_to_expiry=dte,
     ),
-    use_container_width=True,
+    width="stretch",
     config={"displayModeBar": True, "scrollZoom": True},
 )
 
@@ -295,7 +309,7 @@ st.plotly_chart(
         calls=calls,
         puts=puts,
     ),
-    use_container_width=True,
+    width="stretch",
     config={"displayModeBar": True, "scrollZoom": True},
 )
 
@@ -309,14 +323,14 @@ col_iv, col_oi = st.columns(2)
 with col_iv:
     st.plotly_chart(
         build_iv_smile_chart(iv_df, spot),
-        use_container_width=True,
+        width="stretch",
         config={"displayModeBar": False},
     )
 
 with col_oi:
     st.plotly_chart(
         build_oi_chart(calls, puts, spot),
-        use_container_width=True,
+        width="stretch",
         config={"displayModeBar": False},
     )
 

@@ -2,13 +2,15 @@
 
 > See where the market thinks a stock price is headed — derived entirely from publicly available options data.
 
+> **Note:** This is a personal / learning project built quickly for fun — it is **not production-ready**. There are rough edges, limited error handling, and no test suite. That said, contributions are very welcome! If you find it useful and want to improve it, check out [CONTRIBUTING.md](CONTRIBUTING.md).
+
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Streamlit](https://img.shields.io/badge/streamlit-%E2%9C%A8-red)](https://streamlit.io/)
 
 ## What It Does
 
-The tool reads real option chains from Yahoo Finance and derives a **probability distribution** for a stock's future price at a given expiration. It answers questions like:
+The tool reads real option chains and derives a **probability distribution** for a stock's or cryptocurrency's future price at a given expiration. It answers questions like:
 
 - What price range does the market expect?
 - What is the probability the stock goes up or down?
@@ -35,7 +37,7 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Open the URL shown in your terminal (usually `http://localhost:8501`). Enter any US stock ticker and pick an expiration date.
+Open the URL shown in your terminal (usually `http://localhost:8501`). Enter any US stock ticker (or **BTC** / **ETH** for crypto options) and pick an expiration date.
 
 ### CLI
 
@@ -46,13 +48,15 @@ python main.py AAPL              # nearest expiration
 python main.py AAPL --expiry 2   # third-nearest expiration
 python main.py TSLA --all-expiries
 python main.py SPY --save        # save charts to output/
+python main.py BTC               # crypto options via Deribit
+python main.py ETH --expiry 1
 ```
 
 ---
 
 ## How It Works
 
-1. **Fetch the option chain** for a given ticker via `yfinance`.
+1. **Fetch the option chain** for a given ticker via `yfinance` (stocks/ETFs) or the **Deribit public API** (BTC/ETH crypto options).
 2. **Build the risk-neutral probability distribution** using the [Breeden-Litzenberger identity](https://quant.stackexchange.com/questions/29524/breeden-litzenberger-formula-for-risk-neutral-densities) — the second derivative of call prices with respect to strike gives the probability density.
 3. **Compute key metrics**: expected price, expected move, bull/bear probabilities, percentile ranges, max pain, IV smile.
 4. **Visualise** historical prices, the projection cone, options activity, and the implied distribution in interactive charts.
@@ -97,6 +101,7 @@ This yields the **market-implied distribution** — not a prediction of what *wi
 ├── app.py              # Streamlit web UI
 ├── main.py             # CLI entry point
 ├── data_fetcher.py     # Yahoo Finance data layer
+├── crypto_fetcher.py   # Deribit API data layer (BTC/ETH options)
 ├── analysis.py         # Distribution, metrics, IV smile
 ├── charts.py           # Plotly interactive charts
 ├── visualize.py        # Matplotlib static charts (CLI)
@@ -110,7 +115,8 @@ This yields the **market-implied distribution** — not a prediction of what *wi
 
 | Package | Purpose |
 |---|---|
-| `yfinance` | Free market and options data |
+| `yfinance` | Free market and options data (stocks/ETFs) |
+| `requests` | HTTP client for the Deribit crypto options API |
 | `numpy` / `scipy` | Numerical analysis and interpolation |
 | `pandas` | Data wrangling |
 | `streamlit` | Interactive web UI |
@@ -125,12 +131,13 @@ This yields the **market-implied distribution** — not a prediction of what *wi
 - Yahoo Finance data can be delayed or stale for illiquid options.
 - Wide bid-ask spreads on far OTM options add noise to the distribution tails.
 - The analysis is a snapshot — it changes as options prices update.
+- **Crypto options** are sourced from Deribit only — only BTC and ETH are supported. Deribit prices are quoted as a fraction of the underlying and converted to USD at the current index price.
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get involved.
+This started as a quick weekend project, so there is plenty of room for improvement. Bug fixes, new features, better error handling, tests — all contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 

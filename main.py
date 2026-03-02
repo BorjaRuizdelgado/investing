@@ -12,7 +12,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from data_fetcher import MarketData
+from data_fetcher import MarketData, get_market_data
 from analysis import (
     implied_distribution,
     expected_move,
@@ -113,7 +113,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Options-Implied Price Forecast – see where the market thinks a stock is going."
     )
-    parser.add_argument("ticker", help="Stock ticker symbol (e.g. AAPL, TSLA, SPY)")
+    parser.add_argument("ticker", help="Ticker symbol (e.g. AAPL, TSLA, SPY, BTC, ETH)")
     parser.add_argument(
         "--expiry", type=int, default=0,
         help="Expiration index (0 = nearest, 1 = next, …). Default: 0"
@@ -129,7 +129,7 @@ def main():
     args = parser.parse_args()
 
     print(f"\nFetching data for {args.ticker.upper()} …")
-    market = MarketData(args.ticker)
+    market = get_market_data(args.ticker)
 
     expirations = market.expirations
     if not expirations:

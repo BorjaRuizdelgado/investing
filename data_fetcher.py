@@ -1,5 +1,9 @@
 """
 data_fetcher.py – Fetch options chain and market data from Yahoo Finance.
+
+For crypto options (BTC, ETH), see crypto_fetcher.py which uses the
+Deribit public API.  The `get_market_data()` factory at the bottom of
+this module picks the right class automatically.
 """
 
 import yfinance as yf
@@ -107,3 +111,28 @@ class MarketData:
         df.loc[mask, "mid"] = df.loc[mask, "lastPrice"]
         df = df.sort_values("strike").reset_index(drop=True)
         return df
+
+
+# ======================================================================
+# Factory – auto-select MarketData vs CryptoMarketData
+# ======================================================================
+
+def get_market_data(ticker: str):
+    """
+    Return the appropriate data provider for *ticker*.
+
+    Routing logic:
+    1. Strip common suffixes (e.g. BTC-USD → BTC).
+    2. If the base symbol is a known crypto AND Deribit has live options
+       for it → CryptoMarketData (Deribit).
+    3. Otherwise → MarketData (Yahoo Finance).
+
+    If the crypto is recognised but has no options (e.g. SOL), it falls
+    through to yfinance so the user gets a clear "no options" message
+    rather than a confusing routing error.
+    """
+    from crypto_fetcher import CryptoMarketData
+
+    if CryptoMarketData.is_crypto(ticker):
+        return CryptoMarketData(ticker)
+    return MarketData(ticker)

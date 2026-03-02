@@ -71,6 +71,7 @@ Thanks for your interest in improving **Options-Implied Price Forecast**! Contri
 | `app.py` | Streamlit web UI |
 | `main.py` | CLI entry point |
 | `data_fetcher.py` | Yahoo Finance data layer |
+| `crypto_fetcher.py` | Deribit API data layer (BTC/ETH options) |
 | `analysis.py` | Distribution, metrics, IV smile |
 | `charts.py` | Plotly interactive charts |
 | `visualize.py` | Matplotlib static charts (CLI) |
