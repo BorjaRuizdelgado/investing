@@ -361,6 +361,5 @@ with st.expander("Distribution Details", expanded=False):
 
 st.divider()
 st.caption(
-    "This tool shows what is already priced into traded options — it does not predict the future.  \n"
-    "Read the full methodology and limitations in the project README."
+    "This tool shows what is already priced into traded options — it does not predict the future."
 )

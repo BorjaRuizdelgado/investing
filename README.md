@@ -1,10 +1,14 @@
 # Options-Implied Price Forecast
 
-Extract where the market thinks a stock price is headed, using **publicly available options data** from Yahoo Finance.
+> See where the market thinks a stock price is headed — derived entirely from publicly available options data.
+
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Streamlit](https://img.shields.io/badge/streamlit-%E2%9C%A8-red)](https://streamlit.io/)
 
 ## What It Does
 
-The tool reads real option chains and derives a **probability distribution** for a stock's future price. It answers questions like:
+The tool reads real option chains from Yahoo Finance and derives a **probability distribution** for a stock's future price at a given expiration. It answers questions like:
 
 - What price range does the market expect?
 - What is the probability the stock goes up or down?
@@ -12,11 +16,15 @@ The tool reads real option chains and derives a **probability distribution** for
 
 It does **not** predict the future — it shows what is already priced into traded options contracts.
 
-## Interactive UI
+---
 
-The primary interface is a **Streamlit web app** with interactive Plotly charts.
+## Quick Start
 
 ```bash
+# Clone the repository
+git clone https://github.com/borjaruizdelgado/options-implied-forecast.git
+cd options-implied-forecast
+
 # Create a virtual environment (recommended)
 python -m venv .venv && source .venv/bin/activate
 
@@ -29,7 +37,7 @@ streamlit run app.py
 
 Open the URL shown in your terminal (usually `http://localhost:8501`). Enter any US stock ticker and pick an expiration date.
 
-### CLI (alternative)
+### CLI
 
 A command-line interface is also available:
 
@@ -40,19 +48,29 @@ python main.py TSLA --all-expiries
 python main.py SPY --save        # save charts to output/
 ```
 
+---
+
 ## How It Works
 
-1. **Fetch the options chain** for a given ticker via `yfinance`.
+1. **Fetch the option chain** for a given ticker via `yfinance`.
 2. **Build the risk-neutral probability distribution** using the [Breeden-Litzenberger identity](https://quant.stackexchange.com/questions/29524/breeden-litzenberger-formula-for-risk-neutral-densities) — the second derivative of call prices with respect to strike gives the probability density.
 3. **Compute key metrics**: expected price, expected move, bull/bear probabilities, percentile ranges, max pain, IV smile.
 4. **Visualise** historical prices, the projection cone, options activity, and the implied distribution in interactive charts.
 
-## Output
+---
 
-- **Forecast chart** — historical prices on the left, expanding projection cone (50 % and 80 % confidence bands) on the right, with options activity shown as background bars.
-- **IV Smile** — implied volatility across strikes for calls and puts.
-- **Open Interest by Strike** — bar chart of where the most contracts sit.
-- **Key metrics** — expected price, expected move, P(above/below spot), max pain, percentile breakdown.
+## Charts & Output
+
+| Chart | Description |
+|---|---|
+| **Forecast** | Historical prices on the left, expanding projection cone (percentile bands) on the right, with options activity as background bars. |
+| **Implied Distribution** | Risk-neutral probability density across strikes, trimmed to the meaningful range (1st–99th percentile). |
+| **IV Smile** | Implied volatility across strikes for calls and puts. |
+| **Open Interest** | Bar chart showing where the most contracts sit. |
+
+Key metrics displayed: expected price, expected move, P(above/below spot), max pain, percentile breakdown.
+
+---
 
 ## Methodology
 
@@ -62,23 +80,44 @@ $$f(K) = e^{rT} \frac{\partial^2 C}{\partial K^2}$$
 
 where $C(K)$ is the call price at strike $K$, $r$ is the risk-free rate, and $T$ is time to expiration.
 
-In practice we:
+In practice:
 
-1. Select OTM puts (K < spot) and OTM calls (K >= spot).
+1. Select OTM puts ($K < S$) and OTM calls ($K \geq S$).
 2. Convert OTM puts to equivalent call prices via put-call parity: $C = P + S - Ke^{-rT}$.
 3. Fit a smooth cubic spline to the combined call-price curve.
 4. Take the second derivative analytically and normalise to get a proper density.
 
 This yields the **market-implied distribution** — not a prediction of what *will* happen, but what the options market is *pricing in*.
 
+---
+
+## Project Structure
+
+```
+├── app.py              # Streamlit web UI
+├── main.py             # CLI entry point
+├── data_fetcher.py     # Yahoo Finance data layer
+├── analysis.py         # Distribution, metrics, IV smile
+├── charts.py           # Plotly interactive charts
+├── visualize.py        # Matplotlib static charts (CLI)
+├── requirements.txt
+└── options_forecast/   # Package layout (analysis/ + charts/)
+```
+
+---
+
 ## Dependencies
 
-- `yfinance` — free market and options data
-- `numpy` / `scipy` — numerical analysis and interpolation
-- `pandas` — data wrangling
-- `streamlit` — interactive web UI
-- `plotly` — interactive charts
-- `matplotlib` — static charts (CLI mode)
+| Package | Purpose |
+|---|---|
+| `yfinance` | Free market and options data |
+| `numpy` / `scipy` | Numerical analysis and interpolation |
+| `pandas` | Data wrangling |
+| `streamlit` | Interactive web UI |
+| `plotly` | Interactive charts |
+| `matplotlib` | Static charts (CLI mode) |
+
+---
 
 ## Limitations
 
@@ -86,3 +125,13 @@ This yields the **market-implied distribution** — not a prediction of what *wi
 - Yahoo Finance data can be delayed or stale for illiquid options.
 - Wide bid-ask spreads on far OTM options add noise to the distribution tails.
 - The analysis is a snapshot — it changes as options prices update.
+
+---
+
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get involved.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

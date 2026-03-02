@@ -141,18 +141,18 @@ def build_forecast_chart(
     xmax = max(all_dates) if all_dates else anchor + timedelta(days=30)
 
     # Spot
-    fig.add_hline(y=spot, line=dict(color=THEME["text"], width=1, dash="dash"), opacity=0.5)
+    fig.add_hline(y=spot, line=dict(color=THEME["text"], width=2, dash="dash"), opacity=0.5)
     fig.add_annotation(text=f"Spot ${spot:,.2f}", x=1.01, y=spot,
                        xref="paper", yref="y", xanchor="left",
                        font=dict(size=13, color=THEME["text"]), showarrow=False)
     # Mean
-    fig.add_hline(y=dist["mean"], line=dict(color=THEME["accent"], width=1, dash="dashdot"), opacity=0.4)
+    fig.add_hline(y=dist["mean"], line=dict(color=THEME["accent"], width=2, dash="dashdot"), opacity=0.4)
     fig.add_annotation(text=f"Mean ${dist['mean']:,.2f}", x=1.01, y=dist["mean"],
                        xref="paper", yref="y", xanchor="left",
                        font=dict(size=13, color=THEME["accent"]), showarrow=False)
     # Max pain
     if not np.isnan(mp) and abs(mp - spot) / spot < 0.25:
-        fig.add_hline(y=mp, line=dict(color=THEME["accent_warm"], width=1, dash="dot"), opacity=0.35)
+        fig.add_hline(y=mp, line=dict(color=THEME["accent_warm"], width=2, dash="dot"), opacity=0.35)
         fig.add_annotation(text=f"Max Pain ${mp:,.2f}", x=1.01, y=mp,
                            xref="paper", yref="y", xanchor="left",
                            font=dict(size=13, color=THEME["accent_warm"]), showarrow=False)
@@ -481,7 +481,7 @@ def build_distribution_chart(
     for i, (lbl, val, _, colour) in enumerate(level_annotations):
         y_pos = y_max * y_positions[i] if i < len(y_positions) else y_max * 0.82
         fig.add_vline(x=val,
-                      line=dict(color=colour, width=1.5,
+                      line=dict(color=colour, width=2,
                                 dash="dash" if lbl == "Spot" else
                                      "dashdot" if lbl == "Mean" else "dot"),
                       opacity=0.5 if lbl == "Spot" else 0.4)
@@ -507,14 +507,23 @@ def build_distribution_chart(
         )
 
     # ------------------------------------------------------------------
-    # Layout — allow Plotly to autoscale the X-axis (no custom scaling)
+    # Layout — trim X-axis to the meaningful density region
     # ------------------------------------------------------------------
+    # Use the 1st–99th percentile range with 15% padding so the tails
+    # (which carry almost no visual information) are clipped.
+    p01 = K[np.searchsorted(cdf, 0.01)]
+    p99 = K[min(np.searchsorted(cdf, 0.99), len(K) - 1)]
+    x_pad = (p99 - p01) * 0.15
+    x_lo = p01 - x_pad
+    x_hi = p99 + x_pad
+
     _sm_layout = {**LAYOUT_DEFAULTS, "margin": dict(l=65, r=30, t=80, b=65)}
     fig.update_layout(
         **_sm_layout,
         title=dict(text="<b>Implied Price Distribution</b>",
                    font=dict(size=16, color=THEME["text"]), x=0.01),
-        xaxis=dict(**_axis_style(), title="Price ($)", tickprefix="$", autorange=True),
+        xaxis=dict(**_axis_style(), title="Price ($)", tickprefix="$",
+                   range=[x_lo, x_hi]),
         yaxis=dict(**_axis_style(), title="Probability Density",
                    showticklabels=False),
         showlegend=True,
@@ -567,7 +576,7 @@ def build_iv_smile_chart(iv_df: pd.DataFrame, spot: float) -> go.Figure:
             hovertemplate="<b>Put</b> $%{x:,.0f}<br>IV: %{y:.1f}%<extra></extra>",
         ))
 
-    fig.add_vline(x=spot, line=dict(color=THEME["text"], width=1, dash="dash"),
+    fig.add_vline(x=spot, line=dict(color=THEME["text"], width=2, dash="dash"),
                   opacity=0.4)
     fig.add_annotation(text=f"Spot ${spot:,.2f}", x=spot, y=1.05,
                        xref="x", yref="paper", showarrow=False,
@@ -666,7 +675,7 @@ def build_oi_chart(calls: pd.DataFrame, puts: pd.DataFrame, spot: float) -> go.F
             hovertemplate="<b>Put</b> $%{x:,.0f}<br>Vol: %{y:,.0f}<extra></extra>",
         ))
 
-    fig.add_vline(x=spot, line=dict(color=THEME["text"], width=1, dash="dash"),
+    fig.add_vline(x=spot, line=dict(color=THEME["text"], width=2, dash="dash"),
                   opacity=0.4)
     fig.add_annotation(text=f"Spot ${spot:,.2f}", x=spot, y=1.05,
                        xref="x", yref="paper", showarrow=False,
