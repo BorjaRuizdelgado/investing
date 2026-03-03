@@ -1,0 +1,11 @@
+{
+  "name": "options-forecast",
+  "compatibility_date": "2025-05-01",
+  "main": "src/worker.js",
+  "observability": { "enabled": true },
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "binding": "ASSETS"
+  },
+  "compatibility_flags": ["nodejs_compat"]
+}

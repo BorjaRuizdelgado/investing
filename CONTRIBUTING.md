@@ -2,8 +2,6 @@
 
 Thanks for your interest in improving **Options-Implied Price Forecast**! Contributions of all kinds are welcome — bug reports, feature ideas, documentation fixes, code improvements.
 
----
-
 ## Getting Started
 
 1. **Fork** the repository and clone your fork:
@@ -13,20 +11,17 @@ Thanks for your interest in improving **Options-Implied Price Forecast**! Contri
    cd options-implied-forecast
    ```
 
-2. Create a **virtual environment** and install dependencies:
+2. Install dependencies:
 
    ```bash
-   python -m venv .venv && source .venv/bin/activate
-   pip install -r requirements.txt
+   npm install
    ```
 
-3. Verify the app runs:
+3. Start the dev server:
 
    ```bash
-   streamlit run app.py
+   npm run dev
    ```
-
----
 
 ## Making Changes
 
@@ -38,12 +33,7 @@ Thanks for your interest in improving **Options-Implied Price Forecast**! Contri
 
 2. Make your changes. Keep commits small and focused.
 
-3. Test your changes locally — run the Streamlit app and the CLI to make sure nothing is broken:
-
-   ```bash
-   streamlit run app.py          # web UI
-   python main.py AAPL           # CLI
-   ```
+3. Test locally — run the dev server and verify your changes work for both stock tickers (AAPL) and crypto (BTC).
 
 4. **Commit** with a clear, descriptive message:
 
@@ -53,31 +43,18 @@ Thanks for your interest in improving **Options-Implied Price Forecast**! Contri
 
 5. **Push** and open a **Pull Request** against `main`.
 
----
-
-## Code Style
-
-- **Python 3.10+** — use modern syntax (type hints, `match`, `|` unions where appropriate).
-- Follow [PEP 8](https://peps.python.org/pep-0008/) conventions.
-- Keep functions focused and well-documented with docstrings.
-- Use the existing theme constants in `charts.py` (`THEME` dict) for any new visual elements.
-
----
-
 ## Project Layout
 
-| File / Folder | Purpose |
+| Path | Purpose |
 |---|---|
-| `app.py` | Streamlit web UI |
-| `main.py` | CLI entry point |
-| `data_fetcher.py` | Yahoo Finance data layer |
-| `crypto_fetcher.py` | Deribit API data layer (BTC/ETH options) |
-| `analysis.py` | Distribution, metrics, IV smile |
-| `charts.py` | Plotly interactive charts |
-| `visualize.py` | Matplotlib static charts (CLI) |
-| `options_forecast/` | Package layout (analysis + charts submodules) |
-
----
+| `src/worker.js` | Cloudflare Worker — API proxy for Yahoo Finance + Deribit |
+| `src/App.jsx` | Main React app component |
+| `src/components/` | Chart and UI components (Plotly) |
+| `src/lib/analysis.js` | Distribution, metrics, IV smile calculations |
+| `src/lib/fetcher.js` | API client |
+| `src/lib/spline.js` | Cubic spline interpolation |
+| `src/lib/theme.js` | Plotly theme constants |
+| `src/styles.css` | Global styles |
 
 ## Reporting Bugs
 
@@ -85,15 +62,11 @@ Open a [GitHub Issue](https://github.com/borjaruizdelgado/options-implied-foreca
 
 - Steps to reproduce the problem.
 - The ticker and expiration date you were analysing (if applicable).
-- The full error traceback.
-
----
+- The full error message.
 
 ## Suggesting Features
 
 Open an issue with the **enhancement** label. Describe the use case and, if possible, sketch out how it might work.
-
----
 
 ## License
 
