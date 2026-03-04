@@ -30,7 +30,7 @@ export default function Sidebar({
       >
         {collapsed ? "\u00bb" : "\u00ab"}
       </button>
-      {!collapsed && <h2 className="sidebar-title">Ticker symbol</h2>}
+      {!collapsed && <h2 className="sidebar-title">Ticker Symbol</h2>}
 
       {!collapsed && (
         <>
