@@ -9,7 +9,7 @@ export default function Sidebar({
   loading,
   daysToExpiry,
 }) {
-  const [ticker, setTicker] = useState("AAPL");
+  const [ticker, setTicker] = useState();
   const [collapsed, setCollapsed] = useState(false);
 
   function handleSubmit(e) {
@@ -27,13 +27,12 @@ export default function Sidebar({
       >
         {collapsed ? "\u00bb" : "\u00ab"}
       </button>
-      {!collapsed && <br />}
-      {!collapsed && <h2 className="sidebar-title">Options Analysis</h2>}
+      {!collapsed && <h2 className="sidebar-title">Ticker symbol</h2>}
 
       {!collapsed && (
         <>
           <form onSubmit={handleSubmit}>
-            <label htmlFor="ticker" className="field-label">Ticker symbol</label>
+            
             <input
               id="ticker"
               type="text"
@@ -69,6 +68,10 @@ export default function Sidebar({
           <div className="sidebar-vault">
             <SupportVault />
           </div>
+
+          <a href="https://borjaruizdelgado.com" className="sidebar-home">
+            ← Return Home
+          </a>
         </>
       )}
     </aside>

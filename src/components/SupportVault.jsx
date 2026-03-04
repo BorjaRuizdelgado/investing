@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 
 const WALLET_ADDRESSES = {
   btc: "bc1q9zl47s30lqqwp8xq6s4spfctdwv5fa7dfrwwem",
@@ -17,9 +17,18 @@ const LABELS = {
  * Wallet addresses match borjaruizdelgado.com.
  */
 export default function SupportVault() {
+  const ref = useRef(null);
+  const [open, setOpen] = useState(false);
+
+  function handleToggle() {
+    setOpen(ref.current?.open || false);
+  }
+
   return (
-    <details className="support-vault">
-      <summary className="support-vault__summary">Open tip jar</summary>
+    <details ref={ref} className="support-vault" onToggle={handleToggle}>
+      <summary className="support-vault__summary" aria-expanded={open}>
+        {open ? "Close tip jar" : "Open tip jar"}
+      </summary>
       <div className="support-vault__body">
         <h3 className="support-vault__title">Support</h3>
         <p className="support-vault__line">
