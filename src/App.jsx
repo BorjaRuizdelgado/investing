@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import Sidebar from "./components/Sidebar.jsx";
 import KpiRow from "./components/KpiRow.jsx";
 import LabelStrip from "./components/LabelStrip.jsx";
@@ -7,6 +7,7 @@ import DistributionChart from "./components/DistributionChart.jsx";
 import IvSmileChart from "./components/IvSmileChart.jsx";
 import OiChart from "./components/OiChart.jsx";
 import SrChart from "./components/SrChart.jsx";
+import ChartOverlays from "./components/ChartOverlays.jsx";
 import {
   PercentileExpander,
   DistributionExpander,
@@ -19,7 +20,21 @@ import { fmt } from "./lib/format.js";
 import { forecastLabels, distributionLabels, entryLabels } from "./lib/labels.js";
 import useOptionsAnalysis from "./hooks/useOptionsAnalysis.js";
 
+const DEFAULT_FORECAST_OVERLAYS = { ma20: false, ma50: false, ma200: false };
+const DEFAULT_ENTRY_OVERLAYS = { ma20: false, ma50: false, ma200: false, gw: true, pivots: true };
+
 export default function App() {
+  const [forecastOverlays, setForecastOverlays] = useState(DEFAULT_FORECAST_OVERLAYS);
+  const [entryOverlays, setEntryOverlays] = useState(DEFAULT_ENTRY_OVERLAYS);
+
+  const toggleForecast = useCallback((key) => {
+    setForecastOverlays((prev) => ({ ...prev, [key]: !prev[key] }));
+  }, []);
+
+  const toggleEntry = useCallback((key) => {
+    setEntryOverlays((prev) => ({ ...prev, [key]: !prev[key] }));
+  }, []);
+
   const {
     loading,
     error,
@@ -100,6 +115,14 @@ export default function App() {
               mp={analysis.mp}
             />
 
+            <ChartOverlays
+              overlays={[
+                { key: "ma20", label: "MA 20", active: forecastOverlays.ma20 },
+                { key: "ma50", label: "MA 50", active: forecastOverlays.ma50 },
+                { key: "ma200", label: "MA 200", active: forecastOverlays.ma200 },
+              ]}
+              onToggle={toggleForecast}
+            />
             <ForecastChart
               ticker={ticker}
               expiry={analysis.expiry}
@@ -110,6 +133,8 @@ export default function App() {
               mp={analysis.mp}
               history={analysis.history}
               dte={analysis.dte}
+              sr={analysis.sr}
+              overlays={forecastOverlays}
             />
             <LabelStrip items={forecastLabels(analysis)} />
 
@@ -121,12 +146,23 @@ export default function App() {
             />
             <LabelStrip items={distributionLabels(analysis)} />
 
+            <ChartOverlays
+              overlays={[
+                { key: "ma20", label: "MA 20", active: entryOverlays.ma20 },
+                { key: "ma50", label: "MA 50", active: entryOverlays.ma50 },
+                { key: "ma200", label: "MA 200", active: entryOverlays.ma200 },
+                { key: "gw", label: "Gamma Walls", active: entryOverlays.gw },
+                { key: "pivots", label: "Pivots", active: entryOverlays.pivots },
+              ]}
+              onToggle={toggleEntry}
+            />
             <SrChart
               ticker={ticker}
               history={analysis.history}
               spot={analysis.spot}
               sr={analysis.sr}
               entryInfo={analysis.entry}
+              overlays={entryOverlays}
             />
             <LabelStrip items={entryLabels(analysis)} />
 

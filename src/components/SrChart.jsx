@@ -1,11 +1,13 @@
 import React, { useMemo } from "react";
 import Plot from "react-plotly.js";
 import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight } from "../lib/theme.js";
+import { buildMaTracesAndAnnotations } from "../lib/ma.js";
 
-export default function SrChart({ ticker, history, spot, sr, entryInfo }) {
+export default function SrChart({ ticker, history, spot, sr, entryInfo, overlays = {} }) {
   const { data, layout } = useMemo(() => {
     const traces = [];
     const shapes = [];
+    const maAnnotations = [];
 
     let dates = [];
     if (history && history.length > 0) {
@@ -38,39 +40,27 @@ export default function SrChart({ ticker, history, spot, sr, entryInfo }) {
         });
       }
 
-      // MA20 and MA50
-      const fullCloses = history.map((b) => b.close);
-      const fullDates = history.map((b) => b.date);
-      const maCfg = [
-        [20, COLORS.accentWarm, "dot"],
-        [50, COLORS.accent, "dash"],
-      ];
-
-      for (const [period, colour, dash] of maCfg) {
-        if (fullCloses.length >= period) {
-          const maVals = fullCloses.map((_, i) => {
-            const start = Math.max(0, i - period + 1);
-            const slice = fullCloses.slice(start, i + 1);
-            return slice.reduce((a, b) => a + b, 0) / slice.length;
-          });
-          const trimmedVals = maVals.slice(-60);
-          const trimmedDates = fullDates.slice(-60);
-          traces.push({
-            x: trimmedDates,
-            y: trimmedVals,
-            mode: "lines",
-            line: { color: colour, width: 1.2, dash },
-            opacity: 0.7,
-            name: `MA${period}`,
-            hovertemplate: `MA${period}: $%{y:,.2f}<extra></extra>`,
-          });
-        }
-      }
+      // Moving averages (only when toggled on)
+      const ma = buildMaTracesAndAnnotations({
+        dates: history.map((b) => b.date),
+        closes: history.map((b) => b.close),
+        overlays,
+        variant: "entry",
+        sliceLast: 60,
+        anchorSide: "left",
+      });
+      traces.push(...ma.traces);
+      maAnnotations.push(...ma.annotations);
     }
 
     // S/R levels
     const levels = sr.levels || [];
-    const nonMa = levels.filter((l) => !l.source.startsWith("MA"));
+    const nonMa = levels.filter((l) => {
+      if (l.source.startsWith("MA")) return false;
+      if (l.source === "gamma_wall" && !overlays.gw) return false;
+      if (l.source === "pivot" && !overlays.pivots) return false;
+      return true;
+    });
     const supports = nonMa.filter((l) => l.price < spot).sort((a, b) => Math.abs(a.price - spot) - Math.abs(b.price - spot)).slice(0, 3);
     const resistances = nonMa.filter((l) => l.price > spot).sort((a, b) => Math.abs(a.price - spot) - Math.abs(b.price - spot)).slice(0, 3);
 
@@ -111,6 +101,9 @@ export default function SrChart({ ticker, history, spot, sr, entryInfo }) {
       line: { color: COLORS.text, width: 2.5, dash: "dash" }, opacity: 0.55,
     });
     annotations.push({ text: `<b>Spot</b> $${spot.toFixed(2)}`, x: 1.0, xref: "paper", y: spot, yref: "y", showarrow: false, xanchor: "right", yshift: 14, font: { size: 12, color: COLORS.text }, ...tag });
+
+    // MA annotations
+    annotations.push(...maAnnotations);
 
     // S/R level annotations
     for (const level of [...supports, ...resistances]) {
@@ -170,7 +163,7 @@ export default function SrChart({ ticker, history, spot, sr, entryInfo }) {
     };
 
     return { data: traces, layout: lo };
-  }, [ticker, history, spot, sr, entryInfo]);
+  }, [ticker, history, spot, sr, entryInfo, overlays]);
 
   return (
     <div className="chart-section">

@@ -38,7 +38,7 @@ export default function useOptionsAnalysis() {
 
   const runSingleChain = useCallback(async (tickerVal, expiry, spotVal, r) => {
     const dte = daysToExpiry(expiry.date);
-    const histDays = Math.min(Math.max(Math.floor(dte), 30), 200);
+    const histDays = 300;
 
     const [chainData, histData] = await Promise.all([
       fetchChain(tickerVal, expiry.timestamp),
@@ -70,7 +70,7 @@ export default function useOptionsAnalysis() {
 
   const runWeightedChains = useCallback(async (tickerVal, expiry, spotVal, r, allExpirations) => {
     const targetDte = daysToExpiry(expiry.date);
-    const histDays = Math.min(Math.max(Math.floor(targetDte), 30), 200);
+    const histDays = 300;
 
     const eligibleExps = allExpirations.filter(
       (e) => daysToExpiry(e.date) <= targetDte + 0.01 && daysToExpiry(e.date) >= 1,
