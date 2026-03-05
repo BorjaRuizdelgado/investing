@@ -443,6 +443,21 @@ export default {
         return await handleRate();
       }
 
+      // Serve important social/static assets with permissive headers so
+      // crawlers and social scrapers reliably fetch images from the edge.
+      if (url.pathname === "/og-image.svg" || url.pathname === "/favicon.png") {
+        const assetRes = await env.ASSETS.fetch(request);
+        const headers = new Headers(assetRes.headers);
+        // Ensure CORS and a friendly cache policy for social scrapers
+        headers.set("Access-Control-Allow-Origin", "*");
+        headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+        headers.set("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
+        if (!headers.get("content-type")) {
+          headers.set("content-type", url.pathname.endsWith(".svg") ? "image/svg+xml" : "image/png");
+        }
+        return new Response(assetRes.body, { status: assetRes.status, headers });
+      }
+
       // SPA fallback: serve index.html for any non-API, non-asset path
       // (e.g. /BTC, /SPY) so client-side routing can handle it.
       const assetRes = await env.ASSETS.fetch(request);
