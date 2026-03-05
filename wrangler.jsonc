@@ -1,5 +1,5 @@
 {
-  "name": "options-forecast",
+  "name": "options-implied-forecast",
   "compatibility_date": "2025-05-01",
   "main": "src/worker.js",
   "observability": { "enabled": true },
