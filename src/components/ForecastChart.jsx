@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import Plot from "react-plotly.js";
 import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight } from "../lib/theme.js";
-import { buildMaTracesAndAnnotations } from "../lib/ma.js";
 
 /**
  * Main forecast chart: historical price + expanding projection cone.
@@ -16,8 +15,6 @@ export default function ForecastChart({
   mp,
   history,
   dte,
-  sr,
-  overlays = {},
 }) {
   const { data, layout } = useMemo(() => {
     const dteDays = Math.max(Math.ceil(dte), 1);
@@ -26,45 +23,32 @@ export default function ForecastChart({
     // ---- Dates setup ----
     let histDates = [];
     let histPrices = [];
-    // Keep all history data and compute MAs; initial view is zoomed
-    // but user can zoom out to see full range including 200-day MA.
-    const allHistDates = history ? history.map((b) => b.date) : [];
-    const allHistCloses = history ? history.map((b) => b.close) : [];
     if (history && history.length > 0) {
-      histDates = [...allHistDates];
-      histPrices = [...allHistCloses];
+      const maxHist = Math.max(dteDays * 2, 30);
+      const slice = history.slice(-maxHist);
+      histDates = slice.map((b) => b.date);
+      histPrices = slice.map((b) => b.close);
     }
 
-    // Extend history to today at current spot so the line meets the cone
-    const today = new Date().toISOString().slice(0, 10);
-    if (histDates.length > 0) {
-      const lastDate = histDates[histDates.length - 1];
-      if (lastDate === today) {
-        // Update today's close to the live spot price
-        histPrices[histPrices.length - 1] = spot;
-      } else if (lastDate < today) {
-        // Bridge from last close to today at spot
-        histDates.push(today);
-        histPrices.push(spot);
-      }
-    }
+    const anchor = histDates.length > 0 ? histDates[histDates.length - 1] : new Date().toISOString().slice(0, 10);
+    const anchorDate = new Date(anchor + "T00:00:00Z");
+    const expiryDate = new Date(expiry + "T00:00:00Z");
 
-    const anchor = histDates.length > 0 ? histDates[histDates.length - 1] : today;
-    const anchorDate = new Date(anchor + "T00:00:00");
-    const expiryDate = new Date(expiry + "T00:00:00");
-
-    // Future trading dates (weekdays only)
+    // Future trading dates (weekdays only) — always extend all the way to expiry,
+    // regardless of DTE count, so the cone never stops short when the history
+    // anchor is one day behind the current date.
     const futureDates = [];
-    let d = new Date(anchorDate);
-    d.setDate(d.getDate() + 1);
-    while (futureDates.length < dteDays && d <= new Date(expiryDate.getTime() + 86400000)) {
+    let d = new Date(anchorDate.getTime() + 86400000); // start the day after anchor
+    while (d <= expiryDate) {
       if (d.getDay() !== 0 && d.getDay() !== 6) {
         futureDates.push(d.toISOString().slice(0, 10));
       }
       d = new Date(d.getTime() + 86400000);
     }
+    // Fallback: ensure at least dteDays points even if the loop above was empty
+    // (e.g. same-day expiry or weekend-only gap)
     if (futureDates.length === 0) {
-      for (let i = 0; i < Math.max(dteDays, 2); i++) {
+      for (let i = 0; i < Math.max(dteDays, 1); i++) {
         const fd = new Date(anchorDate.getTime() + (i + 1) * 86400000);
         futureDates.push(fd.toISOString().slice(0, 10));
       }
@@ -126,7 +110,6 @@ export default function ForecastChart({
     });
 
     // Historical price line
-    let maAnnotations = [];
     if (histDates.length > 0) {
       traces.push({
         x: histDates,
@@ -146,19 +129,6 @@ export default function ForecastChart({
         name: `Current $${spot.toFixed(2)}`,
         hovertemplate: `<b>Current Price</b><br>$${spot.toFixed(2)}<extra></extra>`,
       });
-
-      // Moving averages (only when toggled on)
-      // Use histDates/histPrices (which include today's live spot)
-      // so the MA line extends to today, not just yesterday's close.
-      const ma = buildMaTracesAndAnnotations({
-        dates: histDates,
-        closes: histPrices,
-        overlays,
-        variant: "forecast",
-        anchorSide: "right",
-      });
-      traces.push(...ma.traces);
-      maAnnotations = ma.annotations;
     }
 
     // Endpoint dots
@@ -181,57 +151,30 @@ export default function ForecastChart({
 
     const shapes = [
       { type: "line", x0: 0, x1: 1, xref: "paper", y0: spot, y1: spot, line: { color: COLORS.text, width: 2, dash: "dash" }, opacity: 0.5 },
-      { type: "line", x0: 0, x1: 1, xref: "paper", y0: dist.mean, y1: dist.mean, line: { color: COLORS.accent, width: 2.5, dash: "dashdot" }, opacity: 0.4 },
+      { type: "line", x0: 0, x1: 1, xref: "paper", y0: dist.mean, y1: dist.mean, line: { color: COLORS.accent, width: 2, dash: "dashdot" }, opacity: 0.4 },
       { type: "line", x0: anchor, x1: anchor, y0: 0, y1: 1, yref: "paper", line: { color: COLORS.border, width: 1.5 }, opacity: 0.6 },
     ];
 
     const tagStyle = { bgcolor: "rgba(247,245,240,0.85)", borderpad: 3 };
     const annotations = [
-      { text: `<b>Spot</b> $${spot.toFixed(2)}`, x: 1.0, xref: "paper", y: spot, yref: "y", showarrow: false, xanchor: "right", yshift: 12, font: { size: 13, color: COLORS.text }, ...tagStyle },
-      { text: `<b>Mean</b> $${dist.mean.toFixed(2)}`, x: 1.0, xref: "paper", y: dist.mean, yref: "y", showarrow: false, xanchor: "right", yshift: -12, font: { size: 13, color: COLORS.accent }, ...tagStyle },
+      { text: `<b>Spot</b> $${spot.toFixed(2)}`, x: 1.0, xref: "paper", y: spot, yref: "y", showarrow: false, xanchor: "right", yshift: 12, font: { size: 12, color: COLORS.text }, ...tagStyle },
+      { text: `<b>Mean</b> $${dist.mean.toFixed(2)}`, x: 1.0, xref: "paper", y: dist.mean, yref: "y", showarrow: false, xanchor: "right", yshift: -12, font: { size: 12, color: COLORS.accent }, ...tagStyle },
       { text: "<b>Now</b>", x: anchor, xref: "x", y: 1.04, yref: "paper", showarrow: false, font: { size: 12, color: COLORS.textMuted } },
-      ...maAnnotations,
     ];
 
     if (!isNaN(mp) && Math.abs(mp - spot) / spot < 0.25) {
       shapes.push({
         type: "line", x0: 0, x1: 1, xref: "paper", y0: mp, y1: mp,
-        line: { color: COLORS.accentWarm, width: 2.5, dash: "dot" }, opacity: 0.40,
+        line: { color: COLORS.accentWarm, width: 2, dash: "dot" }, opacity: 0.35,
       });
-      annotations.push({ text: `<b>Max Pain</b> $${mp.toFixed(0)}`, x: 1.0, xref: "paper", y: mp, yref: "y", showarrow: false, xanchor: "right", yshift: -14, font: { size: 13, color: COLORS.accentWarm }, ...tagStyle });
+      annotations.push({ text: `<b>Max Pain</b> $${mp.toFixed(0)}`, x: 0.0, xref: "paper", y: mp, yref: "y", showarrow: false, xanchor: "left", yshift: 12, font: { size: 12, color: COLORS.accentWarm }, ...tagStyle });
     }
-
-    // Compute x-axis visible window & matching y-range from visible data only
-    const viewDays = Math.max(dteDays * 2, 60);
-    const viewStart = histDates.length > viewDays ? histDates[histDates.length - viewDays] : (histDates[0] || anchor);
-    const viewEnd = futureDates.length > 0 ? futureDates[futureDates.length - 1] : anchor;
-
-    // Collect all y-values visible in the default x-range
-    const visibleYs = [];
-    // Visible historical prices
-    for (let i = 0; i < histDates.length; i++) {
-      if (histDates[i] >= viewStart && histDates[i] <= viewEnd) visibleYs.push(histPrices[i]);
-    }
-    // Forecast bands (all within view)
-    visibleYs.push(...b10, ...b90);
-    // Spot, mean, max pain
-    visibleYs.push(spot, dist.mean);
-    if (!isNaN(mp) && Math.abs(mp - spot) / spot < 0.25) visibleYs.push(mp);
-
-    const yMin = Math.min(...visibleYs);
-    const yMax = Math.max(...visibleYs);
-    const yPad = (yMax - yMin) * 0.08 || 5;
 
     const lo = {
       ...LAYOUT_DEFAULTS,
       title: { text: `<b>${ticker}</b>  \u2014  Forecast to ${expiry}`, font: { size: 17, color: COLORS.text }, x: 0.01 },
-      xaxis: {
-        ...axisStyle(),
-        title: "",
-        // Default view: show last ~60 days + projection; user can zoom out for full history & MA200
-        range: [viewStart, viewEnd],
-      },
-      yaxis: { ...axisStyle(), title: "Price ($)", tickprefix: "$", range: [yMin - yPad, yMax + yPad] },
+      xaxis: { ...axisStyle(), title: "" },
+      yaxis: { ...axisStyle(), title: "Price ($)", tickprefix: "$", autorange: true },
       showlegend: true,
       legend: { bgcolor: "rgba(247,245,240,0.90)", bordercolor: COLORS.borderLight, borderwidth: 1, font: { size: 13 }, x: 0.01, y: 0.99, xanchor: "left", yanchor: "top" },
       height: chartHeight(720),
@@ -241,7 +184,7 @@ export default function ForecastChart({
     };
 
     return { data: traces, layout: lo };
-  }, [ticker, expiry, spot, dist, em, pctiles, mp, history, dte, sr, overlays]);
+  }, [ticker, expiry, spot, dist, em, pctiles, mp, history, dte]);
 
   return (
     <div className="chart-section">

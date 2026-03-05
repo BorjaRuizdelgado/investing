@@ -54,10 +54,25 @@ export async function fetchRate() {
 
 /**
  * Days from today to expiry string "YYYY-MM-DD".
+ *
+ * Uses calendar-day DTE (industry standard): expiry tomorrow = 1, day-after = 2, etc.
+ * This is timezone-independent and matches how options are quoted on trading platforms.
+ * For same-day (0 DTE) options the fractional hours remaining until 4 pm ET (21:00 UTC)
+ * are used so that T > 0 for intraday pricing.
  */
 export function daysToExpiry(expiry) {
-  const exp = new Date(expiry + "T16:00:00");
   const now = new Date();
-  const diff = (exp - now) / (1000 * 60 * 60 * 24);
-  return Math.max(diff, 1 / 365);
+  // Calendar days between today (UTC date) and expiry date
+  const todayMidnight = new Date(now.toISOString().slice(0, 10) + "T00:00:00Z");
+  const expiryMidnight = new Date(expiry + "T00:00:00Z");
+  const calDays = Math.round((expiryMidnight - todayMidnight) / (1000 * 60 * 60 * 24));
+
+  if (calDays <= 0) {
+    // Same-day or past expiry: use hours left until 4 pm ET close (21:00 UTC)
+    const expiryClose = new Date(expiry + "T21:00:00Z");
+    const hoursLeft = (expiryClose - now) / (1000 * 60 * 60);
+    return Math.max(hoursLeft / 24, 1 / 24); // floor at 1 hour
+  }
+
+  return calDays;
 }

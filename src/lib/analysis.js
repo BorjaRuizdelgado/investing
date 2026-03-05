@@ -90,7 +90,29 @@ export function impliedDistribution(calls, spot, r, T, puts = null, nPoints = 50
   }
 
   if (rowMap.size < 6) {
-    throw new Error("Too few liquid strikes to build a distribution");
+    // Try a relaxed pass for sparse markets (crypto): expand OTM bounds
+    for (const c of calls) {
+      if (c.strike >= spot * 0.9 && c.mid > 0) {
+        if (!rowMap.has(c.strike)) rowMap.set(c.strike, c.mid);
+      }
+    }
+    if (puts) {
+      for (const p of puts) {
+        if (p.strike <= spot * 1.1 && p.mid > 0) {
+          const syntheticC = p.mid + spot - p.strike * discount;
+          if (syntheticC > 0) {
+            if (!rowMap.has(p.strike) || p.strike < spot) {
+              rowMap.set(p.strike, syntheticC);
+            }
+          }
+        }
+      }
+    }
+
+    // If still too few, allow a lower threshold so we can still compute
+    if (rowMap.size < 4) {
+      throw new Error("Too few liquid strikes to build a distribution");
+    }
   }
 
   // Sort by strike
