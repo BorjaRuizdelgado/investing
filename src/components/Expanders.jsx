@@ -84,7 +84,7 @@ export function EntryExpander({ entryInfo, sr }) {
       <summary>Entry Setup Details</summary>
       <div className="expander-body">
         <p>
-          These levels are derived from the options-implied distribution,
+          These levels are derived from the implied probability distribution,
           historical price pivots, high open-interest gamma walls and moving
           averages. They are informational — always apply your own risk
           management.

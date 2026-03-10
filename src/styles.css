@@ -1,5 +1,5 @@
 /* =================================================================
-   Options Implied Forecast — styles
+   Investing Tool — styles
    Matches borjaruizdelgado.com design system exactly.
    ================================================================= */
 
@@ -104,14 +104,36 @@ button {
   overflow-y: auto;
 }
 
-.sidebar h2 {
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  cursor: pointer;
+  padding-bottom: 0.25rem;
+}
+
+.sidebar-logo-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--border);
   font-family: var(--font-serif);
-  font-size: 1.05rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.sidebar-logo-text {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
   font-weight: 400;
   color: var(--text);
   letter-spacing: -0.01em;
-  margin: 0;
-  white-space: nowrap;
 }
 
 /* Collapse toggle — pinned top-right */
@@ -847,6 +869,14 @@ hr {
   .metrics-grid.cols-4 {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .trending-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .fundamentals .kpi-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
@@ -857,6 +887,14 @@ hr {
 
 @media (max-width: 600px) {
   .kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .trending-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .fundamentals .kpi-row {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -900,6 +938,194 @@ hr {
   .label-strip {
     gap: 0.4rem 1rem;
   }
+}
+
+/* ---- Fundamentals Panel ---- */
+.fundamentals {
+  margin-bottom: 2rem;
+}
+
+.fundamentals-title {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-bottom: 0.15rem;
+}
+
+.fundamentals-meta {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.fund-section {
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.fund-section > .kpi-row {
+  padding: 0.75rem 1rem 1rem;
+}
+
+.fund-section-title {
+  display: flex;
+  align-items: center;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: color 0.2s var(--ease);
+}
+
+.fund-section-title:hover {
+  color: var(--accent);
+}
+
+.fund-section-title::-webkit-details-marker { display: none; }
+.fund-section-title::marker { display: none; content: ""; }
+
+.fund-section-title::before {
+  content: "▸";
+  margin-right: 0.5rem;
+  font-size: 0.7rem;
+  transition: transform 0.2s var(--ease);
+}
+
+.fund-section[open] > .fund-section-title::before {
+  transform: rotate(90deg);
+}
+
+.fundamentals .kpi-row {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.fundamentals .kpi-value {
+  font-size: 1.05rem;
+}
+
+.fundamentals .kpi-card {
+  padding: 0.55rem 0.65rem;
+}
+
+.fund-positive {
+  color: var(--green) !important;
+}
+
+.fund-negative {
+  color: var(--red) !important;
+}
+
+/* ---- Trending Tickers (Landing) ---- */
+.trending {
+  margin: 2rem 0;
+  width: 100%;
+}
+
+.trending--loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.trending-section {
+  margin-bottom: 1.5rem;
+}
+
+.trending-section-title {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.75rem;
+}
+
+.trending-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.trending-card {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-light);
+  background: var(--bg);
+  transition:
+    border-color 0.35s var(--ease),
+    box-shadow 0.35s var(--ease);
+}
+
+.trending-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.trending-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.trending-card-symbol {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.trending-card-name {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trending-card-price {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 0.25rem;
+}
+
+.trending-card-change {
+  font-size: 0.85rem;
+}
+
+.trending-card-change.positive {
+  color: var(--green);
+}
+
+.trending-card-change.negative {
+  color: var(--red);
+}
+
+.trending-more {
+  all: unset;
+  display: block;
+  margin: 0.75rem auto 0;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  transition: opacity 0.2s var(--ease);
+}
+
+.trending-more:hover {
+  opacity: 0.7;
 }
 
 /* ---- Support / Donation vault ---- */

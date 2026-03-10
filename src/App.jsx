@@ -14,6 +14,8 @@ import {
   EntryExpander,
   PcrExpander,
 } from "./components/Expanders.jsx";
+import FundamentalsPanel from "./components/FundamentalsPanel.jsx";
+import TrendingTickers from "./components/TrendingTickers.jsx";
 import SupportVault from "./components/SupportVault.jsx";
 import { daysToExpiry } from "./lib/fetcher.js";
 import { fmt } from "./lib/format.js";
@@ -42,6 +44,7 @@ export default function App() {
     expirations,
     selectedExpiry,
     analysis,
+    fundamentals,
     weighted,
     handleAnalyse,
     handleExpiryChange,
@@ -66,16 +69,15 @@ export default function App() {
         {/* Landing state */}
         {!ticker && !loading && !error && (
           <div className="landing">
-            <h1>Borja Ruizdelgado's <br></br> Options Implied Forecast</h1>
-            <br />
+            <h1>Borja Ruizdelgado - Investing</h1>
             <p className="landing-desc">
-              Extract the market's expectations from live options data.
-              The tool converts option prices into an implied probability distribution — showing
-              where traders believe a stock, ETF, or crypto is heading.
+              Options-implied forecasts, stock fundamentals, analyst estimates,
+              and crypto analysis — unified in one free tool. Pick a trending
+              ticker below or search any symbol to get started.
             </p>
+            <TrendingTickers onTickerClick={handleAnalyse} />
             <p className="info-box">
-              Enter a ticker symbol in the sidebar and click{" "}
-              <strong>Analyse</strong> to get started.
+              Or enter any ticker in the sidebar to get started.
             </p>
           </div>
         )}
@@ -176,6 +178,8 @@ export default function App() {
             <DistributionExpander dist={analysis.dist} />
             <EntryExpander entryInfo={analysis.entry} sr={analysis.sr} />
             <PcrExpander pcr={analysis.pcr} />
+
+            {fundamentals && <FundamentalsPanel fundamentals={fundamentals} />}
 
             <hr />
             <p className="footnote">

@@ -32,6 +32,7 @@ export default function useOptionsAnalysis() {
   const [expirations, setExpirations] = useState(null);
   const [selectedExpiry, setSelectedExpiry] = useState(null);
   const [analysis, setAnalysis] = useState(null);
+  const [fundamentals, setFundamentals] = useState(null);
   const [weighted, setWeighted] = useState(true);
 
   // ---- Internal: single-chain analysis ----
@@ -165,6 +166,7 @@ export default function useOptionsAnalysis() {
     setLoading(true);
     setError(null);
     setAnalysis(null);
+    setFundamentals(null);
 
     try {
       const [optData, rateData] = await Promise.all([
@@ -186,6 +188,7 @@ export default function useOptionsAnalysis() {
       const resolvedTicker = optData.ticker || tickerInput;
       setTicker(resolvedTicker);
       setSpot(optData.price);
+      setFundamentals(optData.fundamentals || null);
       setExpirations(validExps);
       setSelectedExpiry(validExps[0]);
 
@@ -251,6 +254,7 @@ export default function useOptionsAnalysis() {
     expirations,
     selectedExpiry,
     analysis,
+    fundamentals,
     weighted,
     handleAnalyse,
     handleExpiryChange,

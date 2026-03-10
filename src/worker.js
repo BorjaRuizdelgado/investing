@@ -169,7 +169,11 @@ function parseBybitExpiry(expStr) {
 // ======================================================================
 
 async function handleOptions(ticker) {
-  const data = await fetchYF(`/v7/finance/options/${ticker}`);
+  // Fetch options data and detailed summary in parallel
+  const [data, summaryData] = await Promise.all([
+    fetchYF(`/v7/finance/options/${ticker}`),
+    fetchYF(`/v10/finance/quoteSummary/${ticker}?modules=defaultKeyStatistics,financialData,incomeStatementHistory,balanceSheetHistory,cashflowStatementHistory`).catch(() => null),
+  ]);
   const result = data.optionChain.result[0];
   const rawTimestamps = result.expirationDates || [];
   const expirations = rawTimestamps.map((ts) => ({
@@ -177,10 +181,125 @@ async function handleOptions(ticker) {
     timestamp: ts,
   }));
   const quote = result.quote || {};
+
+  // Extract detailed stats from quoteSummary modules
+  const summaryResult = summaryData?.quoteSummary?.result?.[0] || {};
+  const keyStats = summaryResult.defaultKeyStatistics || {};
+  const finData = summaryResult.financialData || {};
+  const incomeHist = summaryResult.incomeStatementHistory?.incomeStatementHistory?.[0] || {};
+  const balanceHist = summaryResult.balanceSheetHistory?.balanceSheetStatements?.[0] || {};
+  const cashflowHist = summaryResult.cashflowStatementHistory?.cashflowStatements?.[0] || {};
+
+  // Helper: extract raw value from Yahoo's {raw, fmt} objects
+  const rv = (obj) => obj?.raw ?? obj ?? null;
+
+  const fundamentals = {
+    // Identity
+    name: quote.shortName || quote.longName || null,
+    longName: quote.longName || null,
+    sector: quote.sector || null,
+    industry: quote.industry || null,
+    exchange: quote.fullExchangeName || quote.exchange || null,
+    currency: quote.currency || null,
+    quoteType: quote.quoteType || null,
+    // Valuation
+    marketCap: quote.marketCap ?? null,
+    enterpriseValue: rv(keyStats.enterpriseValue) ?? quote.enterpriseValue ?? null,
+    trailingPE: quote.trailingPE ?? null,
+    forwardPE: quote.forwardPE ?? rv(keyStats.forwardPE) ?? null,
+    pegRatio: rv(keyStats.pegRatio) ?? null,
+    priceToBook: quote.priceToBook ?? rv(keyStats.priceToBook) ?? null,
+    priceToSales: quote.priceToSalesTrailing12Months ?? null,
+    enterpriseToRevenue: rv(keyStats.enterpriseToRevenue) ?? quote.enterpriseToRevenue ?? null,
+    enterpriseToEbitda: rv(keyStats.enterpriseToEbitda) ?? quote.enterpriseToEbitda ?? null,
+    // Profitability & income
+    eps: quote.epsTrailingTwelveMonths ?? rv(keyStats.trailingEps) ?? null,
+    epsForward: quote.epsForward ?? rv(keyStats.forwardEps) ?? null,
+    ebitda: rv(finData.ebitda) ?? quote.ebitda ?? null,
+    totalRevenue: rv(finData.totalRevenue) ?? quote.totalRevenue ?? null,
+    revenuePerShare: rv(finData.revenuePerShare) ?? quote.revenuePerShare ?? null,
+    revenueGrowth: rv(finData.revenueGrowth) ?? null,
+    earningsGrowth: rv(finData.earningsGrowth) ?? null,
+    profitMargins: rv(finData.profitMargins) ?? quote.profitMargins ?? null,
+    grossMargins: rv(finData.grossMargins) ?? quote.grossMargins ?? null,
+    ebitdaMargins: rv(finData.ebitdaMargins) ?? null,
+    operatingMargins: rv(finData.operatingMargins) ?? quote.operatingMargins ?? null,
+    returnOnEquity: rv(finData.returnOnEquity) ?? quote.returnOnEquity ?? null,
+    returnOnAssets: rv(finData.returnOnAssets) ?? quote.returnOnAssets ?? null,
+    netIncome: rv(incomeHist.netIncome) ?? null,
+    grossProfit: rv(incomeHist.grossProfit) ?? null,
+    operatingIncome: rv(finData.operatingCashflow) != null ? null : rv(incomeHist.operatingIncome) ?? null,
+    // Balance sheet & cash flow
+    totalCash: rv(finData.totalCash) ?? quote.totalCash ?? null,
+    totalCashPerShare: rv(finData.totalCashPerShare) ?? null,
+    totalDebt: rv(finData.totalDebt) ?? quote.totalDebt ?? null,
+    debtToEquity: rv(finData.debtToEquity) ?? quote.debtToEquity ?? null,
+    currentRatio: rv(finData.currentRatio) ?? quote.currentRatio ?? null,
+    quickRatio: rv(finData.quickRatio) ?? null,
+    bookValue: rv(keyStats.bookValue) ?? quote.bookValue ?? null,
+    totalAssets: rv(balanceHist.totalAssets) ?? null,
+    totalLiabilities: rv(balanceHist.totalLiab) ?? null,
+    totalStockholderEquity: rv(balanceHist.totalStockholderEquity) ?? null,
+    operatingCashflow: rv(finData.operatingCashflow) ?? rv(cashflowHist.totalCashFromOperatingActivities) ?? null,
+    freeCashflow: rv(finData.freeCashflow) ?? null,
+    capitalExpenditures: rv(cashflowHist.capitalExpenditures) ?? null,
+    // Dividends & income
+    dividendYield: quote.dividendYield ?? rv(keyStats.dividendYield) ?? null,
+    dividendRate: quote.dividendRate ?? rv(keyStats.dividendRate) ?? null,
+    trailingAnnualDividendRate: quote.trailingAnnualDividendRate ?? rv(keyStats.trailingAnnualDividendRate) ?? null,
+    fiveYearAvgDividendYield: rv(keyStats.fiveYearAvgDividendYield) ?? null,
+    payoutRatio: rv(keyStats.payoutRatio) ?? quote.payoutRatio ?? null,
+    exDividendDate: rv(keyStats.exDividendDate) ?? null,
+    lastDividendDate: rv(keyStats.lastDividendDate) ?? null,
+    lastDividendValue: rv(keyStats.lastDividendValue) ?? null,
+    // Trading
+    beta: rv(keyStats.beta) ?? quote.beta ?? null,
+    fiftyTwoWeekLow: quote.fiftyTwoWeekLow ?? null,
+    fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh ?? null,
+    fiftyTwoWeekChange: rv(keyStats["52WeekChange"]) ?? null,
+    fiftyDayAverage: quote.fiftyDayAverage ?? null,
+    twoHundredDayAverage: quote.twoHundredDayAverage ?? null,
+    avgVolume: quote.averageDailyVolume3Month ?? null,
+    avgVolume10d: quote.averageDailyVolume10Day ?? null,
+    sharesOutstanding: rv(keyStats.sharesOutstanding) ?? quote.sharesOutstanding ?? null,
+    floatShares: rv(keyStats.floatShares) ?? null,
+    heldPercentInsiders: rv(keyStats.heldPercentInsiders) ?? null,
+    heldPercentInstitutions: rv(keyStats.heldPercentInstitutions) ?? null,
+    sharesShort: rv(keyStats.sharesShort) ?? quote.sharesShort ?? null,
+    shortRatio: rv(keyStats.shortRatio) ?? quote.shortRatio ?? null,
+    shortPercentOfFloat: rv(keyStats.shortPercentOfFloat) ?? quote.shortPercentOfFloat ?? null,
+    sharesShortPriorMonth: rv(keyStats.sharesShortPriorMonth) ?? null,
+    // Price context
+    dayHigh: quote.regularMarketDayHigh ?? null,
+    dayLow: quote.regularMarketDayLow ?? null,
+    previousClose: quote.regularMarketPreviousClose ?? null,
+    open: quote.regularMarketOpen ?? null,
+    volume: quote.regularMarketVolume ?? null,
+    marketChange: quote.regularMarketChange ?? null,
+    marketChangePct: quote.regularMarketChangePercent ?? null,
+    // Analyst
+    targetMeanPrice: rv(finData.targetMeanPrice) ?? quote.targetMeanPrice ?? null,
+    targetHighPrice: rv(finData.targetHighPrice) ?? quote.targetHighPrice ?? null,
+    targetLowPrice: rv(finData.targetLowPrice) ?? quote.targetLowPrice ?? null,
+    targetMedianPrice: rv(finData.targetMedianPrice) ?? null,
+    recommendationMean: rv(finData.recommendationMean) ?? quote.recommendationMean ?? null,
+    recommendationKey: rv(finData.recommendationKey) ?? quote.recommendationKey ?? null,
+    numberOfAnalystOpinions: rv(finData.numberOfAnalystOpinions) ?? quote.numberOfAnalystOpinions ?? null,
+    // Earnings
+    earningsTimestamp: quote.earningsTimestamp ?? null,
+    earningsTimestampStart: quote.earningsTimestampStart ?? null,
+    earningsTimestampEnd: quote.earningsTimestampEnd ?? null,
+    earningsQuarterlyGrowth: rv(keyStats.earningsQuarterlyGrowth) ?? null,
+    mostRecentQuarter: rv(keyStats.mostRecentQuarter) ?? null,
+    lastFiscalYearEnd: rv(keyStats.lastFiscalYearEnd) ?? null,
+    nextFiscalYearEnd: rv(keyStats.nextFiscalYearEnd) ?? null,
+  };
+
   return jsonResp({
     ticker: quote.symbol || ticker,
     price: quote.regularMarketPrice || 0,
     expirations,
+    fundamentals,
   });
 }
 
@@ -293,6 +412,7 @@ async function handleCryptoOptions(currency) {
     ticker: `${currency}-USD`,
     price: spot,
     expirations,
+    fundamentals: null,
   });
 }
 
@@ -373,6 +493,87 @@ async function handleCryptoHistory(currency, days) {
 }
 
 // ======================================================================
+// Trending tickers (landing page)
+// ======================================================================
+
+let cachedTrending = null;
+let trendingExpiry = 0;
+
+const FALLBACK_STOCKS = ["SPY", "AAPL", "MSFT", "NVDA", "TSLA", "AMZN", "META", "GOOGL"];
+const CRYPTO_SYMBOLS = [
+  "BTC-USD", "ETH-USD", "SOL-USD", "XRP-USD", "DOGE-USD",
+  "BNB-USD", "ADA-USD", "AVAX-USD",
+];
+
+/** Check if a stock ticker has options on Yahoo Finance. */
+async function checkStockOptions(symbol) {
+  try {
+    const data = await fetchYF(`/v7/finance/options/${symbol}`);
+    const exps = data?.optionChain?.result?.[0]?.expirationDates || [];
+    return exps.length > 0;
+  } catch { return false; }
+}
+
+async function handleTrending() {
+  const now = Date.now();
+  if (cachedTrending && now < trendingExpiry) return jsonResp(cachedTrending);
+
+  // 1. Get candidate stock symbols (trending or fallback)
+  let stockSymbols = FALLBACK_STOCKS;
+  try {
+    const trending = await fetchYF("/v1/finance/trending/US?count=20");
+    const symbols = trending?.finance?.result?.[0]?.quotes?.map((q) => q.symbol) || [];
+    if (symbols.length > 0) stockSymbols = symbols.slice(0, 20);
+  } catch { /* use fallback */ }
+
+  // 2. Batch-fetch quotes for all candidates
+  const allSymbols = [...stockSymbols, ...CRYPTO_SYMBOLS].join(",");
+  const quoteData = await fetchYF(`/v7/finance/quote?symbols=${encodeURIComponent(allSymbols)}`);
+  const quotes = quoteData?.quoteResponse?.result || [];
+
+  const cryptoSet = new Set(CRYPTO_SYMBOLS);
+  const cryptoBaseSet = new Set(CRYPTO_SYMBOLS.map((s) => s.replace("-USD", "")));
+  const stockCandidates = [];
+  const crypto = [];
+
+  for (const q of quotes) {
+    const item = {
+      symbol: q.symbol,
+      name: q.shortName || q.longName || q.symbol,
+      price: q.regularMarketPrice ?? 0,
+      change: q.regularMarketChange ?? 0,
+      changePct: q.regularMarketChangePercent ?? 0,
+      marketCap: q.marketCap ?? null,
+    };
+    if (cryptoSet.has(q.symbol)) {
+      crypto.push({ ...item, symbol: q.symbol.replace("-USD", "") });
+    } else if (!cryptoBaseSet.has(q.symbol)) {
+      // Skip tickers that collide with crypto base symbols (e.g. BTC, ETH)
+      stockCandidates.push(item);
+    }
+  }
+
+  // 3. Verify options availability for stock candidates (check in parallel, take first 8 that pass)
+  const optChecks = await Promise.all(
+    stockCandidates.map((s) => checkStockOptions(s.symbol).then((ok) => ({ ...s, ok }))),
+  );
+  const stocks = optChecks.filter((s) => s.ok).slice(0, 8).map(({ ok, ...s }) => s);
+
+  // If none passed (unlikely), use fallback symbols that always have options
+  if (stocks.length === 0) {
+    for (const sym of FALLBACK_STOCKS) {
+      const q = stockCandidates.find((s) => s.symbol === sym);
+      if (q) stocks.push(q);
+    }
+  }
+
+  const result = { stocks, crypto };
+  cachedTrending = result;
+  trendingExpiry = now + 5 * 60_000; // 5-minute cache
+  return jsonResp(result);
+}
+
+// ======================================================================
 // Main handler
 // ======================================================================
 
@@ -441,6 +642,10 @@ export default {
 
       if (url.pathname === "/api/rate") {
         return await handleRate();
+      }
+
+      if (url.pathname === "/api/trending") {
+        return await handleTrending();
       }
 
       // Serve important social/static assets with permissive headers so

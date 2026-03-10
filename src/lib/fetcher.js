@@ -53,6 +53,14 @@ export async function fetchRate() {
 }
 
 /**
+ * Fetch trending tickers for the landing page.
+ * Returns { stocks: [...], crypto: [...] }
+ */
+export async function fetchTrending() {
+  return get(`${API}/trending`);
+}
+
+/**
  * Days from today to expiry string "YYYY-MM-DD".
  *
  * Uses calendar-day DTE (industry standard): expiry tomorrow = 1, day-after = 2, etc.

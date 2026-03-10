@@ -35,12 +35,14 @@ export default function Sidebar({
       >
         {collapsed ? "\u00bb" : "\u00ab"}
       </button>
-      {!collapsed && <h2 className="sidebar-title">Ticker Symbol</h2>}
+      <a href="/" className="sidebar-logo" onClick={(e) => { e.preventDefault(); window.location.href = "/"; }}>
+        <span className="sidebar-logo-mark">R</span>
+        {!collapsed && <span className="sidebar-logo-text">Investing</span>}
+      </a>
 
       {!collapsed && (
         <>
           <form onSubmit={handleSubmit}>
-            
             <input
               id="ticker"
               type="text"

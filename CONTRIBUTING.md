@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in improving **Options-Implied Price Forecast**! Contributions of all kinds are welcome — bug reports, feature ideas, documentation fixes, code improvements.
+Thanks for your interest in improving the **Investing Tool**! Contributions of all kinds are welcome — bug reports, feature ideas, documentation fixes, code improvements.
 
 ## Getting Started
 
@@ -46,12 +46,13 @@ Thanks for your interest in improving **Options-Implied Price Forecast**! Contri
 ## Project Layout
 
 | Path | Purpose |
-|---|---|
+| --- | --- |
 | `src/worker.js` | Cloudflare Worker — API proxy for Yahoo Finance + Bybit |
 | `src/App.jsx` | Main React app component |
 | `src/components/` | Chart and UI components (Plotly) |
 | `src/lib/analysis.js` | Distribution, metrics, IV smile calculations |
 | `src/lib/fetcher.js` | API client |
+| `src/lib/format.js` | Number & currency formatting helpers |
 | `src/lib/spline.js` | Cubic spline interpolation |
 | `src/lib/theme.js` | Plotly theme constants |
 | `src/styles.css` | Global styles |
