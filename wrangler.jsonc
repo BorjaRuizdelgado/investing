@@ -1,5 +1,5 @@
 {
-  "name": "investing-tool",
+  "name": "investing",
   "compatibility_date": "2025-05-01",
   "main": "src/worker.js",
   "observability": { "enabled": true },
