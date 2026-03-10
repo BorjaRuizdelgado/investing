@@ -870,13 +870,6 @@ hr {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .trending-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .fundamentals .kpi-row {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 
 @media (max-width: 768px) {
@@ -887,14 +880,6 @@ hr {
 
 @media (max-width: 600px) {
   .kpi-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .trending-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .fundamentals .kpi-row {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -1006,15 +991,17 @@ hr {
 }
 
 .fundamentals .kpi-row {
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 }
 
 .fundamentals .kpi-value {
   font-size: 1.05rem;
+  word-break: break-word;
 }
 
 .fundamentals .kpi-card {
   padding: 0.55rem 0.65rem;
+  min-width: 0;
 }
 
 .fund-positive {
@@ -1051,7 +1038,7 @@ hr {
 
 .trending-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 0.75rem;
 }
 
