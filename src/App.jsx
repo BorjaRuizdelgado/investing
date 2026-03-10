@@ -76,9 +76,6 @@ export default function App() {
               ticker below or search any symbol to get started.
             </p>
             <TrendingTickers onTickerClick={handleAnalyse} />
-            <p className="info-box">
-              Or enter any ticker in the sidebar to get started.
-            </p>
           </div>
         )}
 
