@@ -1,103 +1,115 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import SupportVault from "./SupportVault.jsx";
-import Tooltip from "./Tooltip.jsx";
 
-export default function Sidebar({
-  onAnalyse,
-  expirations,
-  selectedExpiry,
-  onExpiryChange,
-  loading,
-  daysToExpiry,
-  weighted,
-  onWeightedToggle,
-  activeTicker,
-}) {
-  const [ticker, setTicker] = useState(() => {
-    // Pre-fill from URL path if present (e.g. /SPY → "SPY")
-    const path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
-    return path && !path.includes("/") ? decodeURIComponent(path).toUpperCase() : "";
-  });
+const NAV_ITEMS = [
+  { to: "/", label: "Home", description: "Overview and roadmap" },
+  { to: "/screener", label: "Screener", description: "Rank ideas and filter the universe" },
+  { to: "/compare", label: "Compare", description: "Stack names side by side" },
+  { to: "/saved", label: "Saved", description: "Watchlists and presets" },
+];
+
+function normaliseTicker(pathname) {
+  const match = pathname.match(/^\/ticker\/([^/]+)/);
+  return match ? decodeURIComponent(match[1]).toUpperCase() : "";
+}
+
+export default function Sidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [ticker, setTicker] = useState(() => normaliseTicker(window.location.pathname));
   const [collapsed, setCollapsed] = useState(false);
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (ticker.trim()) onAnalyse(ticker.trim().toUpperCase());
+  useEffect(() => {
+    const activeTicker = normaliseTicker(location.pathname);
+    if (activeTicker) {
+      setTicker(activeTicker);
+    }
+  }, [location.pathname]);
+
+  const activeLabel = useMemo(() => {
+    if (location.pathname.startsWith("/ticker/")) return "Ticker";
+    const item = NAV_ITEMS.find((entry) => entry.to === location.pathname);
+    return item?.label || "Home";
+  }, [location.pathname]);
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    if (!ticker.trim()) return;
+    navigate(`/ticker/${encodeURIComponent(ticker.trim().toUpperCase())}`);
   }
 
   return (
-    <aside className={`sidebar${collapsed ? " sidebar--collapsed" : ""}`}>
+    <aside className={`sidebar terminal-sidebar${collapsed ? " sidebar--collapsed" : ""}`}>
       <button
         className="sidebar-toggle"
-        onClick={() => setCollapsed((c) => !c)}
+        onClick={() => setCollapsed((current) => !current)}
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         {collapsed ? "\u00bb" : "\u00ab"}
       </button>
-      <a href="/" className="sidebar-logo" onClick={(e) => { e.preventDefault(); window.location.href = "/"; }}>
+
+      <NavLink to="/" className="sidebar-logo">
         <span className="sidebar-logo-mark">R</span>
-        {!collapsed && <span className="sidebar-logo-text">Investing Tools</span>}
-      </a>
+        {!collapsed && (
+          <span className="sidebar-logo-text">Investment Terminal</span>
+        )}
+      </NavLink>
 
       {!collapsed && (
         <>
-          <form onSubmit={handleSubmit}>
+          <div className="terminal-status">
+            <span className="terminal-status-label">Current Workspace</span>
+            <strong>{activeLabel}</strong>
+          </div>
+
+          <form onSubmit={handleSubmit} className="terminal-search">
+            <label htmlFor="ticker">Research ticker</label>
             <input
               id="ticker"
               type="text"
               value={ticker}
-              onChange={(e) => setTicker(e.target.value.toUpperCase())}
-              placeholder="e.g. AAPL, TSLA, SPY …"
+              onChange={(event) => setTicker(event.target.value.toUpperCase())}
+              placeholder="AAPL, MSFT, NVDA …"
             />
-            <button className="btn" type="submit" disabled={loading}>
-              {loading ? "Loading…" : "Analyse"}
+            <button className="btn" type="submit">
+              Open Ticker
             </button>
           </form>
 
-          {expirations && expirations.length > 0 && (
-            <>
-              <div className="field">
-                <label htmlFor="expiry">Expiration</label>
-                <select
-                  id="expiry"
-                  value={selectedExpiry?.timestamp ?? ""}
-                  onChange={(e) => onExpiryChange(e.target.value)}
-                >
-                  {expirations.map((exp) => {
-                    const dte = daysToExpiry(exp.date);
-                    return (
-                      <option key={exp.timestamp} value={exp.timestamp}>
-                        {exp.date} ({Math.round(dte)}d)
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
+          <nav className="terminal-nav" aria-label="Primary">
+            {NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  `terminal-nav-link${isActive ? " terminal-nav-link--active" : ""}`
+                }
+              >
+                <span className="terminal-nav-link-label">{item.label}</span>
+                <span className="terminal-nav-link-desc">{item.description}</span>
+              </NavLink>
+            ))}
+          </nav>
 
-              <div className="field field--toggle">
-                <label className="toggle-label">
-                  <input
-                    type="checkbox"
-                    checked={weighted}
-                    onChange={() => onWeightedToggle()}
-                    disabled={loading}
-                  />
-                  <span className="toggle-switch" />
-                </label>
-                <span className="toggle-text">Multi-expiry<br />computation</span>
-                <Tooltip text="When enabled, blends all option chains expiring up to the selected date, weighted by proximity (nearer = higher weight). When off, uses only the selected expiry chain." />
-              </div>
-            </>
-          )}
+          <div className="terminal-notes">
+            <div className="terminal-notes-title">Stacked SDD Chain</div>
+            <ol className="terminal-notes-list">
+              <li>001 Shell & routing</li>
+              <li>002 Data provider</li>
+              <li>003 Screener</li>
+              <li>004 Ticker workspace</li>
+              <li>005 Options conviction</li>
+              <li>006 Report visuals</li>
+              <li>007 Compare & saved</li>
+              <li>008 Performance polish</li>
+            </ol>
+          </div>
 
           <div className="sidebar-vault">
             <SupportVault />
           </div>
-
-          <a href="https://borjaruizdelgado.com" className="sidebar-home">
-            ← Return Home
-          </a>
         </>
       )}
     </aside>
