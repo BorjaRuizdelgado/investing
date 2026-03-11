@@ -70,25 +70,11 @@ export default function App() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  const navigateDisclaimer = React.useCallback(() => {
-    if (window.location.pathname !== DISCLAIMER_PATH) {
-      window.history.pushState(null, "", DISCLAIMER_PATH);
+  const navigate = React.useCallback((path, pageKey) => {
+    if (window.location.pathname !== path) {
+      window.history.pushState(null, "", path);
     }
-    setPage("disclaimer");
-  }, []);
-
-  const navigateDonate = React.useCallback(() => {
-    if (window.location.pathname !== DONATE_PATH) {
-      window.history.pushState(null, "", DONATE_PATH);
-    }
-    setPage("donate");
-  }, []);
-
-  const navigateHome = React.useCallback(() => {
-    if (window.location.pathname !== "/") {
-      window.history.pushState(null, "", "/");
-    }
-    setPage("terminal");
+    setPage(pageKey);
   }, []);
 
   return (
@@ -101,8 +87,8 @@ export default function App() {
         }}
         loading={loading}
         activeTicker={ticker}
-        onNavigateDisclaimer={navigateDisclaimer}
-        onNavigateDonate={navigateDonate}
+        onNavigateDisclaimer={() => navigate(DISCLAIMER_PATH, "disclaimer")}
+        onNavigateDonate={() => navigate(DONATE_PATH, "donate")}
       />
 
       <main className="main">
@@ -110,7 +96,7 @@ export default function App() {
           <div className="main-content">
             <DisclaimerPage />
             <div className="page-link-row">
-              <a href="/" className="page-link" onClick={(e) => { e.preventDefault(); navigateHome(); }}>Back to terminal</a>
+              <a href="/" className="page-link" onClick={(e) => { e.preventDefault(); navigate("/", "terminal"); }}>Back to terminal</a>
             </div>
           </div>
         )}
@@ -119,7 +105,7 @@ export default function App() {
           <div className="main-content">
             <DonationsPage />
             <div className="page-link-row">
-              <a href="/" className="page-link" onClick={(e) => { e.preventDefault(); navigateHome(); }}>Back to terminal</a>
+              <a href="/" className="page-link" onClick={(e) => { e.preventDefault(); navigate("/", "terminal"); }}>Back to terminal</a>
             </div>
           </div>
         )}
@@ -204,7 +190,7 @@ export default function App() {
                   className="page-link"
                   onClick={(e) => {
                     e.preventDefault();
-                    navigateDisclaimer();
+                    navigate(DISCLAIMER_PATH, "disclaimer");
                   }}
                 >
                   Disclaimer

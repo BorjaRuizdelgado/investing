@@ -26,6 +26,16 @@
   --section-gap: 112px;
 }
 
+/* ---- Shared card surface ---- */
+.donations-wallet,
+.kpi-card,
+.options-controls,
+.reason-item,
+.support-vault__wallet {
+  border: 1.2px solid var(--border-light);
+  background: var(--bg);
+}
+
 /* ---- Reset ---- */
 *,
 *::before,
@@ -263,8 +273,6 @@ button {
 }
 
 .donations-wallet {
-  border: 1.2px solid var(--border-light);
-  background: var(--bg);
   padding: 1rem 1.1rem;
 }
 
@@ -471,8 +479,6 @@ button {
 
 .kpi-card {
   padding: 0.85rem 1rem;
-  border: 1.2px solid var(--border-light);
-  background: var(--bg);
   transition:
     border-color 0.35s var(--ease),
     box-shadow 0.35s var(--ease);
@@ -994,8 +1000,6 @@ hr {
   align-items: center;
   gap: 1rem 1.5rem;
   padding: 1rem 1.1rem;
-  border: 1.2px solid var(--border-light);
-  background: var(--bg);
 }
 
 .options-controls .field {
@@ -1324,8 +1328,6 @@ hr {
 }
 
 .reason-item {
-  border: 1.2px solid var(--border-light);
-  background: var(--bg);
   padding: 0.85rem 0.95rem;
 }
 
@@ -1456,6 +1458,10 @@ hr {
   .metrics-grid.cols-4 {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .fundamentals-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Mobile: show burger, hide nav links inline, expand search below header */
@@ -1585,11 +1591,6 @@ hr {
   align-items: start;
 }
 
-@media (max-width: 900px) {
-  .fundamentals-grid {
-    grid-template-columns: 1fr;
-  }
-}
 
 .fundamentals-title {
   font-family: var(--font-serif);
@@ -1810,8 +1811,6 @@ hr {
 }
 
 .support-vault__wallet {
-  border: 1.2px solid var(--border-light);
-  background: var(--bg);
   padding: 10px 12px;
 }
 
