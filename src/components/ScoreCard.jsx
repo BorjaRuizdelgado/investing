@@ -12,7 +12,7 @@ export default function ScoreCard({ label, score, tone = "neutral", detail, tool
         </span>
         <span className="score-card-value">{rounded != null ? rounded : "N/A"}</span>
       </div>
-      <div className="score-bar">
+      <div className="score-bar" style={{ "--fill": `${rounded != null ? rounded : 0}%` }}>
         <div
           className="score-bar-fill"
           style={{ width: `${rounded != null ? rounded : 0}%` }}

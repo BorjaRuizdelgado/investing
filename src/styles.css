@@ -1277,11 +1277,40 @@ hr {
   background: var(--border-light);
   margin: 0.7rem 0 0.55rem;
   overflow: hidden;
+  position: relative;
+}
+
+.score-bar::before {
+  /* full-width gradient anchored to the bar */
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background: var(--accent);
+  z-index: 1;
 }
 
 .score-bar-fill {
+  position: relative;
   height: 100%;
-  background: linear-gradient(90deg, var(--accent-warm), var(--accent));
+  width: var(--fill, 0%);
+  z-index: 2;
+  /* keep fill element transparent — gradient comes from ::before */
+  background: transparent;
+}
+
+.score-bar::after {
+  /* overlay to hide the unfilled portion */
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: calc(100% - var(--fill, 0%));
+  background: var(--border-light);
+  z-index: 3;
 }
 
 .score-card-detail {

@@ -14,7 +14,13 @@ export default function RiskPage({ research }) {
           <h2>Risk</h2>
         </div>
         <div className="terminal-grid terminal-grid--2">
-          <ScoreCard label="Risk Score" score={research?.risk?.score} tone={research?.risk?.score >= 65 ? "positive" : research?.risk?.score < 40 ? "negative" : "neutral"} detail={research?.risk?.label} tooltip={METRIC_TIPS.riskScore} />
+          <ScoreCard
+            label="Risk Score"
+            score={research?.risk?.score}
+            tone={research?.risk?.safetyScore >= 65 ? "positive" : research?.risk?.safetyScore < 40 ? "negative" : "neutral"}
+            detail={research?.risk?.label}
+            tooltip={METRIC_TIPS.riskScore}
+          />
           <div className="terminal-card">
             <div className="terminal-eyebrow">Interpretation</div>
             <p className="terminal-copy">

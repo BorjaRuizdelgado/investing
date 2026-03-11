@@ -79,7 +79,8 @@ export function deriveRisk(fundamentals, analysis) {
   return {
     hasData: availableMetricCount >= 2,
     availableMetricCount,
-    score: finalScore,
+    score: Number.isFinite(finalScore) ? 100 - finalScore : null,
+    safetyScore: finalScore,
     label: riskLabelMap[baseLabel] || baseLabel,
     metrics,
     reasons,

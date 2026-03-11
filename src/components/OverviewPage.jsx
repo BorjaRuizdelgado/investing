@@ -38,10 +38,10 @@ function availableScoreCards(research) {
     research?.risk?.hasData
       ? {
           label: "Risk",
-          value: Number.isFinite(research.risk.score) ? 100 - research.risk.score : research.risk.score,
+          value: research.risk.score,
           detail: research.risk.label,
           tooltip: METRIC_TIPS.riskScore,
-          _origScore: research.risk.score,
+          _origScore: research.risk.safetyScore,
         }
       : null,
     research?.options?.score != null ? { label: "Options", value: research.options.score, detail: research.options.label, tooltip: METRIC_TIPS.optionsScore } : null,
@@ -110,12 +110,12 @@ export default function OverviewPage({ ticker, spot, fundamentals, research, ana
           <div className="score-grid">
             {scoreCards.map((card) => (
               <ScoreCard
-                key={card.label}
-                label={card.label}
-                score={card.value}
-                tone={card._origScore != null ? tone(card._origScore) : tone(card.value)}
-                detail={card.detail}
-              />
+                  key={card.label}
+                  label={card.label}
+                  score={card.value}
+                  tone={card._origScore != null ? tone(card._origScore) : tone(card.value)}
+                  detail={card.detail}
+                />
             ))}
           </div>
         </section>
