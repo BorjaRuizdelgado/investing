@@ -120,12 +120,6 @@ export default function BusinessPage({ ticker, fundamentals, research }) {
           Historical financial statement series were not available for this ticker.
         </div>
       )}
-
-      {business?.hasFinancialSeries && (
-        <div className="info-box">
-          Revenue-source breakdown by segment or geography is intentionally not shown yet. Open-data coverage is too inconsistent to present that cleanly without introducing misleading charts.
-        </div>
-      )}
     </>
   );
 }

@@ -96,7 +96,7 @@ button {
   top: 0;
   z-index: 100;
   background: var(--bg-alt);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1.2px solid var(--border);
 }
 
 .app-header__inner {
@@ -153,7 +153,7 @@ button {
 .app-header__search input[type="text"] {
   flex: 1;
   padding: 0.5rem 0.85rem;
-  border: 1px solid var(--border);
+  border: 1.2px solid var(--border);
   border-right: none;
   background: var(--bg);
   color: var(--text);
@@ -176,7 +176,7 @@ button {
   padding: 0.5rem 1.1rem;
   background: var(--accent);
   color: #fff;
-  border: 1px solid var(--accent);
+  border: 1.2px solid var(--accent);
   font-family: var(--font-sans);
   font-size: 0.82rem;
   font-weight: 500;
@@ -263,7 +263,7 @@ button {
 }
 
 .donations-wallet {
-  border: 1px solid var(--border-light);
+  border: 1.2px solid var(--border-light);
   background: var(--bg);
   padding: 1rem 1.1rem;
 }
@@ -297,7 +297,7 @@ button {
   font-size: 0.78rem;
   font-weight: 500;
   color: var(--accent);
-  border: 1px solid var(--accent);
+  border: 1.2px solid var(--accent);
   background: none;
   font-family: inherit;
   cursor: pointer;
@@ -410,7 +410,7 @@ button {
   padding: 12px 32px;
   background: none;
   color: var(--accent);
-  border: 1px solid var(--accent);
+  border: 1.2px solid var(--accent);
   font-family: var(--font-sans);
   font-size: 0.82rem;
   font-weight: 500;
@@ -471,7 +471,7 @@ button {
 
 .kpi-card {
   padding: 0.85rem 1rem;
-  border: 1px solid var(--border-light);
+  border: 1.2px solid var(--border-light);
   background: var(--bg);
   transition:
     border-color 0.35s var(--ease),
@@ -587,7 +587,7 @@ button {
 /* ---- Label Strip ---- */
 .label-strip {
   padding: 0.6rem 0 1rem;
-  border-top: 1px solid var(--border);
+  border-top: 1.2px solid var(--border);
   display: flex;
   flex-wrap: wrap;
   gap: 0 2.5rem;
@@ -630,7 +630,7 @@ button {
   letter-spacing: 0.03em;
   color: var(--text-muted);
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 1.2px solid var(--border);
   border-radius: 999px;
   cursor: pointer;
   transition: all 0.2s var(--ease);
@@ -683,7 +683,7 @@ button {
 
 /* ---- Expanders ---- */
 .expander {
-  border: 1px solid var(--border-light);
+  border: 1.2px solid var(--border-light);
   margin-bottom: 1rem;
   overflow: hidden;
   transition:
@@ -762,7 +762,7 @@ button {
 
 .data-table td {
   padding: 0.45rem 0.75rem;
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1.2px solid var(--border-light);
   color: var(--text-light);
 }
 
@@ -834,7 +834,7 @@ button {
 /* ---- Divider ---- */
 hr {
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: 1.2px solid var(--border);
   margin: 2rem 0 1rem;
 }
 
@@ -873,7 +873,7 @@ hr {
 .error-box {
   padding: 1rem 1.25rem;
   background: #fdf2f0;
-  border: 1px solid #e8c5bf;
+  border: 1.2px solid #e8c5bf;
   color: var(--red);
   font-size: 0.92rem;
   margin-bottom: 1.5rem;
@@ -914,7 +914,7 @@ hr {
   font-weight: 500;
   letter-spacing: 0.05em;
   color: var(--accent);
-  border: 1px solid var(--accent);
+  border: 1.2px solid var(--accent);
   background: none;
   transition: all 0.25s var(--ease);
   cursor: pointer;
@@ -986,7 +986,7 @@ hr {
   align-items: center;
   gap: 1rem 1.5rem;
   padding: 1rem 1.1rem;
-  border: 1px solid var(--border-light);
+  border: 1.2px solid var(--border-light);
   background: var(--bg);
 }
 
@@ -1007,7 +1007,7 @@ hr {
 .options-controls select {
   width: 100%;
   padding: 0.65rem 0.8rem;
-  border: 1px solid var(--border);
+  border: 1.2px solid var(--border);
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
@@ -1034,7 +1034,7 @@ hr {
   top: 60px;
   z-index: 90;
   background: var(--bg);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1.2px solid var(--border);
 }
 
 .terminal-tabs {
@@ -1139,7 +1139,7 @@ hr {
 }
 
 .terminal-card {
-  border: 1px solid var(--border-light);
+  border: 1.2px solid var(--border);
   background: var(--bg);
   padding: 1rem 1.1rem;
   
@@ -1201,7 +1201,7 @@ hr {
   align-items: center;
   gap: 0.75rem;
   padding: 0.55rem 0.75rem;
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1.2px solid var(--border-light);
 }
 
 .scenario-row:last-child {
@@ -1228,17 +1228,17 @@ hr {
 }
 
 .score-card {
-  border: 1px solid var(--border-light);
+  border: 1.2px solid var(--border);
   background: var(--bg);
   padding: 0.95rem 1rem;
 }
 
 .score-card--positive {
-  border-color: rgba(61, 122, 90, 0.28);
+  border-color: var(--green);
 }
 
 .score-card--negative {
-  border-color: rgba(176, 80, 64, 0.28);
+  border-color: var(--red);
 }
 
 .score-card-header {
@@ -1287,7 +1287,7 @@ hr {
 }
 
 .reason-item {
-  border: 1px solid var(--border-light);
+  border: 1.2px solid var(--border-light);
   background: var(--bg);
   padding: 0.85rem 0.95rem;
 }
@@ -1368,7 +1368,7 @@ hr {
     align-items: center;
     justify-content: center;
     border-radius: 0;
-    border-left: 1px solid var(--border);
+    border-left: 1.2px solid var(--border);
     background: var(--bg-alt);
     color: var(--accent);
     cursor: pointer;
@@ -1436,7 +1436,7 @@ hr {
     left: 0;
     right: 0;
     background: var(--bg-alt);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1.2px solid var(--border);
     padding: 0.75rem 1rem;
     max-width: none;
     z-index: 99;
@@ -1634,7 +1634,7 @@ hr {
   flex-direction: column;
   gap: 0.15rem;
   padding: 0.85rem 1rem;
-  border: 1px solid var(--border-light);
+  border: 1.2px solid var(--border-light);
   background: var(--bg);
   transition:
     border-color 0.35s var(--ease),
@@ -1737,7 +1737,7 @@ hr {
 }
 
 .support-vault__body {
-  border-top: 1px solid var(--border-light);
+  border-top: 1.2px solid var(--border-light);
   /* start closed */
   max-height: 0;
   opacity: 0;
@@ -1772,7 +1772,7 @@ hr {
 }
 
 .support-vault__wallet {
-  border: 1px solid var(--border-light);
+  border: 1.2px solid var(--border-light);
   background: var(--bg);
   padding: 10px 12px;
 }
