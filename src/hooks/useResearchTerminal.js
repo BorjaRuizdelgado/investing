@@ -119,9 +119,10 @@ export default function useResearchTerminal() {
       setExpirations(validExps);
       setSelectedExpiry(validExps[0]);
 
-      const path = `/${encodeURIComponent(resolvedTicker)}`;
-      if (window.location.pathname !== path) {
-        window.history.pushState(null, "", path);
+      const basePath = `/${encodeURIComponent(resolvedTicker)}`;
+      // Only update the URL if it doesn't already start with the resolved ticker
+      if (!window.location.pathname.startsWith(basePath)) {
+        window.history.pushState(null, "", basePath);
       }
 
       await runAnalysis(

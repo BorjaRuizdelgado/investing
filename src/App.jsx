@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import Header from "./components/Header.jsx";
 import TerminalTabs from "./components/TerminalTabs.jsx";
 import OverviewPage from "./components/OverviewPage.jsx";
@@ -14,7 +14,7 @@ import TrendingTickers from "./components/TrendingTickers.jsx";
 import SupportVault from "./components/SupportVault.jsx";
 import { daysToExpiry } from "./lib/fetcher.js";
 import useResearchTerminal from "./hooks/useResearchTerminal.js";
-import { DISCLAIMER_PATH, DONATE_PATH, currentPath } from "./lib/routes.js";
+import { DISCLAIMER_PATH, DONATE_PATH, currentPath, tabFromPath } from "./lib/routes.js";
 
 const TABS = [
   { id: "overview", label: "Overview", caption: "Decision snapshot" },
@@ -27,7 +27,12 @@ const TABS = [
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(() => {
+    const tab = tabFromPath(window.location.pathname);
+    return tab || "overview";
+  });
+  const initialUrlTab = tabFromPath(window.location.pathname);
+  const desiredTabRef = useRef(initialUrlTab);
   const [page, setPage] = useState(() => {
     const p = currentPath();
     if (p === DISCLAIMER_PATH) return "disclaimer";
@@ -55,9 +60,23 @@ export default function App() {
   );
   React.useEffect(() => {
     if (!visibleTabs.some((tab) => tab.id === activeTab) && visibleTabs[0]) {
-      setActiveTab(visibleTabs[0].id);
+      // If the URL specified a tab and it's now available, use it.
+      if (desiredTabRef.current && visibleTabs.some((t) => t.id === desiredTabRef.current)) {
+        setActiveTab(desiredTabRef.current);
+      } else {
+        setActiveTab(visibleTabs[0].id);
+      }
     }
   }, [activeTab, visibleTabs]);
+
+  // When research becomes available, if the URL requested a specific tab
+  // and that tab is now visible, switch to it once.
+  React.useEffect(() => {
+    if (desiredTabRef.current && visibleTabs.some((t) => t.id === desiredTabRef.current)) {
+      if (activeTab !== desiredTabRef.current) setActiveTab(desiredTabRef.current);
+      desiredTabRef.current = null;
+    }
+  }, [visibleTabs]);
 
   React.useEffect(() => {
     const onPop = () => {
@@ -65,6 +84,9 @@ export default function App() {
       if (p === DISCLAIMER_PATH) setPage("disclaimer");
       else if (p === DONATE_PATH) setPage("donate");
       else setPage("terminal");
+
+      const tab = tabFromPath(window.location.pathname);
+      if (tab) setActiveTab(tab);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
@@ -143,7 +165,19 @@ export default function App() {
         {page === "terminal" && analysis && research && (
           <>
             <div className="terminal-tabs-bar">
-              <TerminalTabs tabs={visibleTabs} activeTab={activeTab} onChange={setActiveTab} />
+              <TerminalTabs
+                tabs={visibleTabs}
+                activeTab={activeTab}
+                onChange={(tabId) => {
+                  setActiveTab(tabId);
+                  if (ticker) {
+                    const path = `/${encodeURIComponent(ticker)}/${encodeURIComponent(tabId)}`;
+                    if (window.location.pathname !== path) {
+                      window.history.pushState(null, "", path);
+                    }
+                  }
+                }}
+              />
             </div>
 
             <div className="tab-content">

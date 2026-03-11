@@ -10,9 +10,20 @@ export function isReservedPath(pathname) {
 }
 
 export function tickerFromPath(pathname) {
-  const path = pathname.replace(/^\//, "").replace(/\/$/, "");
-  if (!path || path.includes("/")) return null;
-  const normalized = `/${path}`;
-  if (isReservedPath(normalized)) return null;
-  return decodeURIComponent(path).toUpperCase();
+  const cleaned = pathname.replace(/^\//, "").replace(/\/$/, "");
+  if (!cleaned) return null;
+  const parts = cleaned.split("/");
+  const first = parts[0];
+  if (!first) return null;
+  // avoid reserved top-level paths like /disclaimer or /donate
+  if (isReservedPath(`/${first}`)) return null;
+  return decodeURIComponent(first).toUpperCase();
+}
+
+export function tabFromPath(pathname) {
+  const cleaned = pathname.replace(/^\//, "").replace(/\/$/, "");
+  if (!cleaned) return null;
+  const parts = cleaned.split("/");
+  if (parts.length < 2) return null;
+  return decodeURIComponent(parts[1]);
 }
