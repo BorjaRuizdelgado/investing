@@ -1047,6 +1047,11 @@ hr {
   display: none;
 }
 
+/* hide the scroll button by default (shown only in mobile media rules) */
+.terminal-tabs-scroll-btn {
+  display: none;
+}
+
 .terminal-tab {
   flex-shrink: 0;
   padding: 0 1.1rem;
@@ -1133,11 +1138,7 @@ hr {
   border: 1px solid var(--border-light);
   background: var(--bg);
   padding: 1rem 1.1rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  min-width: 0;
+  
 }
 
 .terminal-card--compact {
@@ -1188,16 +1189,7 @@ hr {
   gap: 1rem;
   margin-top: 0.55rem;
 }
-
-.scenario-row {
-  display: grid;
-  grid-template-columns: minmax(120px, 1fr) minmax(180px, 1fr);
-  align-items: baseline;
-  gap: 6rem;
-  padding-bottom: 0.9rem;
-  border-bottom: 1px solid var(--border-light);
-}
-
+  
 .scenario-row:last-child {
   border-bottom: none;
   padding-bottom: 0;
@@ -1329,14 +1321,50 @@ hr {
     width: 100%;
   }
 
+  /* mobile: tabs container + overlayed scroll button affordance */
+  .terminal-tabs-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
   .terminal-tabs {
     width: 100%;
     padding: 0 1rem;
+    -webkit-overflow-scrolling: touch;
+    /* leave room for the square button at the end; larger so last tab isn't covered */
+    padding-right: 96px;
   }
 
   .terminal-tabs-bar {
-    -webkit-mask-image: linear-gradient(to right, black calc(100% - 48px), transparent 90%);
-    mask-image: linear-gradient(to right, black calc(100% - 48px), transparent 90%);
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  /* overlayed scroll button — mobile only */
+  .terminal-tabs-scroll-btn {
+    /* square button, flush to the right end of the bar */
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 56px;
+    height: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+    border-left: 1px solid var(--border);
+    background: var(--bg-alt);
+    color: var(--accent);
+    cursor: pointer;
+    z-index: 110;
+    box-shadow: none;
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+
+  .terminal-tabs-scroll-btn:hover {
+    background: var(--bg);
   }
 
   .landing {
