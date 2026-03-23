@@ -699,6 +699,21 @@ function buildCrawlerHtml(url, ticker) {
     "author":{"@type":"Person","name":"Borja Ruizdelgado","url":"https://borjaruizdelgado.com"}
   }
   </script>
+  ${ticker ? `<script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebPage",
+    "name":"${title}",
+    "url":"${canonical}",
+    "description":"${description}",
+    "isPartOf":{"@type":"WebSite","name":"Borja Ruizdelgado — Investing Tools","url":"${origin}/"},
+    "about":{"@type":"FinancialProduct","name":"${ticker}","url":"${canonical}"},
+    "breadcrumb":{"@type":"BreadcrumbList","itemListElement":[
+      {"@type":"ListItem","position":1,"name":"Home","item":"${origin}/"},
+      {"@type":"ListItem","position":2,"name":"${ticker}","item":"${canonical}"}
+    ]}
+  }
+  </script>` : ""}
 </head>
 <body>
   <h1>${title}</h1>
@@ -810,7 +825,46 @@ export default {
         return await handleTrending();
       }
 
-      // Serve important social/static assets with permissive headers so
+      // Dynamic sitemap with popular tickers so Google discovers more pages
+    if (url.pathname === "/sitemap.xml") {
+      const today = new Date().toISOString().slice(0, 10);
+      const origin = url.origin;
+      const tickers = [
+        // Mega-cap & popular stocks
+        "AAPL","MSFT","NVDA","AMZN","GOOGL","META","TSLA","BRK-B","AVGO","JPM",
+        "LLY","V","UNH","MA","XOM","COST","HD","PG","JNJ","ABBV",
+        "NFLX","CRM","BAC","AMD","ORCL","ADBE","KO","PEP","TMO","MRK",
+        "ACN","CSCO","WMT","ABT","LIN","PM","MCD","DIS","NOW","IBM",
+        "GE","ISRG","INTU","QCOM","TXN","AMGN","HON","CAT","AMAT","BKNG",
+        "GS","AXP","UBER","MS","BLK","SBUX","PFE","SYK","SCHW","LOW",
+        "DE","GILD","MDLZ","REGN","PANW","CB","ADI","VRTX","SO","CME",
+        "BX","LRCX","PYPL","MU","PLTR","COIN","SOFI","RIVN","LCID","ARM",
+        "SNOW","CRWD","DDOG","NET","ZS","MRVL","ABNB","DASH","RBLX","U",
+        "SHOP","SQ","ROKU","SNAP","PINS","HOOD","MARA","RIOT","SMCI","AI",
+        // ETFs
+        "SPY","QQQ","IWM","DIA","VOO","VTI","ARKK","XLF","XLE","XLK",
+        "SOXL","TQQQ","SQQQ","VXX","UVXY","GLD","SLV","TLT","HYG","EEM",
+        // Crypto
+        "BTC","ETH","SOL","XRP","DOGE","ADA","AVAX","DOT","LINK","MATIC",
+      ];
+      const urls = [
+        `<url><loc>${origin}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>`,
+        `<url><loc>${origin}/disclaimer</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>`,
+        `<url><loc>${origin}/donate</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>`,
+        ...tickers.map(t =>
+          `<url><loc>${origin}/${t}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`
+        ),
+      ];
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>`;
+      return new Response(xml, {
+        headers: {
+          "Content-Type": "application/xml; charset=UTF-8",
+          "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+        },
+      });
+    }
+
+    // Serve important social/static assets with permissive headers so
       // crawlers and social scrapers reliably fetch images from the edge.
       if (url.pathname === "/og-image.jpg" || url.pathname === "/og-image.svg" || url.pathname === "/favicon.png") {
         const assetRes = await env.ASSETS.fetch(request);
@@ -856,7 +910,31 @@ export default {
         }
 
         const indexReq = new Request(new URL("/", url.origin), request);
-        return env.ASSETS.fetch(indexReq);
+        const indexRes = await env.ASSETS.fetch(indexReq);
+
+        // Rewrite canonical, title, and meta description so Google's renderer
+        // (which fetches as a normal user) sees the correct values for each ticker page.
+        if (maybeTicker && !reserved.has(maybeTicker)) {
+          const canonical = `${url.origin}/${maybeTicker}`;
+          const title = `${maybeTicker} Options & Stock Analysis — Borja Ruizdelgado Investing Tools`;
+          const desc = `Free ${maybeTicker} analysis: options-implied price forecast, probability distribution, expected move, IV smile, fundamentals (P/E, EBITDA, margins), analyst targets, and support/resistance levels.`;
+          let html = await indexRes.text();
+          html = html
+            .replace(/<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${canonical}" id="canonical"/>`)
+            .replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`)
+            .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${desc}"/>`)
+            .replace(/<meta property="og:url"[^>]*>/, `<meta property="og:url" content="${canonical}"/>`)
+            .replace(/<meta property="og:title"[^>]*>/, `<meta property="og:title" content="${title}"/>`)
+            .replace(/<meta property="og:description"[^>]*>/, `<meta property="og:description" content="${desc}"/>`)
+            .replace(/<meta name="twitter:title"[^>]*>/, `<meta name="twitter:title" content="${title}"/>`)
+            .replace(/<meta name="twitter:description"[^>]*>/, `<meta name="twitter:description" content="${desc}"/>`);
+          return new Response(html, {
+            status: 200,
+            headers: { "Content-Type": "text/html;charset=UTF-8" },
+          });
+        }
+
+        return indexRes;
       }
       return assetRes;
     } catch (err) {
