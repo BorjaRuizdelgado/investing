@@ -12,25 +12,36 @@ import { COMPARE_PREFIX } from "../lib/routes.js";
 import { fmt, fmtPct, fmtRatio, fmtCompact } from "../lib/format.js";
 
 /**
- * Compute daily returns from closing prices, then Pearson correlation.
- * Using returns rather than raw prices avoids spurious correlation
- * from two upward-trending series.
+ * Compute Pearson correlation of daily returns, joining on matching dates.
+ * Crypto trades 7 days/week while stocks trade 5 — we must align by date
+ * to avoid comparing mismatched days.
  */
-function pearsonCorrelation(closesA, closesB) {
-  // Align by using the shorter length from the tail
-  const n = Math.min(closesA.length, closesB.length);
-  if (n < 20) return null;
-  const a = closesA.slice(-n);
-  const b = closesB.slice(-n);
+function computeCorrelation(historyA, historyB) {
+  // Build date→close map for B
+  const mapB = new Map();
+  for (const bar of historyB) {
+    if (bar.date && Number.isFinite(bar.close)) mapB.set(bar.date, bar.close);
+  }
 
-  // Daily returns
-  const ra = [], rb = [];
-  for (let i = 1; i < n; i++) {
-    if (a[i - 1] > 0 && b[i - 1] > 0) {
-      ra.push((a[i] - a[i - 1]) / a[i - 1]);
-      rb.push((b[i] - b[i - 1]) / b[i - 1]);
+  // Collect aligned closing prices (only dates present in both)
+  const aligned = [];
+  for (const bar of historyA) {
+    if (bar.date && Number.isFinite(bar.close) && mapB.has(bar.date)) {
+      aligned.push({ a: bar.close, b: mapB.get(bar.date) });
     }
   }
+
+  if (aligned.length < 20) return null;
+
+  // Compute daily returns on aligned pairs
+  const ra = [], rb = [];
+  for (let i = 1; i < aligned.length; i++) {
+    if (aligned[i - 1].a > 0 && aligned[i - 1].b > 0) {
+      ra.push((aligned[i].a - aligned[i - 1].a) / aligned[i - 1].a);
+      rb.push((aligned[i].b - aligned[i - 1].b) / aligned[i - 1].b);
+    }
+  }
+
   if (ra.length < 15) return null;
 
   const len = ra.length;
@@ -237,9 +248,9 @@ export default function ComparePage({ tickers = [] }) {
       {!loading && activeTickers.length >= 2 && results[0] && results[1] && (() => {
         const t0 = results[0]?.ticker || activeTickers[0];
         const t1 = results[1]?.ticker || activeTickers[1];
-        const closesA = results[0]?.analysis?.history?.map((h) => h.close).filter(Number.isFinite) || [];
-        const closesB = results[1]?.analysis?.history?.map((h) => h.close).filter(Number.isFinite) || [];
-        const corrResult = pearsonCorrelation(closesA, closesB);
+        const histA = results[0]?.analysis?.history || [];
+        const histB = results[1]?.analysis?.history || [];
+        const corrResult = computeCorrelation(histA, histB);
         const corrVal = corrResult?.r ?? null;
         const corrDays = corrResult?.days ?? 0;
         const { text: corrText, tone: corrTone } = correlationLabel(corrVal);
@@ -388,7 +399,7 @@ export default function ComparePage({ tickers = [] }) {
             </section>
           )}
           {/* Correlation card */}
-          {closesA.length > 20 && closesB.length > 20 && (
+          {corrResult && (
             <div className="terminal-card compare-correlation">
               <div className="terminal-eyebrow">Tickers' Correlation</div>
               <div className="compare-correlation__row">
