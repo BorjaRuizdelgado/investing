@@ -136,3 +136,26 @@ export const RISK_SHORT_BAD = 25
 /** Implied move — lower is better */
 export const RISK_MOVE_GOOD = 0.03
 export const RISK_MOVE_BAD = 0.12
+
+// ---- technicals.js: indicator parameters & scoring ranges ----------------
+
+/** RSI */
+export const TA_RSI_PERIOD = 14
+export const TA_RSI_OVERSOLD = 30
+export const TA_RSI_OVERBOUGHT = 70
+
+/** MACD */
+export const TA_MACD_FAST = 12
+export const TA_MACD_SLOW = 26
+export const TA_MACD_SIGNAL = 9
+
+/** Bollinger Bands */
+export const TA_BB_PERIOD = 20
+export const TA_BB_STD_DEV = 2
+
+/** Volume trend lookback */
+export const TA_VOLUME_SHORT = 5
+export const TA_VOLUME_LONG = 20
+
+/** Earnings proximity warning threshold (days) */
+export const EARNINGS_WARNING_DAYS = 14

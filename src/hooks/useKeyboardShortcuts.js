@@ -36,9 +36,9 @@ export default function useKeyboardShortcuts({ inputRef, visibleTabs, activeTab,
         return
       }
 
-      // 1-7 for tab switching
+      // 1-9 for tab switching
       const num = parseInt(e.key, 10)
-      if (num >= 1 && num <= 7 && visibleTabs?.length) {
+      if (num >= 1 && num <= 9 && visibleTabs?.length) {
         const tab = visibleTabs[num - 1]
         if (tab) {
           setActiveTab(tab.id)

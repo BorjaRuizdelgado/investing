@@ -190,7 +190,7 @@ async function handleOptions(ticker) {
   const [data, summaryData] = await Promise.all([
     fetchYF(`/v7/finance/options/${ticker}`),
     fetchYF(
-      `/v10/finance/quoteSummary/${ticker}?modules=defaultKeyStatistics,financialData,incomeStatementHistory,balanceSheetHistory,cashflowStatementHistory`,
+      `/v10/finance/quoteSummary/${ticker}?modules=defaultKeyStatistics,financialData,incomeStatementHistory,balanceSheetHistory,cashflowStatementHistory,earningsHistory`,
     ).catch(() => null),
   ])
   const result = data.optionChain.result[0]
@@ -208,6 +208,7 @@ async function handleOptions(ticker) {
   const incomeHist = summaryResult.incomeStatementHistory?.incomeStatementHistory?.[0] || {}
   const balanceHist = summaryResult.balanceSheetHistory?.balanceSheetStatements?.[0] || {}
   const cashflowHist = summaryResult.cashflowStatementHistory?.cashflowStatements?.[0] || {}
+  const earningsHistRaw = summaryResult.earningsHistory?.history || []
   const incomeHistory = summaryResult.incomeStatementHistory?.incomeStatementHistory || []
   const balanceHistory = summaryResult.balanceSheetHistory?.balanceSheetStatements || []
   const cashflowHistory = summaryResult.cashflowStatementHistory?.cashflowStatements || []
@@ -351,6 +352,16 @@ async function handleOptions(ticker) {
         }))
         .filter((row) => row.endDate),
     },
+    earningsHistory: earningsHistRaw
+      .map((e) => ({
+        quarter: e?.quarter?.fmt || null,
+        period: e?.period || null,
+        epsEstimate: rv(e?.epsEstimate),
+        epsActual: rv(e?.epsActual),
+        epsDifference: rv(e?.epsDifference),
+        surprisePercent: rv(e?.surprisePercent),
+      }))
+      .filter((e) => e.epsActual != null),
   }
 
   return jsonResp({

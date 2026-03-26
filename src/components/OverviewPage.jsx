@@ -1,9 +1,9 @@
-import React from 'react'
 import { fmt, fmtCompact, fmtPct } from '../lib/format.js'
 import ScoreCard from './ScoreCard.jsx'
 import ReasonList from './ReasonList.jsx'
 import Tooltip from './Tooltip.jsx'
 import ScenarioCard from './ScenarioCard.jsx'
+import EarningsCalendar from './EarningsCalendar.jsx'
 import { METRIC_TIPS } from '../lib/metricTips.js'
 
 function tone(score) {
@@ -32,6 +32,7 @@ const SCORE_TO_TAB = {
   Valuation: 'value',
   Quality: 'quality',
   Risk: 'risk',
+  Technicals: 'technicals',
   Options: 'options',
 }
 
@@ -68,6 +69,14 @@ function availableScoreCards(research) {
           detail: research.risk.label,
           tooltip: METRIC_TIPS.riskScore,
           _origScore: research.risk.safetyScore,
+        }
+      : null,
+    research?.technicals?.hasData
+      ? {
+          label: 'Technicals',
+          value: research.technicals.score,
+          detail: research.technicals.label,
+          tooltip: METRIC_TIPS.technicalsScore,
         }
       : null,
     research?.options?.score != null
@@ -207,6 +216,8 @@ export default function OverviewPage({
           <ScenarioCard fairValue={research.valuation.fairValue} />
         </section>
       )}
+
+      <EarningsCalendar fundamentals={fundamentals} />
 
       <ReasonList title="Key Signals" reasons={research?.signals || []} />
       <ReasonList title="Why These Scores" reasons={reasonPool} />

@@ -3,7 +3,7 @@ import React from 'react'
 const SHORTCUTS = [
   { keys: '/', desc: 'Focus search' },
   { keys: 'Esc', desc: 'Blur search / close modal' },
-  { keys: '1-7', desc: 'Switch tabs' },
+  { keys: '1-9', desc: 'Switch tabs' },
   { keys: '\u2190 \u2192', desc: 'Previous / next tab' },
   { keys: '?', desc: 'Toggle this help' },
 ]

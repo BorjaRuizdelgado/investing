@@ -19,6 +19,9 @@ export default function EarningsCalendar({ fundamentals }) {
   // EPS history from fundamentals (if available via earningsChart or earningsHistory)
   const epsHistory = fundamentals.earningsHistory || []
 
+  // Nothing to show for crypto / tickers without earnings data
+  if (!earningsDate && epsHistory.length === 0) return null
+
   const c = getColors()
 
   return (
