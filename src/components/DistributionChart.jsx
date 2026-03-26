@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import Plot from 'react-plotly.js'
-import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, legendBg } from '../lib/theme.js'
+import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, legendBg, mobileMargin } from '../lib/theme.js'
 
 export default function DistributionChart({ dist, spot, pctiles, mp }) {
   const { data, layout } = useMemo(() => {
@@ -165,7 +165,7 @@ export default function DistributionChart({ dist, spot, pctiles, mp }) {
         y0: 0,
         y1: 1,
         yref: 'paper',
-        line: { color: colour, width: 1, dash: 'dot' },
+        line: { color: colour, width: 1.5, dash: 'dot' },
         opacity: 0.35,
       })
       annotations.push({
@@ -199,7 +199,7 @@ export default function DistributionChart({ dist, spot, pctiles, mp }) {
 
     const lo = {
       ...LAYOUT_DEFAULTS,
-      margin: { l: 65, r: 30, t: 80, b: 65 },
+      margin: mobileMargin(65, 30, 80, 65),
       title: {
         text: '<b>Implied Price Distribution</b>',
         font: { size: 16, color: COLORS.text },

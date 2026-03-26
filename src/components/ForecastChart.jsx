@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import Plot from 'react-plotly.js'
-import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, legendBg } from '../lib/theme.js'
+import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, legendBg, mobileMargin } from '../lib/theme.js'
 import { buildMaTracesAndAnnotations } from '../lib/ma.js'
 
 /**
@@ -282,6 +282,7 @@ export default function ForecastChart({
         yanchor: 'top',
       },
       height: chartHeight(720),
+      margin: mobileMargin(65, 30, 60, 55),
       hovermode: 'x unified',
       shapes,
       annotations,

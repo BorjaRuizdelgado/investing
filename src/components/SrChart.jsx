@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import Plot from 'react-plotly.js'
-import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, legendBg } from '../lib/theme.js'
+import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, legendBg, mobileMargin } from '../lib/theme.js'
 import { buildMaTracesAndAnnotations } from '../lib/ma.js'
 
 export default function SrChart({ ticker, history, spot, sr, entryInfo, overlays = {} }) {
@@ -242,7 +242,7 @@ export default function SrChart({ ticker, history, spot, sr, entryInfo, overlays
 
     const lo = {
       ...LAYOUT_DEFAULTS,
-      margin: { l: 65, r: 40, t: 50, b: 50 },
+      margin: mobileMargin(65, 40, 50, 50),
       title: {
         text: `<b>${ticker}</b>  \u2014  Potential Entry Setup`,
         font: { size: 16, color: COLORS.text },

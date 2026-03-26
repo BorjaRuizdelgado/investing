@@ -145,3 +145,10 @@ export function chartHeight(desktop, mobile = Math.round(desktop * 0.65)) {
   if (typeof window === 'undefined') return desktop
   return window.innerWidth <= 600 ? mobile : desktop
 }
+
+/** Responsive chart margin: tighter on narrow (≤640px) viewports to maximise plot width. */
+export function mobileMargin(l = 65, r = 30, t = 20, b = 55, { mobileL = 44, mobileR = 6 } = {}) {
+  if (typeof window === 'undefined') return { l, r, t, b }
+  const mob = window.innerWidth <= 640
+  return mob ? { l: mobileL, r: mobileR, t, b: b > 28 ? b - 8 : b } : { l, r, t, b }
+}

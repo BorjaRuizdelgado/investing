@@ -7,6 +7,7 @@ import {
   PLOTLY_CONFIG_SMALL,
   chartHeight,
   legendBg,
+  mobileMargin,
 } from '../lib/theme.js'
 
 export default function OiChart({ calls, puts, spot }) {
@@ -121,7 +122,7 @@ export default function OiChart({ calls, puts, spot }) {
 
     const lo = {
       ...LAYOUT_DEFAULTS,
-      margin: { l: 65, r: 30, t: 80, b: 55 },
+      margin: mobileMargin(65, 30, 80, 55),
       title: {
         text: '<b>Open Interest & Volume by Strike</b>',
         font: { size: 16, color: COLORS.text },

@@ -7,7 +7,7 @@ import { deriveQuality } from '../lib/quality.js'
 import { deriveRisk } from '../lib/risk.js'
 import { deriveOpportunity, deriveOptionsSentiment } from '../lib/signals.js'
 import { daysToExpiry } from '../lib/fetcher.js'
-import { getColors } from '../lib/theme.js'
+import { getColors, mobileMargin } from '../lib/theme.js'
 import { COMPARE_PREFIX } from '../lib/routes.js'
 import { fmt, fmtPct, fmtRatio, fmtCompact } from '../lib/format.js'
 
@@ -443,7 +443,7 @@ export default function ComparePage({ tickers = [] }) {
                       layout={{
                         autosize: true,
                         height: 350,
-                        margin: { l: 60, r: 60, t: 20, b: 40 },
+                        margin: mobileMargin(60, 60, 20, 40, { mobileL: 40, mobileR: 20 }),
                         paper_bgcolor: 'transparent',
                         plot_bgcolor: 'transparent',
                         font: { color: c.textLight, family: 'DM Sans, sans-serif', size: 12 },
