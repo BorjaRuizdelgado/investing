@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef } from "react";
+import React, { useMemo, useState, useRef, useCallback } from "react";
 import Header from "./components/Header.jsx";
 import TerminalTabs from "./components/TerminalTabs.jsx";
 import OverviewPage from "./components/OverviewPage.jsx";
@@ -14,7 +14,15 @@ import TrendingTickers from "./components/TrendingTickers.jsx";
 import SupportVault from "./components/SupportVault.jsx";
 import { daysToExpiry } from "./lib/fetcher.js";
 import useResearchTerminal from "./hooks/useResearchTerminal.js";
-import { DISCLAIMER_PATH, DONATE_PATH, currentPath, tabFromPath } from "./lib/routes.js";
+import useTheme from "./hooks/useTheme.js";
+import useWatchlist from "./hooks/useWatchlist.js";
+import useKeyboardShortcuts from "./hooks/useKeyboardShortcuts.js";
+import { invalidateColors } from "./lib/theme.js";
+import { DISCLAIMER_PATH, DONATE_PATH, WATCHLIST_PATH, COMPARE_PREFIX, currentPath, tabFromPath, isComparePath, compareTickersFromPath } from "./lib/routes.js";
+import { OverviewSkeleton } from "./components/SkeletonLayouts.jsx";
+import ShortcutHelp from "./components/ShortcutHelp.jsx";
+import WatchlistPage from "./components/WatchlistPage.jsx";
+import ComparePage from "./components/ComparePage.jsx";
 
 const TABS = [
   { id: "overview", label: "Overview", caption: "Decision snapshot" },
@@ -37,8 +45,15 @@ export default function App() {
     const p = currentPath();
     if (p === DISCLAIMER_PATH) return "disclaimer";
     if (p === DONATE_PATH) return "donate";
+    if (p === WATCHLIST_PATH) return "watchlist";
+    if (isComparePath(p)) return "compare";
     return "terminal";
   });
+
+  const { theme, toggle: toggleTheme } = useTheme();
+  const watchlist = useWatchlist();
+  const inputRef = useRef(null);
+
   const {
     loading,
     error,
@@ -58,9 +73,21 @@ export default function App() {
     () => TABS.filter((tab) => research?.availability?.[tab.id] ?? tab.id === "overview"),
     [research],
   );
+
+  const handleThemeToggle = useCallback(() => {
+    toggleTheme();
+    invalidateColors();
+  }, [toggleTheme]);
+
+  const { showHelp, setShowHelp } = useKeyboardShortcuts({
+    inputRef,
+    visibleTabs,
+    activeTab,
+    setActiveTab,
+  });
+
   React.useEffect(() => {
     if (!visibleTabs.some((tab) => tab.id === activeTab) && visibleTabs[0]) {
-      // If the URL specified a tab and it's now available, use it.
       if (desiredTabRef.current && visibleTabs.some((t) => t.id === desiredTabRef.current)) {
         setActiveTab(desiredTabRef.current);
       } else {
@@ -69,8 +96,6 @@ export default function App() {
     }
   }, [activeTab, visibleTabs]);
 
-  // When research becomes available, if the URL requested a specific tab
-  // and that tab is now visible, switch to it once.
   React.useEffect(() => {
     if (desiredTabRef.current && visibleTabs.some((t) => t.id === desiredTabRef.current)) {
       if (activeTab !== desiredTabRef.current) setActiveTab(desiredTabRef.current);
@@ -83,6 +108,8 @@ export default function App() {
       const p = currentPath();
       if (p === DISCLAIMER_PATH) setPage("disclaimer");
       else if (p === DONATE_PATH) setPage("donate");
+      else if (p === WATCHLIST_PATH) setPage("watchlist");
+      else if (isComparePath(p)) setPage("compare");
       else setPage("terminal");
 
       const tab = tabFromPath(window.location.pathname);
@@ -99,9 +126,18 @@ export default function App() {
     setPage(pageKey);
   }, []);
 
+  const handleNavigateCompare = useCallback((prefillTicker) => {
+    if (prefillTicker) {
+      navigate(`${COMPARE_PREFIX}${encodeURIComponent(prefillTicker)}`, "compare");
+    } else {
+      navigate(`/compare`, "compare");
+    }
+  }, [navigate]);
+
   return (
     <div className="app">
       <Header
+        ref={inputRef}
         onAnalyse={(nextTicker) => {
           setActiveTab("overview");
           setPage("terminal");
@@ -111,6 +147,11 @@ export default function App() {
         activeTicker={ticker}
         onNavigateDisclaimer={() => navigate(DISCLAIMER_PATH, "disclaimer")}
         onNavigateDonate={() => navigate(DONATE_PATH, "donate")}
+        onNavigateWatchlist={() => navigate(WATCHLIST_PATH, "watchlist")}
+        onNavigateCompare={handleNavigateCompare}
+        theme={theme}
+        onToggleTheme={handleThemeToggle}
+        hasAnalysis={Boolean(analysis && research)}
       />
 
       <main className="main">
@@ -126,6 +167,31 @@ export default function App() {
         {page === "donate" && (
           <div className="main-content">
             <DonationsPage />
+            <div className="page-link-row">
+              <a href="/" className="page-link" onClick={(e) => { e.preventDefault(); navigate("/", "terminal"); }}>Back to terminal</a>
+            </div>
+          </div>
+        )}
+
+        {page === "watchlist" && (
+          <div className="main-content">
+            <WatchlistPage
+              watchlist={watchlist}
+              onAnalyse={(t) => {
+                setActiveTab("overview");
+                setPage("terminal");
+                handleAnalyse(t);
+              }}
+            />
+            <div className="page-link-row">
+              <a href="/" className="page-link" onClick={(e) => { e.preventDefault(); navigate("/", "terminal"); }}>Back to terminal</a>
+            </div>
+          </div>
+        )}
+
+        {page === "compare" && (
+          <div className="main-content">
+            <ComparePage tickers={compareTickersFromPath(currentPath())} />
             <div className="page-link-row">
               <a href="/" className="page-link" onClick={(e) => { e.preventDefault(); navigate("/", "terminal"); }}>Back to terminal</a>
             </div>
@@ -149,10 +215,7 @@ export default function App() {
 
         {page === "terminal" && loading && !analysis && (
           <div className="main-content">
-            <div className="loading">
-              <div className="spinner" />
-              <span>{ticker ? `Running analysis for ${ticker}…` : "Fetching data…"}</span>
-            </div>
+            <OverviewSkeleton />
           </div>
         )}
 
@@ -188,11 +251,22 @@ export default function App() {
                   fundamentals={fundamentals}
                   research={research}
                   analysis={analysis}
+                  onTabChange={(tabId) => {
+                    setActiveTab(tabId);
+                    if (ticker) {
+                      const path = `/${encodeURIComponent(ticker)}/${encodeURIComponent(tabId)}`;
+                      if (window.location.pathname !== path) {
+                        window.history.pushState(null, "", path);
+                      }
+                    }
+                  }}
+                  watchlistHas={ticker ? watchlist.has(ticker) : false}
+                  onToggleWatchlist={ticker ? () => (watchlist.has(ticker) ? watchlist.remove(ticker) : watchlist.add(ticker)) : undefined}
                 />
               )}
-              {activeTab === "value" && <ValuePage research={research} />}
-              {activeTab === "quality" && <QualityPage research={research} />}
-              {activeTab === "risk" && <RiskPage research={research} />}
+              {activeTab === "value" && <ValuePage research={research} fundamentals={fundamentals} />}
+              {activeTab === "quality" && <QualityPage research={research} fundamentals={fundamentals} />}
+              {activeTab === "risk" && <RiskPage research={research} fundamentals={fundamentals} />}
               {activeTab === "business" && (
                 <BusinessPage ticker={ticker} fundamentals={fundamentals} research={research} />
               )}
@@ -207,6 +281,7 @@ export default function App() {
                   weighted={weighted}
                   onWeightedToggle={handleWeightedToggle}
                   loading={loading}
+                  research={research}
                 />
               )}
               {activeTab === "fundamentals" && (
@@ -235,6 +310,8 @@ export default function App() {
           </>
         )}
       </main>
+
+      {showHelp && <ShortcutHelp onClose={() => setShowHelp(false)} />}
     </div>
   );
 }

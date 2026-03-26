@@ -16,6 +16,7 @@ import {
 } from "./Expanders.jsx";
 import { forecastLabels, distributionLabels, entryLabels } from "../lib/labels.js";
 import { fmt } from "../lib/format.js";
+import StrategySuggestions from "./StrategySuggestions.jsx";
 
 const DEFAULT_FORECAST_OVERLAYS = { ma20: false, ma50: false, ma200: false };
 const DEFAULT_ENTRY_OVERLAYS = { ma20: false, ma50: false, ma200: false, gw: true, pivots: true };
@@ -30,6 +31,7 @@ export default function OptionsPage({
   weighted,
   onWeightedToggle,
   loading,
+  research,
 }) {
   const [forecastOverlays, setForecastOverlays] = useState(DEFAULT_FORECAST_OVERLAYS);
   const [entryOverlays, setEntryOverlays] = useState(DEFAULT_ENTRY_OVERLAYS);
@@ -161,6 +163,8 @@ export default function OptionsPage({
       <DistributionExpander dist={analysis.dist} />
       <EntryExpander entryInfo={analysis.entry} sr={analysis.sr} />
       <PcrExpander pcr={analysis.pcr} />
+
+      <StrategySuggestions analysis={analysis} research={research} />
     </div>
   );
 }

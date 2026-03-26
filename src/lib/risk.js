@@ -55,12 +55,12 @@ export function deriveRisk(fundamentals, analysis) {
   }
 
   const metrics = [
-    { label: "Debt / Equity", value: f.debtToEquity, kind: "ratio", tip: METRIC_TIPS.debtToEquity },
-    { label: "Current Ratio", value: f.currentRatio, kind: "ratio", tip: METRIC_TIPS.currentRatio },
-    { label: "Quick Ratio", value: f.quickRatio, kind: "ratio", tip: METRIC_TIPS.quickRatio },
-    { label: "Beta", value: f.beta, kind: "ratio", tip: METRIC_TIPS.beta },
-    { label: "Short % Float", value: f.shortPercentOfFloat, kind: "pct-whole", tip: METRIC_TIPS.shortPercentOfFloat },
-    { label: "Implied Move", value: optionsMove, kind: "pct", tip: METRIC_TIPS.impliedMove },
+    { key: "debtToEquity", label: "Debt / Equity", value: f.debtToEquity, kind: "ratio", tip: METRIC_TIPS.debtToEquity },
+    { key: "currentRatio", label: "Current Ratio", value: f.currentRatio, kind: "ratio", tip: METRIC_TIPS.currentRatio },
+    { key: "quickRatio", label: "Quick Ratio", value: f.quickRatio, kind: "ratio", tip: METRIC_TIPS.quickRatio },
+    { key: "beta", label: "Beta", value: f.beta, kind: "ratio", tip: METRIC_TIPS.beta },
+    { key: "shortPercentOfFloat", label: "Short % Float", value: f.shortPercentOfFloat, kind: "pct-whole", tip: METRIC_TIPS.shortPercentOfFloat },
+    { key: "impliedMove", label: "Implied Move", value: optionsMove, kind: "pct", tip: METRIC_TIPS.impliedMove },
   ];
 
   const finalScore = availableMetricCount >= 2 ? softenScore(score) : null;

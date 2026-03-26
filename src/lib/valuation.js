@@ -37,7 +37,6 @@ export function deriveValuation(fundamentals, spot) {
   const scoreParts = [
     scoreLowBetter(f.forwardPE, 12, 32),
     scoreLowBetter(f.trailingPE, 15, 35),
-    scoreLowBetter(f.pegRatio, 1, 2.5),
     scoreLowBetter(f.priceToBook, 1.5, 6),
     scoreLowBetter(f.enterpriseToRevenue, 2, 10),
     scoreLowBetter(f.enterpriseToEbitda, 8, 22),
@@ -55,14 +54,6 @@ export function deriveValuation(fundamentals, spot) {
       f.forwardPE <= 15 ? "positive" : f.forwardPE >= 28 ? "negative" : "neutral",
       "Forward earnings multiple",
       `Forward P/E is ${f.forwardPE.toFixed(1)}x.`
-    );
-  }
-  if (Number.isFinite(f.pegRatio)) {
-    addReason(
-      reasons,
-      f.pegRatio <= 1.2 ? "positive" : f.pegRatio >= 2 ? "negative" : "neutral",
-      "Growth-adjusted valuation",
-      `PEG ratio is ${f.pegRatio.toFixed(2)}.`
     );
   }
   if (Number.isFinite(fcfYield)) {
@@ -107,13 +98,12 @@ export function deriveValuation(fundamentals, spot) {
     : null;
 
   const metrics = [
-    { label: "Forward P/E", value: f.forwardPE, kind: "ratio", tip: METRIC_TIPS.forwardPE },
-    { label: "Trailing P/E", value: f.trailingPE, kind: "ratio", tip: METRIC_TIPS.trailingPE },
-    { label: "PEG", value: f.pegRatio, kind: "ratio", tip: METRIC_TIPS.pegRatio },
-    { label: "EV / EBITDA", value: f.enterpriseToEbitda, kind: "ratio", tip: METRIC_TIPS.enterpriseToEbitda },
-    { label: "EV / Revenue", value: f.enterpriseToRevenue, kind: "ratio", tip: METRIC_TIPS.enterpriseToRevenue },
-    { label: "Earnings Yield", value: earningsYield, kind: "pct", tip: METRIC_TIPS.earningsYield },
-    { label: "FCF Yield", value: fcfYield, kind: "pct", tip: METRIC_TIPS.fcfYield },
+    { key: "forwardPE", label: "Forward P/E", value: f.forwardPE, kind: "ratio", tip: METRIC_TIPS.forwardPE },
+    { key: "trailingPE", label: "Trailing P/E", value: f.trailingPE, kind: "ratio", tip: METRIC_TIPS.trailingPE },
+    { key: "enterpriseToEbitda", label: "EV / EBITDA", value: f.enterpriseToEbitda, kind: "ratio", tip: METRIC_TIPS.enterpriseToEbitda },
+    { key: "enterpriseToRevenue", label: "EV / Revenue", value: f.enterpriseToRevenue, kind: "ratio", tip: METRIC_TIPS.enterpriseToRevenue },
+    { key: "earningsYield", label: "Earnings Yield", value: earningsYield, kind: "pct", tip: METRIC_TIPS.earningsYield },
+    { key: "fcfYield", label: "FCF Yield", value: fcfYield, kind: "pct", tip: METRIC_TIPS.fcfYield },
   ];
 
   const finalScore = availableMetricCount >= 2 ? softenScore(score) : null;

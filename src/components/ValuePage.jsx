@@ -4,9 +4,12 @@ import MetricTable from "./MetricTable.jsx";
 import ReasonList from "./ReasonList.jsx";
 import ScenarioCard from "./ScenarioCard.jsx";
 import { METRIC_TIPS } from "../lib/metricTips.js";
+import { buildSectorMedians } from "../lib/sectorMedians.js";
 
-export default function ValuePage({ research }) {
+export default function ValuePage({ research, fundamentals }) {
   if (!research?.valuation?.hasData) return null;
+
+  const sectorMedians = React.useMemo(() => buildSectorMedians(fundamentals), [fundamentals]);
 
   return (
     <>
@@ -27,7 +30,7 @@ export default function ValuePage({ research }) {
         </div>
       </section>
 
-      <MetricTable title="Valuation Metrics" metrics={research?.valuation?.metrics || []} />
+      <MetricTable title="Valuation Metrics" metrics={research?.valuation?.metrics || []} sectorMedians={sectorMedians} />
       <ReasonList title="Valuation Drivers" reasons={research?.valuation?.reasons || []} />
     </>
   );

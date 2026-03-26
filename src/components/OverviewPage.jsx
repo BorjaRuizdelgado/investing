@@ -26,15 +26,20 @@ function VerdictCard({ label, value, caption, tooltip }) {
   );
 }
 
+// Map score label → tab id
+const SCORE_TO_TAB = {
+  Opportunity: null,
+  Valuation: "value",
+  Quality: "quality",
+  Risk: "risk",
+  Options: "options",
+};
+
 function availableScoreCards(research) {
   return [
     research?.opportunity?.hasData ? { label: "Opportunity", value: research.opportunity.score, detail: research.opportunity.label, tooltip: METRIC_TIPS.opportunityScore } : null,
     research?.valuation?.hasData ? { label: "Valuation", value: research.valuation.score, detail: research.valuation.label, tooltip: METRIC_TIPS.valuationScore } : null,
     research?.quality?.hasData ? { label: "Quality", value: research.quality.score, detail: research.quality.label, tooltip: METRIC_TIPS.qualityScore } : null,
-    // For risk, the internal score represents 'safety' (higher = better). Display
-    // an inverted value so the card shows a "risk level" (higher = worse), but
-    // keep the tone based on the original score so coloring still reflects
-    // whether the underlying signals are good or bad.
     research?.risk?.hasData
       ? {
           label: "Risk",
@@ -48,7 +53,7 @@ function availableScoreCards(research) {
   ].filter(Boolean);
 }
 
-export default function OverviewPage({ ticker, spot, fundamentals, research, analysis }) {
+export default function OverviewPage({ ticker, spot, fundamentals, research, analysis, onTabChange, watchlistHas, onToggleWatchlist }) {
   const title = fundamentals?.longName || fundamentals?.name || ticker;
   const sectorLine = [fundamentals?.sector, fundamentals?.industry].filter(Boolean).join(" · ");
   const scoreCards = availableScoreCards(research);
@@ -91,6 +96,14 @@ export default function OverviewPage({ ticker, spot, fundamentals, research, ana
         <div>
           <h1>{ticker}</h1>
           <p className="subtitle">{title}{sectorLine ? ` · ${sectorLine}` : ""}</p>
+          {onToggleWatchlist && (
+            <button
+              className={`overview-watchlist-btn${watchlistHas ? " overview-watchlist-btn--active" : ""}`}
+              onClick={onToggleWatchlist}
+            >
+              {watchlistHas ? "\u2605 In watchlist" : "\u2606 Add to watchlist"}
+            </button>
+          )}
         </div>
         <div className="hero-stats">
           <VerdictCard label="Price" value={fmt(spot)} caption={fundamentals?.currency || "USD"} />
@@ -108,15 +121,19 @@ export default function OverviewPage({ ticker, spot, fundamentals, research, ana
             <h2>Composite Scores</h2>
           </div>
           <div className="score-grid">
-            {scoreCards.map((card) => (
-              <ScoreCard
+            {scoreCards.map((card) => {
+              const tabId = SCORE_TO_TAB[card.label];
+              return (
+                <ScoreCard
                   key={card.label}
                   label={card.label}
                   score={card.value}
                   tone={card._origScore != null ? tone(card._origScore) : tone(card.value)}
                   detail={card.detail}
+                  onClick={tabId && onTabChange ? () => onTabChange(tabId) : undefined}
                 />
-            ))}
+              );
+            })}
           </div>
         </section>
       )}

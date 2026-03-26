@@ -118,7 +118,6 @@ export default function FundamentalsPanel({ fundamentals }) {
   const valuationItems = [
     buildMetric("trailingPE", "P/E (TTM)", fmtRatio(f.trailingPE), f.trailingPE, TIPS.trailingPE),
     buildMetric("forwardPE", "P/E (Fwd)", fmtRatio(f.forwardPE), f.forwardPE, TIPS.forwardPE),
-    buildMetric("pegRatio", "PEG Ratio", fmtRatio(f.pegRatio), f.pegRatio, TIPS.pegRatio),
     buildMetric("priceToBook", "P/B", fmtRatio(f.priceToBook), f.priceToBook, TIPS.priceToBook),
     buildMetric("priceToSales", "P/S", fmtRatio(f.priceToSales), f.priceToSales, TIPS.priceToSales),
     buildMetric("marketCap", "Market Cap", fmtCompact(f.marketCap), f.marketCap, TIPS.marketCap),

@@ -10,7 +10,10 @@
     <meta name="author" content="Borja Ruizdelgado" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <meta name="theme-color" content="#F7F5F0" />
-    <meta name="color-scheme" content="light" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      (function(){try{var t=localStorage.getItem("theme");if(!t){t=window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"}document.documentElement.dataset.theme=t;if(t==="dark"){document.querySelector('meta[name="theme-color"]').content="#1a1a1a"}}catch(e){}})();
+    </script>
     <link rel="canonical" href="https://investing.borjaruizdelgado.com/" />
 
     <!-- Generic image hints -->

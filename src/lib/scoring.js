@@ -77,10 +77,6 @@ export function metricSentiment(key, val) {
       if (val < 15) return "positive";
       if (val > 30) return "negative";
       return null;
-    case "pegRatio":
-      if (val > 0 && val < 1) return "positive";
-      if (val > 2) return "negative";
-      return null;
     case "priceToBook":
       if (val < 1.5) return "positive";
       if (val > 5) return "negative";
@@ -146,7 +142,6 @@ export function buildFundamentalsScore(f) {
   const candidates = [
     ["forwardPE", f.forwardPE],
     ["trailingPE", f.trailingPE],
-    ["pegRatio", f.pegRatio],
     ["priceToBook", f.priceToBook],
     ["priceToSales", f.priceToSales],
     ["eps", f.eps],

@@ -3,9 +3,12 @@ import ScoreCard from "./ScoreCard.jsx";
 import MetricTable from "./MetricTable.jsx";
 import ReasonList from "./ReasonList.jsx";
 import { METRIC_TIPS } from "../lib/metricTips.js";
+import { buildSectorMedians } from "../lib/sectorMedians.js";
 
-export default function QualityPage({ research }) {
+export default function QualityPage({ research, fundamentals }) {
   if (!research?.quality?.hasData) return null;
+
+  const sectorMedians = React.useMemo(() => buildSectorMedians(fundamentals), [fundamentals]);
 
   return (
     <>
@@ -24,7 +27,7 @@ export default function QualityPage({ research }) {
         </div>
       </section>
 
-      <MetricTable title="Quality Metrics" metrics={research?.quality?.metrics || []} />
+      <MetricTable title="Quality Metrics" metrics={research?.quality?.metrics || []} sectorMedians={sectorMedians} />
       <ReasonList title="Quality Drivers" reasons={research?.quality?.reasons || []} />
     </>
   );

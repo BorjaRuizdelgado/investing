@@ -195,16 +195,6 @@ async function handleOptions(ticker) {
 
   // Helper: extract raw value from Yahoo's {raw, fmt} objects
   const rv = (obj) => obj?.raw ?? obj ?? null;
-  const derivedPegRatio =
-    rv(keyStats.pegRatio) ??
-    rv(finData.pegRatio) ??
-    (
-      (quote.forwardPE ?? rv(keyStats.forwardPE) ?? null) > 0 &&
-      rv(finData.earningsGrowth) > 0
-        ? (quote.forwardPE ?? rv(keyStats.forwardPE)) / (rv(finData.earningsGrowth) * 100)
-        : null
-    );
-
   const fundamentals = {
     // Identity
     name: quote.shortName || quote.longName || null,
@@ -219,7 +209,6 @@ async function handleOptions(ticker) {
     enterpriseValue: rv(keyStats.enterpriseValue) ?? quote.enterpriseValue ?? null,
     trailingPE: quote.trailingPE ?? null,
     forwardPE: quote.forwardPE ?? rv(keyStats.forwardPE) ?? null,
-    pegRatio: derivedPegRatio,
     priceToBook: quote.priceToBook ?? rv(keyStats.priceToBook) ?? null,
     priceToSales: quote.priceToSalesTrailing12Months ?? null,
     enterpriseToRevenue: rv(keyStats.enterpriseToRevenue) ?? quote.enterpriseToRevenue ?? null,
@@ -654,16 +643,39 @@ function isCrawler(request) {
 }
 
 /**
+ * Fetch a lightweight quote for social card enrichment.
+ * Returns { name, price, changePct } or null on failure.
+ */
+async function fetchQuickQuote(ticker) {
+  try {
+    const data = await fetchYF(`/v7/finance/quote?symbols=${encodeURIComponent(ticker)}`);
+    const q = data?.quoteResponse?.result?.[0];
+    if (!q) return null;
+    return {
+      name: q.shortName || q.longName || ticker,
+      price: q.regularMarketPrice ?? null,
+      changePct: q.regularMarketChangePercent ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Build an HTML page with dynamic meta tags for a specific ticker,
  * so crawlers index meaningful content for each route.
  */
-function buildCrawlerHtml(url, ticker) {
+function buildCrawlerHtml(url, ticker, quote) {
   const origin = url.origin;
+  const qName = quote?.name || ticker;
+  const qPrice = quote?.price != null ? `$${quote.price.toFixed(2)}` : null;
   const title = ticker
     ? `${ticker} Options & Stock Analysis — Borja Ruizdelgado Investing Tools`
     : "Borja Ruizdelgado — Free Options & Stock Analysis Tools";
   const description = ticker
-    ? `Free ${ticker} analysis by Borja Ruizdelgado: options-implied price forecast, probability distribution, expected move, IV smile, fundamentals (P/E, EBITDA, margins), analyst targets, and support/resistance levels.`
+    ? (qPrice
+        ? `${qName} (${ticker}) trading at ${qPrice}. Free options-implied valuation analysis by Borja Ruizdelgado: price forecast, probability distribution, expected move, IV smile, fundamentals, and support/resistance levels.`
+        : `Free ${ticker} analysis by Borja Ruizdelgado: options-implied price forecast, probability distribution, expected move, IV smile, fundamentals (P/E, EBITDA, margins), analyst targets, and support/resistance levels.`)
     : "Free investing tools by Borja Ruizdelgado: options-implied price forecasts, probability distributions, IV smile, stock fundamentals, and crypto options analysis.";
   const canonical = ticker ? `${origin}/${ticker}` : `${origin}/`;
 
@@ -683,10 +695,10 @@ function buildCrawlerHtml(url, ticker) {
   <meta property="og:description" content="${description}"/>
   <meta property="og:image" content="${origin}/og-image.jpg"/>
   <meta property="og:site_name" content="Borja Ruizdelgado — Investing Tools"/>
-  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:card" content="${ticker ? "summary" : "summary_large_image"}"/>
   <meta name="twitter:title" content="${title}"/>
   <meta name="twitter:description" content="${description}"/>
-  <meta name="twitter:image" content="${origin}/og-image.jpg"/>
+  ${ticker ? "" : `<meta name="twitter:image" content="${origin}/og-image.jpg"/>`}
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -821,6 +833,35 @@ export default {
         return await handleRate();
       }
 
+      if (url.pathname === "/api/quotes") {
+        const tickers = url.searchParams.get("tickers");
+        if (!tickers) return jsonResp({ error: "tickers required" }, 400);
+        const symbols = tickers.split(",").slice(0, 20).map((t) => t.trim().toUpperCase());
+        // Map crypto tickers to Yahoo format
+        const yfSymbols = symbols.map((s) => isCrypto(s) ? `${stripCryptoSuffix(s)}-USD` : s);
+        try {
+          const data = await fetchYF(`/v7/finance/quote?symbols=${encodeURIComponent(yfSymbols.join(","))}`);
+          const results = (data?.quoteResponse?.result || []).map((q) => {
+            const sym = q.symbol;
+            // Map back to original ticker for crypto
+            const origTicker = sym.endsWith("-USD") && isCrypto(sym.replace("-USD", ""))
+              ? sym.replace("-USD", "")
+              : sym;
+            return {
+              ticker: origTicker,
+              symbol: sym,
+              name: q.shortName || q.longName || sym,
+              price: q.regularMarketPrice ?? null,
+              change: q.regularMarketChange ?? null,
+              changePct: q.regularMarketChangePercent ?? null,
+            };
+          });
+          return jsonResp({ quotes: results });
+        } catch (err) {
+          return jsonResp({ error: err.message, quotes: [] }, 500);
+        }
+      }
+
       if (url.pathname === "/api/trending") {
         return await handleTrending();
       }
@@ -893,8 +934,9 @@ export default {
         const reserved = new Set(["DISCLAIMER", "DONATE"]);
 
         if (isCrawler(request) && maybeTicker && !reserved.has(maybeTicker)) {
-          // Serve crawler-friendly HTML with dynamic meta tags
-          const html = buildCrawlerHtml(url, maybeTicker);
+          // Fetch live quote for enriched social card meta tags
+          const quote = await fetchQuickQuote(maybeTicker).catch(() => null);
+          const html = buildCrawlerHtml(url, maybeTicker, quote);
           return new Response(html, {
             status: 200,
             headers: { "Content-Type": "text/html;charset=UTF-8" },
@@ -902,7 +944,7 @@ export default {
         }
 
         if (isCrawler(request) && (!maybeTicker || reserved.has(maybeTicker))) {
-          const html = buildCrawlerHtml(url, null);
+          const html = buildCrawlerHtml(url, null, null);
           return new Response(html, {
             status: 200,
             headers: { "Content-Type": "text/html;charset=UTF-8" },

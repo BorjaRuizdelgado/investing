@@ -1,6 +1,8 @@
 import React from "react";
 import Plot from "react-plotly.js";
 import { fmtCompact } from "../lib/format.js";
+import { getColors } from "../lib/theme.js";
+import EarningsCalendar from "./EarningsCalendar.jsx";
 
 function StatementChart({ title, series = [], keys = [], colors = [] }) {
   if (!series.length) return null;
@@ -29,10 +31,10 @@ function StatementChart({ title, series = [], keys = [], colors = [] }) {
           margin: { l: 40, r: 12, t: 12, b: 40 },
           paper_bgcolor: "transparent",
           plot_bgcolor: "transparent",
-          font: { color: "#5a5a5a", family: "DM Sans, sans-serif", size: 12 },
-          legend: { orientation: "h", y: 1.16, x: 0 },
-          xaxis: { fixedrange: true },
-          yaxis: { fixedrange: true, gridcolor: "#e8e5de" },
+          font: { color: getColors().textLight, family: "DM Sans, sans-serif", size: 12 },
+          legend: { orientation: "h", y: 1.16, x: 0, font: { color: getColors().textLight } },
+          xaxis: { fixedrange: true, tickfont: { color: getColors().textMuted } },
+          yaxis: { fixedrange: true, gridcolor: getColors().borderLight, tickfont: { color: getColors().textMuted } },
         }}
         config={{ displayModeBar: false, responsive: true }}
         style={{ width: "100%" }}
@@ -69,6 +71,8 @@ export default function BusinessPage({ ticker, fundamentals, research }) {
 
   return (
     <>
+      <EarningsCalendar fundamentals={fundamentals} />
+
       <section className="terminal-section">
         <div className="section-heading">
           <h2>Business</h2>
@@ -98,7 +102,7 @@ export default function BusinessPage({ ticker, fundamentals, research }) {
                   { field: "operatingIncome", label: "Operating income" },
                   { field: "netIncome", label: "Net income" },
                 ]}
-                colors={["#4d6a61", "#c08050", "#6e8a80"]}
+                colors={[getColors().accent, getColors().accentWarm, getColors().textLight]}
               />
             )}
             {business?.hasCashflowSeries && (
@@ -110,7 +114,7 @@ export default function BusinessPage({ ticker, fundamentals, research }) {
                   { field: "freeCashflow", label: "Free cash flow" },
                   { field: "capitalExpenditures", label: "Capex" },
                 ]}
-                colors={["#4d6a61", "#3d7a5a", "#b05040"]}
+                colors={[getColors().accent, getColors().green, getColors().red]}
               />
             )}
           </div>

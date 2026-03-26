@@ -64,14 +64,14 @@ export function deriveQuality(fundamentals) {
   }
 
   const metrics = [
-    { label: "Revenue Growth", value: f.revenueGrowth, kind: "pct", tip: METRIC_TIPS.revenueGrowth },
-    { label: "Earnings Growth", value: f.earningsGrowth, kind: "pct", tip: METRIC_TIPS.earningsGrowth },
-    { label: "Gross Margin", value: f.grossMargins, kind: "pct", tip: METRIC_TIPS.grossMargins },
-    { label: "Operating Margin", value: f.operatingMargins, kind: "pct", tip: METRIC_TIPS.operatingMargins },
-    { label: "Net Margin", value: f.profitMargins, kind: "pct", tip: METRIC_TIPS.profitMargins },
-    { label: "ROE", value: f.returnOnEquity, kind: "pct", tip: METRIC_TIPS.returnOnEquity },
-    { label: "ROA", value: f.returnOnAssets, kind: "pct", tip: METRIC_TIPS.returnOnAssets },
-    { label: "FCF Margin", value: fcfMargin, kind: "pct", tip: METRIC_TIPS.fcfMargin },
+    { key: "revenueGrowth", label: "Revenue Growth", value: f.revenueGrowth, kind: "pct", tip: METRIC_TIPS.revenueGrowth },
+    { key: "earningsGrowth", label: "Earnings Growth", value: f.earningsGrowth, kind: "pct", tip: METRIC_TIPS.earningsGrowth },
+    { key: "grossMargins", label: "Gross Margin", value: f.grossMargins, kind: "pct", tip: METRIC_TIPS.grossMargins },
+    { key: "operatingMargins", label: "Operating Margin", value: f.operatingMargins, kind: "pct", tip: METRIC_TIPS.operatingMargins },
+    { key: "profitMargins", label: "Net Margin", value: f.profitMargins, kind: "pct", tip: METRIC_TIPS.profitMargins },
+    { key: "returnOnEquity", label: "ROE", value: f.returnOnEquity, kind: "pct", tip: METRIC_TIPS.returnOnEquity },
+    { key: "returnOnAssets", label: "ROA", value: f.returnOnAssets, kind: "pct", tip: METRIC_TIPS.returnOnAssets },
+    { key: "fcfMargin", label: "FCF Margin", value: fcfMargin, kind: "pct", tip: METRIC_TIPS.fcfMargin },
   ];
 
   const finalScore = availableMetricCount >= 2 ? softenScore(score) : null;
