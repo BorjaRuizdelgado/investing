@@ -1,5 +1,5 @@
 import React, { useState, forwardRef } from "react";
-import { DISCLAIMER_PATH, DONATE_PATH, WATCHLIST_PATH, COMPARE_PREFIX, tickerFromPath } from "../lib/routes.js";
+import { DISCLAIMER_PATH, DONATE_PATH, WATCHLIST_PATH, tickerFromPath } from "../lib/routes.js";
 
 const Header = forwardRef(function Header({
   onAnalyse, loading, activeTicker, onNavigateDisclaimer, onNavigateDonate,
@@ -15,6 +15,10 @@ const Header = forwardRef(function Header({
       onAnalyse(val);
       setMenuOpen(false);
     }
+  }
+
+  function navAction(fn) {
+    return () => { setMenuOpen(false); fn(); };
   }
 
   return (
@@ -49,12 +53,12 @@ const Header = forwardRef(function Header({
           </div>
         </form>
 
-        {/* Right side nav */}
-        <nav className="app-header__nav">
+        {/* Nav — visible on desktop, toggled by burger on mobile */}
+        <nav className={`app-header__nav${menuOpen ? " app-header__nav--open" : ""}`}>
           {onNavigateCompare && (
             <button
               className="app-header__nav-link"
-              onClick={() => onNavigateCompare(activeTicker || null)}
+              onClick={navAction(() => onNavigateCompare(activeTicker || null))}
             >
               Compare
             </button>
@@ -63,7 +67,7 @@ const Header = forwardRef(function Header({
             <a
               href={WATCHLIST_PATH}
               className="app-header__nav-link"
-              onClick={(e) => { e.preventDefault(); onNavigateWatchlist(); }}
+              onClick={(e) => { e.preventDefault(); navAction(onNavigateWatchlist)(); }}
             >
               Watchlist
             </a>
@@ -71,14 +75,14 @@ const Header = forwardRef(function Header({
           <a
             href={DONATE_PATH}
             className="app-header__nav-link"
-            onClick={(e) => { e.preventDefault(); onNavigateDonate(); }}
+            onClick={(e) => { e.preventDefault(); navAction(onNavigateDonate)(); }}
           >
             Support
           </a>
           <a
             href={DISCLAIMER_PATH}
             className="app-header__nav-link"
-            onClick={(e) => { e.preventDefault(); onNavigateDisclaimer(); }}
+            onClick={(e) => { e.preventDefault(); navAction(onNavigateDisclaimer)(); }}
           >
             Disclaimer
           </a>
@@ -88,7 +92,7 @@ const Header = forwardRef(function Header({
             aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             title={theme === "dark" ? "Light mode" : "Dark mode"}
           >
-            {theme === "dark" ? "\u2600" : "\u263E"}
+            {theme === "dark" ? "\u2600" : "\u263E"}<span className="theme-text">{theme === "dark" ? " Light mode" : " Dark mode"}</span>
           </button>
         </nav>
 

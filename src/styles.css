@@ -282,10 +282,15 @@ button {
   color: var(--accent);
 }
 
-/* Theme toggle button */
-.app-header__theme-btn {
-  font-size: 1.1rem !important;
-  padding: 0.35rem 0.5rem !important;
+/* Theme toggle button — icon only on desktop, full text on mobile */
+.app-header__theme-btn .theme-text {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .app-header__theme-btn .theme-text {
+    display: inline;
+  }
 }
 
 /* Mobile burger button */
@@ -1856,7 +1861,13 @@ hr {
     grid-template-columns: 1fr;
   }
 
+  .compare-form__inputs {
+    flex-direction: column;
+    width: 100%;
+  }
+
   .compare-form input[type="text"] {
+    width: 100%;
     max-width: none;
   }
 
@@ -1900,6 +1911,37 @@ hr {
 
   .app-header__nav {
     display: none;
+    position: absolute;
+    top: 54px;
+    left: 0;
+    right: 0;
+    background: var(--bg-alt);
+    border-bottom: 1.2px solid var(--border);
+    padding: 0.5rem 1rem 0.75rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    z-index: 98;
+  }
+
+  .app-header__nav--open {
+    display: flex;
+  }
+
+  /* push nav below search when both open */
+  .app-header__search--open + .app-header__nav--open,
+  .app-header__search--open ~ .app-header__nav--open {
+    top: calc(54px + 52px);
+  }
+
+  .app-header__nav--open .app-header__nav-link {
+    padding: 0.55rem 0.5rem;
+    font-size: 0.88rem;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .app-header__nav--open .app-header__nav-link:last-child {
+    border-bottom: none;
   }
 
   .app-header__burger {
