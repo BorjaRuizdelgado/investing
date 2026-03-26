@@ -10,13 +10,17 @@
 
 A single-page research terminal for stocks and crypto that combines options math with fundamental analysis. Enter any US stock, ETF, or crypto ticker and get:
 
-- Scored, reasoned assessment across Opportunity, Valuation, Quality, Risk, and Options dimensions (0–100)
+- Scored, reasoned assessment across Opportunity, Valuation, Quality, Risk, and Options dimensions (0-100)
 - Options-implied probability distribution and expected move derived from live market pricing
 - Cross-metric signals — e.g. value trap, undervalued quality, financial fragility
 - Full fundamentals reference: P/E, EBITDA, margins, ROE, balance sheet, cash flow, analyst targets
 - Income statement and cash flow charts over 3 years
 - IV smile, open interest, put/call ratio, support/resistance, and entry analysis
 - Trending tickers landing page for discovery
+- Dark/light theme toggle
+- Watchlist with local persistence
+- Multi-ticker comparison side by side
+- Keyboard shortcuts for power users
 
 All information reflects what is already priced into traded options and publicly available financial data — it does **not** predict the future.
 
@@ -28,6 +32,17 @@ npm run dev        # local dev server with hot reload
 ```
 
 Open the URL shown in your terminal (usually `http://localhost:5173`). Enter any US stock ticker (e.g. `AAPL`, `TSLA`, `SPY`) or crypto ticker (`BTC`, `ETH`, `SOL`, `XRP`, `DOGE`) and pick an expiration date.
+
+## Scripts
+
+| Command          | Description                           |
+| ---------------- | ------------------------------------- |
+| `npm run dev`    | Local dev server with hot reload      |
+| `npm run build`  | Production build                      |
+| `npm run deploy` | Build + deploy via wrangler           |
+| `npm test`       | Run unit + integration tests (Vitest) |
+| `npm run lint`   | Lint with ESLint                      |
+| `npm run format` | Format with Prettier                  |
 
 ## Deploy
 
@@ -43,29 +58,31 @@ Routes follow `/{ticker}/{tab}` and are bookmarkable. Supported tabs: `overview`
 
 ## Tabs
 
-| Tab | Content |
-|-----|---------|
-| **Overview** | All five scores at a glance + top reasons + cross-metric signals |
-| **Value** | Valuation score + bear/base/bull fair value range + metric table + reasons |
-| **Quality** | Profitability score + growth, margins, ROE/ROA, FCF margin |
-| **Risk** | Safety score (inverted for clarity) + leverage, liquidity, beta, volatility |
-| **Business** | Revenue, income, and cash flow charts over 3 fiscal years |
-| **Options Forecasting** | Full options hub — forecast cone, distribution, IV smile, OI, S/R, entry |
-| **Fundamentals** | Raw fundamentals reference — all metrics in sortable tables |
+| Tab                     | Content                                                                     |
+| ----------------------- | --------------------------------------------------------------------------- |
+| **Overview**            | All five scores at a glance + top reasons + cross-metric signals            |
+| **Value**               | Valuation score + bear/base/bull fair value range + metric table + reasons  |
+| **Quality**             | Profitability score + growth, margins, ROE/ROA, FCF margin                  |
+| **Risk**                | Safety score (inverted for clarity) + leverage, liquidity, beta, volatility |
+| **Business**            | Revenue, income, and cash flow charts over 3 fiscal years                   |
+| **Options Forecasting** | Full options hub — forecast cone, distribution, IV smile, OI, S/R, entry    |
+| **Fundamentals**        | Raw fundamentals reference — all metrics in sortable tables                 |
 
 ## Scoring System
 
-Each dimension is scored 0–100 and labelled Weak / Mixed / Good / Strong. The **Opportunity** score aggregates valuation, quality, risk, options sentiment, and analyst upside into a single signal.
+Each dimension is scored 0-100 and labelled Weak / Mixed / Good / Strong. The **Opportunity** score aggregates valuation, quality, risk, options sentiment, and analyst upside into a single signal.
+
+All scoring thresholds are centralised in `src/lib/constants.js` for easy tuning.
 
 ### Cross-metric signals
 
-| Signal | Condition |
-|--------|-----------|
-| Undervalued quality | Low valuation + high quality |
-| Value trap | Low valuation + low quality |
-| Financial fragility | High risk despite apparent value |
-| Analyst alignment | Score direction matches analyst consensus |
-| Pricing full | Options-implied upside already matches analyst target |
+| Signal              | Condition                                             |
+| ------------------- | ----------------------------------------------------- |
+| Undervalued quality | Low valuation + high quality                          |
+| Value trap          | Low valuation + low quality                           |
+| Financial fragility | High risk despite apparent value                      |
+| Analyst alignment   | Score direction matches analyst consensus             |
+| Pricing full        | Options-implied upside already matches analyst target |
 
 ## Options Analysis
 
@@ -118,24 +135,15 @@ In practice:
 3. Fit a smooth cubic spline to the combined call-price curve.
 4. Take the second derivative analytically and normalise to get a proper density.
 
-When multi-expiry weighting is enabled (the default), steps 1–4 are repeated for every available chain up to the selected date. Each resulting PDF is resampled onto a common strike grid and blended using inverse-square-root-of-DTE weights.
+When multi-expiry weighting is enabled (the default), steps 1-4 are repeated for every available chain up to the selected date. Each resulting PDF is resampled onto a common strike grid and blended using inverse-square-root-of-DTE weights.
 
 ## Data Sources
 
-| Source | Used for |
-|--------|----------|
-| Yahoo Finance | Options chains (cookie+crumb auth proxy), fundamentals, price history, risk-free rate (^IRX) |
-| Bybit public API | Crypto options for BTC, ETH, SOL, XRP, DOGE |
-| Yahoo Finance (fallback) | Crypto price history |
-
-## Limitations
-
-- Uses **risk-neutral** probabilities, not real-world forecasts.
-- Yahoo Finance data can be delayed or stale for illiquid options.
-- Wide bid-ask spreads on far OTM options add noise to the distribution tails.
-- The analysis is a snapshot — it changes as options prices update.
-- Crypto options via Bybit cover BTC, ETH, SOL, XRP, and DOGE only.
-- Fundamentals and scoring are only available for stocks — crypto tickers show options analysis only.
+| Source                   | Used for                                                                                     |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| Yahoo Finance            | Options chains (cookie+crumb auth proxy), fundamentals, price history, risk-free rate (^IRX) |
+| Bybit public API         | Crypto options for BTC, ETH, SOL, XRP, DOGE                                                  |
+| Yahoo Finance (fallback) | Crypto price history                                                                         |
 
 ## Tech Stack
 
@@ -143,6 +151,9 @@ When multi-expiry weighting is enabled (the default), steps 1–4 are repeated f
 - **Plotly.js** — all charts (forecast cone, distribution, IV smile, OI, candlestick S/R, financial statements)
 - **Cloudflare Pages** — static hosting with SPA fallback
 - **Cloudflare Workers** — API proxy with Yahoo auth caching and Bybit routing
+- **Vitest** — unit and integration tests
+- **ESLint 10** + **Prettier** — linting and formatting
+- **TypeScript** — type definitions for core lib modules (`scoring.ts`, `analysis.ts`)
 
 ## Contributing
 

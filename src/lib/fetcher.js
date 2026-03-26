@@ -6,19 +6,19 @@
  * Cloudflare Vite plugin.
  */
 
-const API = "/api";
+const API = '/api'
 
 async function get(path, params = {}) {
-  const url = new URL(path, window.location.origin);
+  const url = new URL(path, window.location.origin)
   for (const [k, v] of Object.entries(params)) {
-    url.searchParams.set(k, v);
+    url.searchParams.set(k, v)
   }
-  const res = await fetch(url.toString());
+  const res = await fetch(url.toString())
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `API error ${res.status}`);
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.error || `API error ${res.status}`)
   }
-  return res.json();
+  return res.json()
 }
 
 /**
@@ -26,7 +26,7 @@ async function get(path, params = {}) {
  * Returns { ticker, price, expirations: [{ date, timestamp }] }
  */
 export async function fetchOptions(ticker) {
-  return get(`${API}/options`, { ticker });
+  return get(`${API}/options`, { ticker })
 }
 
 /**
@@ -34,7 +34,7 @@ export async function fetchOptions(ticker) {
  * Returns { ticker, price, expiry, calls: [], puts: [] }
  */
 export async function fetchChain(ticker, expTimestamp) {
-  return get(`${API}/chain`, { ticker, exp: String(expTimestamp) });
+  return get(`${API}/chain`, { ticker, exp: String(expTimestamp) })
 }
 
 /**
@@ -42,14 +42,14 @@ export async function fetchChain(ticker, expTimestamp) {
  * Returns { ticker, bars: [{ date, open, high, low, close, volume }] }
  */
 export async function fetchHistory(ticker, days = 60) {
-  return get(`${API}/history`, { ticker, days: String(days) });
+  return get(`${API}/history`, { ticker, days: String(days) })
 }
 
 /**
  * Fetch risk-free rate. Returns { rate: number }
  */
 export async function fetchRate() {
-  return get(`${API}/rate`);
+  return get(`${API}/rate`)
 }
 
 /**
@@ -57,7 +57,7 @@ export async function fetchRate() {
  * Returns { stocks: [...], crypto: [...] }
  */
 export async function fetchTrending() {
-  return get(`${API}/trending`);
+  return get(`${API}/trending`)
 }
 
 /**
@@ -69,18 +69,18 @@ export async function fetchTrending() {
  * are used so that T > 0 for intraday pricing.
  */
 export function daysToExpiry(expiry) {
-  const now = new Date();
+  const now = new Date()
   // Calendar days between today (UTC date) and expiry date
-  const todayMidnight = new Date(now.toISOString().slice(0, 10) + "T00:00:00Z");
-  const expiryMidnight = new Date(expiry + "T00:00:00Z");
-  const calDays = Math.round((expiryMidnight - todayMidnight) / (1000 * 60 * 60 * 24));
+  const todayMidnight = new Date(now.toISOString().slice(0, 10) + 'T00:00:00Z')
+  const expiryMidnight = new Date(expiry + 'T00:00:00Z')
+  const calDays = Math.round((expiryMidnight - todayMidnight) / (1000 * 60 * 60 * 24))
 
   if (calDays <= 0) {
     // Same-day or past expiry: use hours left until 4 pm ET close (21:00 UTC)
-    const expiryClose = new Date(expiry + "T21:00:00Z");
-    const hoursLeft = (expiryClose - now) / (1000 * 60 * 60);
-    return Math.max(hoursLeft / 24, 1 / 24); // floor at 1 hour
+    const expiryClose = new Date(expiry + 'T21:00:00Z')
+    const hoursLeft = (expiryClose - now) / (1000 * 60 * 60)
+    return Math.max(hoursLeft / 24, 1 / 24) // floor at 1 hour
   }
 
-  return calDays;
+  return calDays
 }

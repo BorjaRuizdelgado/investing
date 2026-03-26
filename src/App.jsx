@@ -1,58 +1,68 @@
-import React, { useMemo, useState, useRef, useCallback } from "react";
-import Header from "./components/Header.jsx";
-import TerminalTabs from "./components/TerminalTabs.jsx";
-import OverviewPage from "./components/OverviewPage.jsx";
-import ValuePage from "./components/ValuePage.jsx";
-import QualityPage from "./components/QualityPage.jsx";
-import RiskPage from "./components/RiskPage.jsx";
-import BusinessPage from "./components/BusinessPage.jsx";
-import OptionsPage from "./components/OptionsPage.jsx";
-import FundamentalsPanel from "./components/FundamentalsPanel.jsx";
-import DisclaimerPage from "./components/DisclaimerPage.jsx";
-import DonationsPage from "./components/DonationsPage.jsx";
-import TrendingTickers from "./components/TrendingTickers.jsx";
-import SupportVault from "./components/SupportVault.jsx";
-import { daysToExpiry } from "./lib/fetcher.js";
-import useResearchTerminal from "./hooks/useResearchTerminal.js";
-import useTheme from "./hooks/useTheme.js";
-import useWatchlist from "./hooks/useWatchlist.js";
-import useKeyboardShortcuts from "./hooks/useKeyboardShortcuts.js";
-import { invalidateColors } from "./lib/theme.js";
-import { DISCLAIMER_PATH, DONATE_PATH, WATCHLIST_PATH, COMPARE_PREFIX, currentPath, tabFromPath, isComparePath, compareTickersFromPath } from "./lib/routes.js";
-import { OverviewSkeleton } from "./components/SkeletonLayouts.jsx";
-import ShortcutHelp from "./components/ShortcutHelp.jsx";
-import WatchlistPage from "./components/WatchlistPage.jsx";
-import ComparePage from "./components/ComparePage.jsx";
+import React, { useMemo, useState, useRef, useCallback } from 'react'
+import Header from './components/Header.jsx'
+import TerminalTabs from './components/TerminalTabs.jsx'
+import OverviewPage from './components/OverviewPage.jsx'
+import ValuePage from './components/ValuePage.jsx'
+import QualityPage from './components/QualityPage.jsx'
+import RiskPage from './components/RiskPage.jsx'
+import BusinessPage from './components/BusinessPage.jsx'
+import OptionsPage from './components/OptionsPage.jsx'
+import FundamentalsPanel from './components/FundamentalsPanel.jsx'
+import DisclaimerPage from './components/DisclaimerPage.jsx'
+import DonationsPage from './components/DonationsPage.jsx'
+import TrendingTickers from './components/TrendingTickers.jsx'
+import SupportVault from './components/SupportVault.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
+import { daysToExpiry } from './lib/fetcher.js'
+import useResearchTerminal from './hooks/useResearchTerminal.js'
+import useTheme from './hooks/useTheme.js'
+import useWatchlist from './hooks/useWatchlist.js'
+import useKeyboardShortcuts from './hooks/useKeyboardShortcuts.js'
+import { invalidateColors } from './lib/theme.js'
+import {
+  DISCLAIMER_PATH,
+  DONATE_PATH,
+  WATCHLIST_PATH,
+  COMPARE_PREFIX,
+  currentPath,
+  tabFromPath,
+  isComparePath,
+  compareTickersFromPath,
+} from './lib/routes.js'
+import { OverviewSkeleton } from './components/SkeletonLayouts.jsx'
+import ShortcutHelp from './components/ShortcutHelp.jsx'
+import WatchlistPage from './components/WatchlistPage.jsx'
+import ComparePage from './components/ComparePage.jsx'
 
 const TABS = [
-  { id: "overview", label: "Overview", caption: "Decision snapshot" },
-  { id: "value", label: "Value", caption: "Cheap or expensive" },
-  { id: "quality", label: "Quality", caption: "Business strength" },
-  { id: "risk", label: "Risk", caption: "Fragility and downside" },
-  { id: "business", label: "Business", caption: "Financial trends" },
-  { id: "options", label: "Options Forecasting", caption: "Market pricing" },
-  { id: "fundamentals", label: "Fundamentals", caption: "Raw reference" },
-];
+  { id: 'overview', label: 'Overview', caption: 'Decision snapshot' },
+  { id: 'value', label: 'Value', caption: 'Cheap or expensive' },
+  { id: 'quality', label: 'Quality', caption: 'Business strength' },
+  { id: 'risk', label: 'Risk', caption: 'Fragility and downside' },
+  { id: 'business', label: 'Business', caption: 'Financial trends' },
+  { id: 'options', label: 'Options Forecasting', caption: 'Market pricing' },
+  { id: 'fundamentals', label: 'Fundamentals', caption: 'Raw reference' },
+]
 
 export default function App() {
   const [activeTab, setActiveTab] = useState(() => {
-    const tab = tabFromPath(window.location.pathname);
-    return tab || "overview";
-  });
-  const initialUrlTab = tabFromPath(window.location.pathname);
-  const desiredTabRef = useRef(initialUrlTab);
+    const tab = tabFromPath(window.location.pathname)
+    return tab || 'overview'
+  })
+  const initialUrlTab = tabFromPath(window.location.pathname)
+  const desiredTabRef = useRef(initialUrlTab)
   const [page, setPage] = useState(() => {
-    const p = currentPath();
-    if (p === DISCLAIMER_PATH) return "disclaimer";
-    if (p === DONATE_PATH) return "donate";
-    if (p === WATCHLIST_PATH) return "watchlist";
-    if (isComparePath(p)) return "compare";
-    return "terminal";
-  });
+    const p = currentPath()
+    if (p === DISCLAIMER_PATH) return 'disclaimer'
+    if (p === DONATE_PATH) return 'donate'
+    if (p === WATCHLIST_PATH) return 'watchlist'
+    if (isComparePath(p)) return 'compare'
+    return 'terminal'
+  })
 
-  const { theme, toggle: toggleTheme } = useTheme();
-  const watchlist = useWatchlist();
-  const inputRef = useRef(null);
+  const { theme, toggle: toggleTheme } = useTheme()
+  const watchlist = useWatchlist()
+  const inputRef = useRef(null)
 
   const {
     loading,
@@ -67,87 +77,90 @@ export default function App() {
     handleAnalyse,
     handleExpiryChange,
     handleWeightedToggle,
-  } = useResearchTerminal();
+  } = useResearchTerminal()
 
   const visibleTabs = useMemo(
-    () => TABS.filter((tab) => research?.availability?.[tab.id] ?? tab.id === "overview"),
+    () => TABS.filter((tab) => research?.availability?.[tab.id] ?? tab.id === 'overview'),
     [research],
-  );
+  )
 
   const handleThemeToggle = useCallback(() => {
-    toggleTheme();
-    invalidateColors();
-  }, [toggleTheme]);
+    toggleTheme()
+    invalidateColors()
+  }, [toggleTheme])
 
   const { showHelp, setShowHelp } = useKeyboardShortcuts({
     inputRef,
     visibleTabs,
     activeTab,
     setActiveTab,
-  });
+  })
 
   React.useEffect(() => {
     if (!visibleTabs.some((tab) => tab.id === activeTab) && visibleTabs[0]) {
       if (desiredTabRef.current && visibleTabs.some((t) => t.id === desiredTabRef.current)) {
-        setActiveTab(desiredTabRef.current);
+        setActiveTab(desiredTabRef.current)
       } else {
-        setActiveTab(visibleTabs[0].id);
+        setActiveTab(visibleTabs[0].id)
       }
     }
-  }, [activeTab, visibleTabs]);
+  }, [activeTab, visibleTabs])
 
   React.useEffect(() => {
     if (desiredTabRef.current && visibleTabs.some((t) => t.id === desiredTabRef.current)) {
-      if (activeTab !== desiredTabRef.current) setActiveTab(desiredTabRef.current);
-      desiredTabRef.current = null;
+      if (activeTab !== desiredTabRef.current) setActiveTab(desiredTabRef.current)
+      desiredTabRef.current = null
     }
-  }, [visibleTabs]);
+  }, [visibleTabs])
 
   React.useEffect(() => {
     const onPop = () => {
-      const p = currentPath();
-      if (p === DISCLAIMER_PATH) setPage("disclaimer");
-      else if (p === DONATE_PATH) setPage("donate");
-      else if (p === WATCHLIST_PATH) setPage("watchlist");
-      else if (isComparePath(p)) setPage("compare");
-      else setPage("terminal");
+      const p = currentPath()
+      if (p === DISCLAIMER_PATH) setPage('disclaimer')
+      else if (p === DONATE_PATH) setPage('donate')
+      else if (p === WATCHLIST_PATH) setPage('watchlist')
+      else if (isComparePath(p)) setPage('compare')
+      else setPage('terminal')
 
-      const tab = tabFromPath(window.location.pathname);
-      if (tab) setActiveTab(tab);
-    };
-    window.addEventListener("popstate", onPop);
-    return () => window.removeEventListener("popstate", onPop);
-  }, []);
+      const tab = tabFromPath(window.location.pathname)
+      if (tab) setActiveTab(tab)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
 
   const navigate = React.useCallback((path, pageKey) => {
     if (window.location.pathname !== path) {
-      window.history.pushState(null, "", path);
+      window.history.pushState(null, '', path)
     }
-    setPage(pageKey);
-  }, []);
+    setPage(pageKey)
+  }, [])
 
-  const handleNavigateCompare = useCallback((prefillTicker) => {
-    if (prefillTicker) {
-      navigate(`${COMPARE_PREFIX}${encodeURIComponent(prefillTicker)}`, "compare");
-    } else {
-      navigate(`/compare`, "compare");
-    }
-  }, [navigate]);
+  const handleNavigateCompare = useCallback(
+    (prefillTicker) => {
+      if (prefillTicker) {
+        navigate(`${COMPARE_PREFIX}${encodeURIComponent(prefillTicker)}`, 'compare')
+      } else {
+        navigate(`/compare`, 'compare')
+      }
+    },
+    [navigate],
+  )
 
   return (
     <div className="app">
       <Header
         ref={inputRef}
         onAnalyse={(nextTicker) => {
-          setActiveTab("overview");
-          setPage("terminal");
-          handleAnalyse(nextTicker);
+          setActiveTab('overview')
+          setPage('terminal')
+          handleAnalyse(nextTicker)
         }}
         loading={loading}
         activeTicker={ticker}
-        onNavigateDisclaimer={() => navigate(DISCLAIMER_PATH, "disclaimer")}
-        onNavigateDonate={() => navigate(DONATE_PATH, "donate")}
-        onNavigateWatchlist={() => navigate(WATCHLIST_PATH, "watchlist")}
+        onNavigateDisclaimer={() => navigate(DISCLAIMER_PATH, 'disclaimer')}
+        onNavigateDonate={() => navigate(DONATE_PATH, 'donate')}
+        onNavigateWatchlist={() => navigate(WATCHLIST_PATH, 'watchlist')}
         onNavigateCompare={handleNavigateCompare}
         theme={theme}
         onToggleTheme={handleThemeToggle}
@@ -155,88 +168,126 @@ export default function App() {
       />
 
       <main className="main">
-        {page === "disclaimer" && (
+        {page === 'disclaimer' && (
           <div className="main-content">
             <DisclaimerPage />
             <div className="page-link-row">
-              <a href="/" className="page-link" onClick={(e) => { e.preventDefault(); navigate("/", "terminal"); }}>Back to terminal</a>
+              <a
+                href="/"
+                className="page-link"
+                onClick={(e) => {
+                  e.preventDefault()
+                  navigate('/', 'terminal')
+                }}
+              >
+                Back to terminal
+              </a>
             </div>
           </div>
         )}
 
-        {page === "donate" && (
+        {page === 'donate' && (
           <div className="main-content">
             <DonationsPage />
             <div className="page-link-row">
-              <a href="/" className="page-link" onClick={(e) => { e.preventDefault(); navigate("/", "terminal"); }}>Back to terminal</a>
+              <a
+                href="/"
+                className="page-link"
+                onClick={(e) => {
+                  e.preventDefault()
+                  navigate('/', 'terminal')
+                }}
+              >
+                Back to terminal
+              </a>
             </div>
           </div>
         )}
 
-        {page === "watchlist" && (
+        {page === 'watchlist' && (
           <div className="main-content">
             <WatchlistPage
               watchlist={watchlist}
               onAnalyse={(t) => {
-                setActiveTab("overview");
-                setPage("terminal");
-                handleAnalyse(t);
+                setActiveTab('overview')
+                setPage('terminal')
+                handleAnalyse(t)
               }}
             />
             <div className="page-link-row">
-              <a href="/" className="page-link" onClick={(e) => { e.preventDefault(); navigate("/", "terminal"); }}>Back to terminal</a>
+              <a
+                href="/"
+                className="page-link"
+                onClick={(e) => {
+                  e.preventDefault()
+                  navigate('/', 'terminal')
+                }}
+              >
+                Back to terminal
+              </a>
             </div>
           </div>
         )}
 
-        {page === "compare" && (
+        {page === 'compare' && (
           <div className="main-content">
             <ComparePage tickers={compareTickersFromPath(currentPath())} />
             <div className="page-link-row">
-              <a href="/" className="page-link" onClick={(e) => { e.preventDefault(); navigate("/", "terminal"); }}>Back to terminal</a>
+              <a
+                href="/"
+                className="page-link"
+                onClick={(e) => {
+                  e.preventDefault()
+                  navigate('/', 'terminal')
+                }}
+              >
+                Back to terminal
+              </a>
             </div>
           </div>
         )}
 
-        {page === "terminal" && !ticker && !loading && !error && (
+        {page === 'terminal' && !ticker && !loading && !error && (
           <div className="landing">
             <h1>Borja Ruizdelgado's - Investing Tools</h1>
             <p className="landing-desc">
-              A browser-based investing workspace for valuation, business quality,
-              downside risk, and options-implied market pricing. Search a ticker
-              or start from the live trending list.
+              A browser-based investing workspace for valuation, business quality, downside risk,
+              and options-implied market pricing. Search a ticker or start from the live trending
+              list.
             </p>
-            <TrendingTickers onTickerClick={(nextTicker) => {
-              setActiveTab("overview");
-              handleAnalyse(nextTicker);
-            }} />
+            <TrendingTickers
+              onTickerClick={(nextTicker) => {
+                setActiveTab('overview')
+                handleAnalyse(nextTicker)
+              }}
+            />
           </div>
         )}
 
-        {page === "terminal" && loading && !analysis && (
+        {page === 'terminal' && loading && !analysis && (
           <div className="main-content">
             <OverviewSkeleton />
           </div>
         )}
 
-        {page === "terminal" && error && (
+        {page === 'terminal' && error && (
           <div className="main-content">
             <div className="error-box">{error}</div>
           </div>
         )}
 
-        {page === "terminal" && analysis && research && (
+        {page === 'terminal' && analysis && research && (
           <>
             <div className="terminal-tabs-bar">
               <TerminalTabs
                 tabs={visibleTabs}
                 activeTab={activeTab}
                 onChange={(tabId) => {
-                  setActiveTab(tabId);
+                  setActiveTab(tabId)
                   if (ticker) {
-                    const path = `/${encodeURIComponent(ticker)}/${encodeURIComponent(tabId)}`;
+                    const path = `/${encodeURIComponent(ticker)}/${encodeURIComponent(tabId)}`
                     if (window.location.pathname !== path) {
-                      window.history.pushState(null, "", path);
+                      window.history.pushState(null, '', path)
                     }
                   }
                 }}
@@ -244,52 +295,79 @@ export default function App() {
             </div>
 
             <div className="tab-content">
-              {activeTab === "overview" && (
-                <OverviewPage
-                  ticker={ticker}
-                  spot={analysis.spot}
-                  fundamentals={fundamentals}
-                  research={research}
-                  analysis={analysis}
-                  onTabChange={(tabId) => {
-                    setActiveTab(tabId);
-                    if (ticker) {
-                      const path = `/${encodeURIComponent(ticker)}/${encodeURIComponent(tabId)}`;
-                      if (window.location.pathname !== path) {
-                        window.history.pushState(null, "", path);
+              {activeTab === 'overview' && (
+                <ErrorBoundary name="OverviewPage">
+                  <OverviewPage
+                    ticker={ticker}
+                    spot={analysis.spot}
+                    fundamentals={fundamentals}
+                    research={research}
+                    analysis={analysis}
+                    onTabChange={(tabId) => {
+                      setActiveTab(tabId)
+                      if (ticker) {
+                        const path = `/${encodeURIComponent(ticker)}/${encodeURIComponent(tabId)}`
+                        if (window.location.pathname !== path) {
+                          window.history.pushState(null, '', path)
+                        }
                       }
+                    }}
+                    watchlistHas={ticker ? watchlist.has(ticker) : false}
+                    onToggleWatchlist={
+                      ticker
+                        ? () =>
+                            watchlist.has(ticker) ? watchlist.remove(ticker) : watchlist.add(ticker)
+                        : undefined
                     }
-                  }}
-                  watchlistHas={ticker ? watchlist.has(ticker) : false}
-                  onToggleWatchlist={ticker ? () => (watchlist.has(ticker) ? watchlist.remove(ticker) : watchlist.add(ticker)) : undefined}
-                />
+                  />
+                </ErrorBoundary>
               )}
-              {activeTab === "value" && <ValuePage research={research} fundamentals={fundamentals} />}
-              {activeTab === "quality" && <QualityPage research={research} fundamentals={fundamentals} />}
-              {activeTab === "risk" && <RiskPage research={research} fundamentals={fundamentals} />}
-              {activeTab === "business" && (
-                <BusinessPage ticker={ticker} fundamentals={fundamentals} research={research} />
+              {activeTab === 'value' && (
+                <ErrorBoundary name="ValuePage">
+                  <ValuePage research={research} fundamentals={fundamentals} />
+                </ErrorBoundary>
               )}
-              {activeTab === "options" && (
-                <OptionsPage
-                  ticker={ticker}
-                  analysis={analysis}
-                  expirations={expirations}
-                  selectedExpiry={selectedExpiry}
-                  onExpiryChange={handleExpiryChange}
-                  daysToExpiry={daysToExpiry}
-                  weighted={weighted}
-                  onWeightedToggle={handleWeightedToggle}
-                  loading={loading}
-                  research={research}
-                />
+              {activeTab === 'quality' && (
+                <ErrorBoundary name="QualityPage">
+                  <QualityPage research={research} fundamentals={fundamentals} />
+                </ErrorBoundary>
               )}
-              {activeTab === "fundamentals" && (
-                fundamentals ? (
-                  <FundamentalsPanel fundamentals={fundamentals} />
-                ) : (
-                  <div className="info-box">Fundamental reference data is not available for this ticker.</div>
-                )
+              {activeTab === 'risk' && (
+                <ErrorBoundary name="RiskPage">
+                  <RiskPage research={research} fundamentals={fundamentals} />
+                </ErrorBoundary>
+              )}
+              {activeTab === 'business' && (
+                <ErrorBoundary name="BusinessPage">
+                  <BusinessPage ticker={ticker} fundamentals={fundamentals} research={research} />
+                </ErrorBoundary>
+              )}
+              {activeTab === 'options' && (
+                <ErrorBoundary name="OptionsPage">
+                  <OptionsPage
+                    ticker={ticker}
+                    analysis={analysis}
+                    expirations={expirations}
+                    selectedExpiry={selectedExpiry}
+                    onExpiryChange={handleExpiryChange}
+                    daysToExpiry={daysToExpiry}
+                    weighted={weighted}
+                    onWeightedToggle={handleWeightedToggle}
+                    loading={loading}
+                    research={research}
+                  />
+                </ErrorBoundary>
+              )}
+              {activeTab === 'fundamentals' && (
+                <ErrorBoundary name="FundamentalsPanel">
+                  {fundamentals ? (
+                    <FundamentalsPanel fundamentals={fundamentals} />
+                  ) : (
+                    <div className="info-box">
+                      Fundamental reference data is not available for this ticker.
+                    </div>
+                  )}
+                </ErrorBoundary>
               )}
 
               <hr />
@@ -298,8 +376,8 @@ export default function App() {
                   href={DISCLAIMER_PATH}
                   className="page-link"
                   onClick={(e) => {
-                    e.preventDefault();
-                    navigate(DISCLAIMER_PATH, "disclaimer");
+                    e.preventDefault()
+                    navigate(DISCLAIMER_PATH, 'disclaimer')
                   }}
                 >
                   Disclaimer
@@ -313,5 +391,5 @@ export default function App() {
 
       {showHelp && <ShortcutHelp onClose={() => setShowHelp(false)} />}
     </div>
-  );
+  )
 }

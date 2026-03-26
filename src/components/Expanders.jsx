@@ -1,21 +1,25 @@
-import React from "react";
-import { fmt, fmtDecimal, fmtInt } from "../lib/format.js";
-import Expander from "./Expander.jsx";
+import React from 'react'
+import { fmt, fmtDecimal, fmtInt } from '../lib/format.js'
+import Expander from './Expander.jsx'
 
 export function PercentileExpander({ pctiles, spot }) {
   const rows = Object.entries(pctiles)
     .sort(([a], [b]) => Number(a) - Number(b))
     .map(([p, val]) => {
-      const chg = ((val - spot) / spot) * 100;
-      return { percentile: `${p}th`, price: fmt(val), change: `${chg >= 0 ? "+" : ""}${chg.toFixed(1)}%` };
-    });
+      const chg = ((val - spot) / spot) * 100
+      return {
+        percentile: `${p}th`,
+        price: fmt(val),
+        change: `${chg >= 0 ? '+' : ''}${chg.toFixed(1)}%`,
+      }
+    })
 
   return (
     <Expander title="Percentile Breakdown">
       <p>
-        Percentiles show where the market implies the price will land. For
-        example, the 25th percentile means there is roughly a 25% chance the
-        price will be <strong>at or below</strong> that level by expiry.
+        Percentiles show where the market implies the price will land. For example, the 25th
+        percentile means there is roughly a 25% chance the price will be{' '}
+        <strong>at or below</strong> that level by expiry.
       </p>
       <table className="data-table">
         <thead>
@@ -36,7 +40,7 @@ export function PercentileExpander({ pctiles, spot }) {
         </tbody>
       </table>
     </Expander>
-  );
+  )
 }
 
 export function DistributionExpander({ dist }) {
@@ -57,40 +61,43 @@ export function DistributionExpander({ dist }) {
         </div>
         <div className="metric-card">
           <div className="metric-label">Skewness</div>
-          <div className="metric-value">{dist.skew >= 0 ? "+" : ""}{dist.skew.toFixed(3)}</div>
+          <div className="metric-value">
+            {dist.skew >= 0 ? '+' : ''}
+            {dist.skew.toFixed(3)}
+          </div>
         </div>
       </div>
-      <p style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>
-        The implied distribution is derived from market option prices using
-        the Breeden-Litzenberger identity. It represents the market&apos;s
-        risk-neutral probability assessment for the underlying&apos;s price at
-        expiry.
+      <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+        The implied distribution is derived from market option prices using the Breeden-Litzenberger
+        identity. It represents the market&apos;s risk-neutral probability assessment for the
+        underlying&apos;s price at expiry.
       </p>
     </Expander>
-  );
+  )
 }
 
 export function EntryExpander({ entryInfo, sr }) {
-  const levels = (sr.levels || []).sort((a, b) => a.price - b.price);
-  const ma = sr.movingAvgs || {};
+  const levels = (sr.levels || []).sort((a, b) => a.price - b.price)
+  const ma = sr.movingAvgs || {}
 
   return (
     <Expander title="Entry Setup Details">
       <p>
-        These levels are derived from the implied probability distribution,
-        historical price pivots, high open-interest gamma walls and moving
-        averages. They are informational — always apply your own risk
-        management.
+        These levels are derived from the implied probability distribution, historical price pivots,
+        high open-interest gamma walls and moving averages. They are informational — always apply
+        your own risk management.
       </p>
-      <ul style={{ margin: "0.75rem 0", paddingLeft: "1.2rem" }}>
+      <ul style={{ margin: '0.75rem 0', paddingLeft: '1.2rem' }}>
         {entryInfo.notes.map((note, i) => (
-          <li key={i} style={{ marginBottom: "0.25rem" }}>{note}</li>
+          <li key={i} style={{ marginBottom: '0.25rem' }}>
+            {note}
+          </li>
         ))}
       </ul>
 
       {levels.length > 0 && (
         <>
-          <h4 style={{ marginTop: "1rem", marginBottom: "0.5rem" }}>Key Levels</h4>
+          <h4 style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>Key Levels</h4>
           <table className="data-table">
             <thead>
               <tr>
@@ -104,9 +111,9 @@ export function EntryExpander({ entryInfo, sr }) {
               {levels.map((l, i) => (
                 <tr key={i}>
                   <td>{fmt(l.price)}</td>
-                  <td style={{ textTransform: "capitalize" }}>{l.type}</td>
-                  <td>{l.source.replace(/_/g, " ")}</td>
-                  <td>{"★".repeat(l.strength)}</td>
+                  <td style={{ textTransform: 'capitalize' }}>{l.type}</td>
+                  <td>{l.source.replace(/_/g, ' ')}</td>
+                  <td>{'★'.repeat(l.strength)}</td>
                 </tr>
               ))}
             </tbody>
@@ -116,7 +123,7 @@ export function EntryExpander({ entryInfo, sr }) {
 
       {Object.values(ma).some((v) => v != null) && (
         <>
-          <h4 style={{ marginTop: "1rem", marginBottom: "0.5rem" }}>Moving Averages</h4>
+          <h4 style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>Moving Averages</h4>
           <table className="data-table">
             <thead>
               <tr>
@@ -125,29 +132,31 @@ export function EntryExpander({ entryInfo, sr }) {
               </tr>
             </thead>
             <tbody>
-              {Object.entries(ma).sort(([a], [b]) => Number(a) - Number(b)).map(([period, val]) => (
-                <tr key={period}>
-                  <td>MA{period}</td>
-                  <td>{val != null ? fmt(val) : "N/A"}</td>
-                </tr>
-              ))}
+              {Object.entries(ma)
+                .sort(([a], [b]) => Number(a) - Number(b))
+                .map(([period, val]) => (
+                  <tr key={period}>
+                    <td>MA{period}</td>
+                    <td>{val != null ? fmt(val) : 'N/A'}</td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </>
       )}
     </Expander>
-  );
+  )
 }
 
 export function PcrExpander({ pcr }) {
   return (
     <Expander title="Put/Call Ratio">
       <p>
-        The Put/Call Ratio (PCR) measures relative options activity. A PCR{" "}
-        <strong>above 1.2</strong> is broadly bearish sentiment;{" "}
-        <strong>below 0.7</strong> is broadly bullish.
+        The Put/Call Ratio (PCR) measures relative options activity. A PCR{' '}
+        <strong>above 1.2</strong> is broadly bearish sentiment; <strong>below 0.7</strong> is
+        broadly bullish.
       </p>
-      <div className="metrics-grid cols-4" style={{ marginTop: "0.75rem" }}>
+      <div className="metrics-grid cols-4" style={{ marginTop: '0.75rem' }}>
         <div className="metric-card">
           <div className="metric-label">PCR (Volume)</div>
           <div className="metric-value">{fmtDecimal(pcr.pcrVol)}</div>
@@ -175,9 +184,9 @@ export function PcrExpander({ pcr }) {
           <div className="metric-value">{fmtInt(pcr.putOi)}</div>
         </div>
       </div>
-      <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginTop: "0.5rem" }}>
-        Sentiment signal: <strong style={{ textTransform: "capitalize" }}>{pcr.sentiment}</strong>
+      <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+        Sentiment signal: <strong style={{ textTransform: 'capitalize' }}>{pcr.sentiment}</strong>
       </p>
     </Expander>
-  );
+  )
 }

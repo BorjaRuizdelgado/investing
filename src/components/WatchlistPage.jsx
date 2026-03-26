@@ -1,32 +1,34 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react'
 
 export default function WatchlistPage({ watchlist, onAnalyse }) {
-  const [quotes, setQuotes] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [quotes, setQuotes] = useState([])
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (!watchlist.tickers.length) {
-      setQuotes([]);
-      return;
+      setQuotes([])
+      return
     }
 
-    let cancelled = false;
-    setLoading(true);
+    let cancelled = false
+    setLoading(true)
 
-    fetch(`/api/quotes?tickers=${encodeURIComponent(watchlist.tickers.join(","))}`)
+    fetch(`/api/quotes?tickers=${encodeURIComponent(watchlist.tickers.join(','))}`)
       .then((r) => r.json())
       .then((data) => {
-        if (!cancelled) setQuotes(data.quotes || []);
+        if (!cancelled) setQuotes(data.quotes || [])
       })
       .catch(() => {
-        if (!cancelled) setQuotes([]);
+        if (!cancelled) setQuotes([])
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+        if (!cancelled) setLoading(false)
+      })
 
-    return () => { cancelled = true; };
-  }, [watchlist.tickers]);
+    return () => {
+      cancelled = true
+    }
+  }, [watchlist.tickers])
 
   return (
     <div>
@@ -50,7 +52,7 @@ export default function WatchlistPage({ watchlist, onAnalyse }) {
       {!loading && watchlist.tickers.length > 0 && (
         <div className="watchlist-grid">
           {watchlist.tickers.map((ticker) => {
-            const q = quotes.find((x) => x.ticker === ticker || x.symbol === ticker);
+            const q = quotes.find((x) => x.ticker === ticker || x.symbol === ticker)
             return (
               <div
                 key={ticker}
@@ -62,8 +64,8 @@ export default function WatchlistPage({ watchlist, onAnalyse }) {
                   <button
                     className="watchlist-card__remove"
                     onClick={(e) => {
-                      e.stopPropagation();
-                      watchlist.remove(ticker);
+                      e.stopPropagation()
+                      watchlist.remove(ticker)
                     }}
                     title="Remove from watchlist"
                   >
@@ -74,20 +76,23 @@ export default function WatchlistPage({ watchlist, onAnalyse }) {
                   <>
                     <div className="trending-card-name">{q.name || ticker}</div>
                     <div className="trending-card-price">${q.price?.toFixed(2)}</div>
-                    <div className={`trending-card-change ${q.changePct >= 0 ? "positive" : "negative"}`}>
-                      {q.changePct >= 0 ? "+" : ""}{q.changePct?.toFixed(2)}%
+                    <div
+                      className={`trending-card-change ${q.changePct >= 0 ? 'positive' : 'negative'}`}
+                    >
+                      {q.changePct >= 0 ? '+' : ''}
+                      {q.changePct?.toFixed(2)}%
                     </div>
                   </>
                 ) : (
-                  <div className="terminal-caption" style={{ marginTop: "0.5rem" }}>
-                    {loading ? "Loading..." : "Quote unavailable"}
+                  <div className="terminal-caption" style={{ marginTop: '0.5rem' }}>
+                    {loading ? 'Loading...' : 'Quote unavailable'}
                   </div>
                 )}
               </div>
-            );
+            )
           })}
         </div>
       )}
     </div>
-  );
+  )
 }

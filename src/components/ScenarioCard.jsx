@@ -1,10 +1,10 @@
-import React from "react";
-import Tooltip from "./Tooltip.jsx";
-import { fmt } from "../lib/format.js";
-import { METRIC_TIPS } from "../lib/metricTips.js";
+import React from 'react'
+import Tooltip from './Tooltip.jsx'
+import { fmt } from '../lib/format.js'
+import { METRIC_TIPS } from '../lib/metricTips.js'
 
 export default function ScenarioCard({ fairValue }) {
-  if (!fairValue) return null;
+  if (!fairValue) return null
 
   return (
     <div className="terminal-card scenario-card">
@@ -27,5 +27,5 @@ export default function ScenarioCard({ fairValue }) {
         </div>
       </div>
     </div>
-  );
+  )
 }

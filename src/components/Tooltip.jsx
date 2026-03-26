@@ -1,5 +1,5 @@
-import React, { useState, useRef, useCallback } from "react";
-import { createPortal } from "react-dom";
+import React, { useState, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 
 /**
  * Small "?" icon that shows a tooltip on hover.
@@ -7,34 +7,31 @@ import { createPortal } from "react-dom";
  * (e.g. the sidebar) and overlaps the main page content.
  */
 export default function Tooltip({ text }) {
-  const [pos, setPos] = useState(null);
-  const iconRef = useRef(null);
+  const [pos, setPos] = useState(null)
+  const iconRef = useRef(null)
 
   const handleMouseEnter = useCallback(() => {
-    if (!iconRef.current) return;
-    const rect = iconRef.current.getBoundingClientRect();
+    if (!iconRef.current) return
+    const rect = iconRef.current.getBoundingClientRect()
     setPos({
       // Vertically centred on the icon, opens to the right into main content
       top: rect.top + rect.height / 2,
       left: rect.right + 8,
-    });
-  }, []);
+    })
+  }, [])
 
-  const handleMouseLeave = useCallback(() => setPos(null), []);
+  const handleMouseLeave = useCallback(() => setPos(null), [])
 
-  if (!text) return null;
+  if (!text) return null
 
   const tooltip =
     pos &&
     createPortal(
-      <div
-        className="tooltip-portal"
-        style={{ top: pos.top, left: pos.left }}
-      >
+      <div className="tooltip-portal" style={{ top: pos.top, left: pos.left }}>
         {text}
       </div>,
-      document.body
-    );
+      document.body,
+    )
 
   return (
     <span className="tip-wrap">
@@ -48,5 +45,5 @@ export default function Tooltip({ text }) {
       </span>
       {tooltip}
     </span>
-  );
+  )
 }

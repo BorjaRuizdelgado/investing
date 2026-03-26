@@ -1,53 +1,58 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from 'react'
 
 export default function TerminalTabs({ tabs, activeTab, onChange }) {
-  const containerRef = useRef(null);
-  const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const containerRef = useRef(null)
+  const [showScrollBtn, setShowScrollBtn] = useState(false)
 
   function updateScrollState() {
-    const el = containerRef.current;
-    if (!el) return setShowScrollBtn(false);
-    const overflow = el.scrollWidth > el.clientWidth + 1;
-    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
-    setShowScrollBtn(overflow && !atEnd);
+    const el = containerRef.current
+    if (!el) return setShowScrollBtn(false)
+    const overflow = el.scrollWidth > el.clientWidth + 1
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1
+    setShowScrollBtn(overflow && !atEnd)
   }
 
   useEffect(() => {
-    updateScrollState();
-    const el = containerRef.current;
-    if (!el) return;
+    updateScrollState()
+    const el = containerRef.current
+    if (!el) return
 
     function onResize() {
-      updateScrollState();
+      updateScrollState()
     }
 
     function onScroll() {
-      updateScrollState();
+      updateScrollState()
     }
 
-    window.addEventListener("resize", onResize);
-    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener('resize', onResize)
+    el.addEventListener('scroll', onScroll, { passive: true })
 
     return () => {
-      window.removeEventListener("resize", onResize);
-      el.removeEventListener("scroll", onScroll);
-    };
-  }, [tabs]);
+      window.removeEventListener('resize', onResize)
+      el.removeEventListener('scroll', onScroll)
+    }
+  }, [tabs])
 
   function scrollRight() {
-    const el = containerRef.current;
-    if (!el) return;
-    const amount = Math.round(el.clientWidth * 0.6);
-    el.scrollBy({ left: amount, behavior: "smooth" });
+    const el = containerRef.current
+    if (!el) return
+    const amount = Math.round(el.clientWidth * 0.6)
+    el.scrollBy({ left: amount, behavior: 'smooth' })
   }
 
   return (
     <div className="terminal-tabs-wrapper">
-      <div ref={containerRef} className="terminal-tabs" role="tablist" aria-label="Research sections">
+      <div
+        ref={containerRef}
+        className="terminal-tabs"
+        role="tablist"
+        aria-label="Research sections"
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            className={`terminal-tab${activeTab === tab.id ? " terminal-tab--active" : ""}`}
+            className={`terminal-tab${activeTab === tab.id ? ' terminal-tab--active' : ''}`}
             onClick={() => onChange(tab.id)}
             role="tab"
             aria-selected={activeTab === tab.id}
@@ -68,5 +73,5 @@ export default function TerminalTabs({ tabs, activeTab, onChange }) {
         </button>
       )}
     </div>
-  );
+  )
 }

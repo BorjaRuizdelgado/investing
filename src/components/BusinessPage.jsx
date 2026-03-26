@@ -1,73 +1,77 @@
-import React from "react";
-import Plot from "react-plotly.js";
-import { fmtCompact } from "../lib/format.js";
-import { getColors } from "../lib/theme.js";
-import EarningsCalendar from "./EarningsCalendar.jsx";
+import React from 'react'
+import Plot from 'react-plotly.js'
+import { fmtCompact } from '../lib/format.js'
+import { getColors } from '../lib/theme.js'
+import EarningsCalendar from './EarningsCalendar.jsx'
 
 function StatementChart({ title, series = [], keys = [], colors = [] }) {
-  if (!series.length) return null;
+  if (!series.length) return null
 
-  const visibleKeys = keys.filter((key) =>
-    series.some((row) => Number.isFinite(row[key.field]))
-  );
-  if (!visibleKeys.length) return null;
+  const visibleKeys = keys.filter((key) => series.some((row) => Number.isFinite(row[key.field])))
+  if (!visibleKeys.length) return null
 
   return (
     <div className="terminal-card">
       <div className="terminal-eyebrow">{title}</div>
       <Plot
         data={visibleKeys.map((key, index) => ({
-          type: "bar",
+          type: 'bar',
           name: key.label,
           x: series.map((row) => row.period),
           y: series.map((row) => row[key.field]),
           marker: { color: colors[index] },
-          hovertemplate: "%{x}<br>%{y:$,.0f}<extra></extra>",
+          hovertemplate: '%{x}<br>%{y:$,.0f}<extra></extra>',
         }))}
         layout={{
-          barmode: "group",
+          barmode: 'group',
           autosize: true,
           height: 320,
           margin: { l: 40, r: 12, t: 12, b: 40 },
-          paper_bgcolor: "transparent",
-          plot_bgcolor: "transparent",
-          font: { color: getColors().textLight, family: "DM Sans, sans-serif", size: 12 },
-          legend: { orientation: "h", y: 1.16, x: 0, font: { color: getColors().textLight } },
+          paper_bgcolor: 'transparent',
+          plot_bgcolor: 'transparent',
+          font: { color: getColors().textLight, family: 'DM Sans, sans-serif', size: 12 },
+          legend: { orientation: 'h', y: 1.16, x: 0, font: { color: getColors().textLight } },
           xaxis: { fixedrange: true, tickfont: { color: getColors().textMuted } },
-          yaxis: { fixedrange: true, gridcolor: getColors().borderLight, tickfont: { color: getColors().textMuted } },
+          yaxis: {
+            fixedrange: true,
+            gridcolor: getColors().borderLight,
+            tickfont: { color: getColors().textMuted },
+          },
         }}
         config={{ displayModeBar: false, responsive: true }}
-        style={{ width: "100%" }}
+        style={{ width: '100%' }}
         useResizeHandler
       />
     </div>
-  );
+  )
 }
 
 export default function BusinessPage({ ticker, fundamentals, research }) {
-  const business = research?.business;
+  const business = research?.business
   const summaryCards = [
     {
-      label: "Company",
+      label: 'Company',
       value: fundamentals?.longName || fundamentals?.name || ticker,
-      caption: [fundamentals?.sector, fundamentals?.industry].filter(Boolean).join(" · ") || "No profile metadata",
+      caption:
+        [fundamentals?.sector, fundamentals?.industry].filter(Boolean).join(' · ') ||
+        'No profile metadata',
       show: Boolean(fundamentals?.longName || fundamentals?.name || ticker),
     },
     {
-      label: "Revenue",
+      label: 'Revenue',
       value: fmtCompact(fundamentals?.totalRevenue),
-      caption: "Latest reported annual revenue",
+      caption: 'Latest reported annual revenue',
       show: fundamentals?.totalRevenue != null,
     },
     {
-      label: "Free Cash Flow",
+      label: 'Free Cash Flow',
       value: fmtCompact(fundamentals?.freeCashflow),
-      caption: "Latest trailing free cash flow",
+      caption: 'Latest trailing free cash flow',
       show: fundamentals?.freeCashflow != null,
     },
-  ].filter((card) => card.show);
+  ].filter((card) => card.show)
 
-  if (!business?.hasData) return null;
+  if (!business?.hasData) return null
 
   return (
     <>
@@ -98,9 +102,9 @@ export default function BusinessPage({ ticker, fundamentals, research }) {
                 title="Income Statement Trend"
                 series={business.incomeSeries}
                 keys={[
-                  { field: "revenue", label: "Revenue" },
-                  { field: "operatingIncome", label: "Operating income" },
-                  { field: "netIncome", label: "Net income" },
+                  { field: 'revenue', label: 'Revenue' },
+                  { field: 'operatingIncome', label: 'Operating income' },
+                  { field: 'netIncome', label: 'Net income' },
                 ]}
                 colors={[getColors().accent, getColors().accentWarm, getColors().textLight]}
               />
@@ -110,9 +114,9 @@ export default function BusinessPage({ ticker, fundamentals, research }) {
                 title="Cash Flow Trend"
                 series={business.cashflowSeries}
                 keys={[
-                  { field: "operatingCashflow", label: "Operating cash flow" },
-                  { field: "freeCashflow", label: "Free cash flow" },
-                  { field: "capitalExpenditures", label: "Capex" },
+                  { field: 'operatingCashflow', label: 'Operating cash flow' },
+                  { field: 'freeCashflow', label: 'Free cash flow' },
+                  { field: 'capitalExpenditures', label: 'Capex' },
                 ]}
                 colors={[getColors().accent, getColors().green, getColors().red]}
               />
@@ -125,5 +129,5 @@ export default function BusinessPage({ ticker, fundamentals, research }) {
         </div>
       )}
     </>
-  );
+  )
 }

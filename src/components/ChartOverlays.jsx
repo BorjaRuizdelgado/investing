@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 
 /**
  * Pill-toggle bar for chart overlays (MAs, gamma walls, etc.).
@@ -10,7 +10,7 @@ export default function ChartOverlays({ overlays, onToggle }) {
       {overlays.map(({ key, label, active }) => (
         <button
           key={key}
-          className={`overlay-pill${active ? " overlay-pill--active" : ""}`}
+          className={`overlay-pill${active ? ' overlay-pill--active' : ''}`}
           onClick={() => onToggle(key)}
           type="button"
         >
@@ -18,5 +18,5 @@ export default function ChartOverlays({ overlays, onToggle }) {
         </button>
       ))}
     </div>
-  );
+  )
 }

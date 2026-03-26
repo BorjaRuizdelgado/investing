@@ -1,5 +1,5 @@
-import React from "react";
-import Tooltip from "./Tooltip.jsx";
+import React from 'react'
+import Tooltip from './Tooltip.jsx'
 
 /**
  * Horizontal label strip rendered below a chart.
@@ -20,5 +20,5 @@ export default function LabelStrip({ items }) {
         </div>
       ))}
     </div>
-  );
+  )
 }

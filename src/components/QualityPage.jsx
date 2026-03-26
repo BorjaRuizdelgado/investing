@@ -1,14 +1,14 @@
-import React from "react";
-import ScoreCard from "./ScoreCard.jsx";
-import MetricTable from "./MetricTable.jsx";
-import ReasonList from "./ReasonList.jsx";
-import { METRIC_TIPS } from "../lib/metricTips.js";
-import { buildSectorMedians } from "../lib/sectorMedians.js";
+import React from 'react'
+import ScoreCard from './ScoreCard.jsx'
+import MetricTable from './MetricTable.jsx'
+import ReasonList from './ReasonList.jsx'
+import { METRIC_TIPS } from '../lib/metricTips.js'
+import { buildSectorMedians } from '../lib/sectorMedians.js'
 
 export default function QualityPage({ research, fundamentals }) {
-  if (!research?.quality?.hasData) return null;
+  if (!research?.quality?.hasData) return null
 
-  const sectorMedians = React.useMemo(() => buildSectorMedians(fundamentals), [fundamentals]);
+  const sectorMedians = React.useMemo(() => buildSectorMedians(fundamentals), [fundamentals])
 
   return (
     <>
@@ -17,18 +17,35 @@ export default function QualityPage({ research, fundamentals }) {
           <h2>Business Quality</h2>
         </div>
         <div className="terminal-grid terminal-grid--2">
-          <ScoreCard label="Quality Score" score={research?.quality?.score} tone={research?.quality?.score >= 70 ? "positive" : research?.quality?.score < 40 ? "negative" : "neutral"} detail={research?.quality?.label} tooltip={METRIC_TIPS.qualityScore} />
+          <ScoreCard
+            label="Quality Score"
+            score={research?.quality?.score}
+            tone={
+              research?.quality?.score >= 70
+                ? 'positive'
+                : research?.quality?.score < 40
+                  ? 'negative'
+                  : 'neutral'
+            }
+            detail={research?.quality?.label}
+            tooltip={METRIC_TIPS.qualityScore}
+          />
           <div className="terminal-card">
             <div className="terminal-eyebrow">Interpretation</div>
             <p className="terminal-copy">
-              Strong businesses usually sustain margins, generate cash, and avoid relying on purely narrative-driven growth.
+              Strong businesses usually sustain margins, generate cash, and avoid relying on purely
+              narrative-driven growth.
             </p>
           </div>
         </div>
       </section>
 
-      <MetricTable title="Quality Metrics" metrics={research?.quality?.metrics || []} sectorMedians={sectorMedians} />
+      <MetricTable
+        title="Quality Metrics"
+        metrics={research?.quality?.metrics || []}
+        sectorMedians={sectorMedians}
+      />
       <ReasonList title="Quality Drivers" reasons={research?.quality?.reasons || []} />
     </>
-  );
+  )
 }

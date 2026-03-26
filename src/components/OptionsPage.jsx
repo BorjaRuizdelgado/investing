@@ -1,25 +1,25 @@
-import React, { useState, useCallback } from "react";
-import Tooltip from "./Tooltip.jsx";
-import KpiRow from "./KpiRow.jsx";
-import LabelStrip from "./LabelStrip.jsx";
-import ForecastChart from "./ForecastChart.jsx";
-import DistributionChart from "./DistributionChart.jsx";
-import IvSmileChart from "./IvSmileChart.jsx";
-import OiChart from "./OiChart.jsx";
-import SrChart from "./SrChart.jsx";
-import ChartOverlays from "./ChartOverlays.jsx";
+import React, { useState, useCallback } from 'react'
+import Tooltip from './Tooltip.jsx'
+import KpiRow from './KpiRow.jsx'
+import LabelStrip from './LabelStrip.jsx'
+import ForecastChart from './ForecastChart.jsx'
+import DistributionChart from './DistributionChart.jsx'
+import IvSmileChart from './IvSmileChart.jsx'
+import OiChart from './OiChart.jsx'
+import SrChart from './SrChart.jsx'
+import ChartOverlays from './ChartOverlays.jsx'
 import {
   PercentileExpander,
   DistributionExpander,
   EntryExpander,
   PcrExpander,
-} from "./Expanders.jsx";
-import { forecastLabels, distributionLabels, entryLabels } from "../lib/labels.js";
-import { fmt } from "../lib/format.js";
-import StrategySuggestions from "./StrategySuggestions.jsx";
+} from './Expanders.jsx'
+import { forecastLabels, distributionLabels, entryLabels } from '../lib/labels.js'
+import { fmt } from '../lib/format.js'
+import StrategySuggestions from './StrategySuggestions.jsx'
 
-const DEFAULT_FORECAST_OVERLAYS = { ma20: false, ma50: false, ma200: false };
-const DEFAULT_ENTRY_OVERLAYS = { ma20: false, ma50: false, ma200: false, gw: true, pivots: true };
+const DEFAULT_FORECAST_OVERLAYS = { ma20: false, ma50: false, ma200: false }
+const DEFAULT_ENTRY_OVERLAYS = { ma20: false, ma50: false, ma200: false, gw: true, pivots: true }
 
 export default function OptionsPage({
   ticker,
@@ -33,18 +33,18 @@ export default function OptionsPage({
   loading,
   research,
 }) {
-  const [forecastOverlays, setForecastOverlays] = useState(DEFAULT_FORECAST_OVERLAYS);
-  const [entryOverlays, setEntryOverlays] = useState(DEFAULT_ENTRY_OVERLAYS);
+  const [forecastOverlays, setForecastOverlays] = useState(DEFAULT_FORECAST_OVERLAYS)
+  const [entryOverlays, setEntryOverlays] = useState(DEFAULT_ENTRY_OVERLAYS)
 
   const toggleForecast = useCallback((key) => {
-    setForecastOverlays((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
+    setForecastOverlays((prev) => ({ ...prev, [key]: !prev[key] }))
+  }, [])
 
   const toggleEntry = useCallback((key) => {
-    setEntryOverlays((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
+    setEntryOverlays((prev) => ({ ...prev, [key]: !prev[key] }))
+  }, [])
 
-  if (!analysis) return null;
+  if (!analysis) return null
 
   return (
     <div className="options-page">
@@ -52,9 +52,14 @@ export default function OptionsPage({
         <div className="section-heading">
           <h2>Options Positioning</h2>
           <p>
-            Current price <strong>{fmt(analysis.spot)}</strong> · Expiry <strong>{analysis.expiry}</strong>
-            {" "}({Math.round(analysis.dte)} days)
-            {analysis.chainsUsed > 1 && <> · Weighted from <strong>{analysis.chainsUsed}</strong> chains</>}
+            Current price <strong>{fmt(analysis.spot)}</strong> · Expiry{' '}
+            <strong>{analysis.expiry}</strong> ({Math.round(analysis.dte)} days)
+            {analysis.chainsUsed > 1 && (
+              <>
+                {' '}
+                · Weighted from <strong>{analysis.chainsUsed}</strong> chains
+              </>
+            )}
           </p>
         </div>
         {expirations?.length > 0 && (
@@ -63,17 +68,17 @@ export default function OptionsPage({
               <label htmlFor="options-expiry">Expiration</label>
               <select
                 id="options-expiry"
-                value={selectedExpiry?.timestamp ?? ""}
+                value={selectedExpiry?.timestamp ?? ''}
                 onChange={(e) => onExpiryChange(e.target.value)}
                 disabled={loading}
               >
                 {expirations.map((exp) => {
-                  const dte = daysToExpiry(exp.date);
+                  const dte = daysToExpiry(exp.date)
                   return (
                     <option key={exp.timestamp} value={exp.timestamp}>
                       {exp.date} ({Math.round(dte)}d)
                     </option>
-                  );
+                  )
                 })}
               </select>
             </div>
@@ -88,7 +93,11 @@ export default function OptionsPage({
                 />
                 <span className="toggle-switch" />
               </label>
-              <span className="toggle-text">Multi-expiry<br />computation</span>
+              <span className="toggle-text">
+                Multi-expiry
+                <br />
+                computation
+              </span>
               <Tooltip text="When enabled, blends all option chains expiring up to the selected date, weighted by proximity (nearer = higher weight). When off, uses only the selected expiry chain." />
             </div>
           </div>
@@ -105,9 +114,9 @@ export default function OptionsPage({
 
       <ChartOverlays
         overlays={[
-          { key: "ma20", label: "MA 20", active: forecastOverlays.ma20 },
-          { key: "ma50", label: "MA 50", active: forecastOverlays.ma50 },
-          { key: "ma200", label: "MA 200", active: forecastOverlays.ma200 },
+          { key: 'ma20', label: 'MA 20', active: forecastOverlays.ma20 },
+          { key: 'ma50', label: 'MA 50', active: forecastOverlays.ma50 },
+          { key: 'ma200', label: 'MA 200', active: forecastOverlays.ma200 },
         ]}
         onToggle={toggleForecast}
       />
@@ -136,11 +145,11 @@ export default function OptionsPage({
 
       <ChartOverlays
         overlays={[
-          { key: "ma20", label: "MA 20", active: entryOverlays.ma20 },
-          { key: "ma50", label: "MA 50", active: entryOverlays.ma50 },
-          { key: "ma200", label: "MA 200", active: entryOverlays.ma200 },
-          { key: "gw", label: "Gamma Walls", active: entryOverlays.gw },
-          { key: "pivots", label: "Pivots", active: entryOverlays.pivots },
+          { key: 'ma20', label: 'MA 20', active: entryOverlays.ma20 },
+          { key: 'ma50', label: 'MA 50', active: entryOverlays.ma50 },
+          { key: 'ma200', label: 'MA 200', active: entryOverlays.ma200 },
+          { key: 'gw', label: 'Gamma Walls', active: entryOverlays.gw },
+          { key: 'pivots', label: 'Pivots', active: entryOverlays.pivots },
         ]}
         onToggle={toggleEntry}
       />
@@ -166,5 +175,5 @@ export default function OptionsPage({
 
       <StrategySuggestions analysis={analysis} research={research} />
     </div>
-  );
+  )
 }

@@ -1,6 +1,6 @@
-import React from "react";
-import Tooltip from "./Tooltip.jsx";
-import { fmt } from "../lib/format.js";
+import React from 'react'
+import Tooltip from './Tooltip.jsx'
+import { fmt } from '../lib/format.js'
 
 function KpiCard({ label, value, delta, deltaPositive, tooltip }) {
   return (
@@ -11,16 +11,14 @@ function KpiCard({ label, value, delta, deltaPositive, tooltip }) {
       </div>
       <div className="kpi-value">{value}</div>
       {delta != null && (
-        <div className={`kpi-delta ${deltaPositive ? "positive" : "negative"}`}>
-          {delta}
-        </div>
+        <div className={`kpi-delta ${deltaPositive ? 'positive' : 'negative'}`}>{delta}</div>
       )}
     </div>
-  );
+  )
 }
 
 export default function KpiRow({ dist, spot, em, probs, mp }) {
-  const meanChg = ((dist.mean - spot) / spot) * 100;
+  const meanChg = ((dist.mean - spot) / spot) * 100
 
   return (
     <div className="kpi-row">
@@ -52,5 +50,5 @@ export default function KpiRow({ dist, spot, em, probs, mp }) {
         tooltip="Strike price where the most options expire worthless, causing maximum pain to option holders."
       />
     </div>
-  );
+  )
 }

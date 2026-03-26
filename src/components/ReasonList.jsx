@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
-export default function ReasonList({ title = "What matters", reasons = [] }) {
-  if (!reasons.length) return null;
+export default function ReasonList({ title = 'What matters', reasons = [] }) {
+  if (!reasons.length) return null
 
   return (
     <section className="terminal-section">
@@ -10,12 +10,15 @@ export default function ReasonList({ title = "What matters", reasons = [] }) {
       </div>
       <div className="reason-list">
         {reasons.map((reason) => (
-          <div key={`${reason.title}-${reason.detail}`} className={`reason-item reason-item--${reason.tone || "neutral"}`}>
+          <div
+            key={`${reason.title}-${reason.detail}`}
+            className={`reason-item reason-item--${reason.tone || 'neutral'}`}
+          >
             <div className="reason-title">{reason.title}</div>
             <div className="reason-detail">{reason.detail}</div>
           </div>
         ))}
       </div>
     </section>
-  );
+  )
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 
 export default function Expander({ title, children }) {
   return (
@@ -6,5 +6,5 @@ export default function Expander({ title, children }) {
       <summary>{title}</summary>
       <div className="expander-body">{children}</div>
     </details>
-  );
+  )
 }

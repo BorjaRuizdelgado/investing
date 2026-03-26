@@ -1,13 +1,13 @@
-import React from "react";
-import { suggestStrategies } from "../lib/strategies.js";
+import React from 'react'
+import { suggestStrategies } from '../lib/strategies.js'
 
 export default function StrategySuggestions({ analysis, research }) {
   const strategies = React.useMemo(
     () => suggestStrategies(analysis, research),
     [analysis, research],
-  );
+  )
 
-  if (!strategies.length) return null;
+  if (!strategies.length) return null
 
   return (
     <section className="terminal-section">
@@ -20,7 +20,9 @@ export default function StrategySuggestions({ analysis, research }) {
         {strategies.map((s) => (
           <div key={s.name} className="terminal-card strategy-card">
             <div className="terminal-eyebrow">{s.name}</div>
-            <p className="terminal-caption" style={{ marginBottom: "0.5rem" }}>{s.description}</p>
+            <p className="terminal-caption" style={{ marginBottom: '0.5rem' }}>
+              {s.description}
+            </p>
 
             <table className="strategy-legs">
               <thead>
@@ -33,7 +35,7 @@ export default function StrategySuggestions({ analysis, research }) {
               <tbody>
                 {s.legs.map((leg, i) => (
                   <tr key={i}>
-                    <td className={leg.action === "Sell" ? "strategy-sell" : "strategy-buy"}>
+                    <td className={leg.action === 'Sell' ? 'strategy-sell' : 'strategy-buy'}>
                       {leg.action}
                     </td>
                     <td>{leg.type}</td>
@@ -44,8 +46,12 @@ export default function StrategySuggestions({ analysis, research }) {
             </table>
 
             <div className="strategy-meta">
-              <span><strong>Premium:</strong> {s.premium}</span>
-              <span><strong>Max Risk:</strong> {s.maxRisk}</span>
+              <span>
+                <strong>Premium:</strong> {s.premium}
+              </span>
+              <span>
+                <strong>Max Risk:</strong> {s.maxRisk}
+              </span>
             </div>
 
             <p className="strategy-rationale">{s.rationale}</p>
@@ -53,5 +59,5 @@ export default function StrategySuggestions({ analysis, research }) {
         ))}
       </div>
     </section>
-  );
+  )
 }

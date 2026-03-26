@@ -1,49 +1,52 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react'
 
-const STORAGE_KEY = "watchlist";
+const STORAGE_KEY = 'watchlist'
 
 function readWatchlist() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) return parsed
     }
   } catch {}
-  return [];
+  return []
 }
 
 function writeWatchlist(tickers) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tickers));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tickers))
   } catch {}
 }
 
 export default function useWatchlist() {
-  const [tickers, setTickers] = useState(readWatchlist);
+  const [tickers, setTickers] = useState(readWatchlist)
 
   const add = useCallback((ticker) => {
-    const t = ticker.toUpperCase();
+    const t = ticker.toUpperCase()
     setTickers((prev) => {
-      if (prev.includes(t)) return prev;
-      const next = [...prev, t];
-      writeWatchlist(next);
-      return next;
-    });
-  }, []);
+      if (prev.includes(t)) return prev
+      const next = [...prev, t]
+      writeWatchlist(next)
+      return next
+    })
+  }, [])
 
   const remove = useCallback((ticker) => {
-    const t = ticker.toUpperCase();
+    const t = ticker.toUpperCase()
     setTickers((prev) => {
-      const next = prev.filter((x) => x !== t);
-      writeWatchlist(next);
-      return next;
-    });
-  }, []);
+      const next = prev.filter((x) => x !== t)
+      writeWatchlist(next)
+      return next
+    })
+  }, [])
 
-  const has = useCallback((ticker) => {
-    return tickers.includes(ticker.toUpperCase());
-  }, [tickers]);
+  const has = useCallback(
+    (ticker) => {
+      return tickers.includes(ticker.toUpperCase())
+    },
+    [tickers],
+  )
 
-  return { tickers, add, remove, has };
+  return { tickers, add, remove, has }
 }
