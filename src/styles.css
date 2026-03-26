@@ -1010,6 +1010,12 @@ hr {
   font-size: 0.92rem;
 }
 
+.info-box--warn {
+  background: rgba(192, 128, 80, 0.06);
+  border-left-color: var(--accent-warm);
+  color: var(--text);
+}
+
 .legal-page {
   max-width: 920px;
   margin: 0 auto;
@@ -2188,6 +2194,19 @@ hr {
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem 1.5rem;
   align-items: start;
+}
+
+.fundamentals-grid .terminal-section {
+  margin-bottom: 0;
+}
+
+.fundamentals-grid .section-heading {
+  margin-bottom: 0.5rem;
+}
+
+.fundamentals-grid .section-heading h2 {
+  font-size: 1.1rem;
+  font-weight: 500;
 }
 
 .fundamentals-title {

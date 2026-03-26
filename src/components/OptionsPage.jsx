@@ -21,6 +21,25 @@ import StrategySuggestions from './StrategySuggestions.jsx'
 const DEFAULT_FORECAST_OVERLAYS = { ma20: false, ma50: false, ma200: false }
 const DEFAULT_ENTRY_OVERLAYS = { ma20: false, ma50: false, ma200: false, gw: true, pivots: true }
 
+function EarningsIvWarning({ fundamentals }) {
+  if (!fundamentals?.earningsTimestamp) return null
+  const earningsDate = new Date(fundamentals.earningsTimestamp * 1000)
+  const daysUntil = Math.ceil((earningsDate - Date.now()) / (1000 * 60 * 60 * 24))
+  if (daysUntil < 0 || daysUntil > 14) return null
+
+  return (
+    <div className="info-box info-box--warn" style={{ marginBottom: '1rem' }}>
+      <strong>IV crush warning:</strong> Earnings are{' '}
+      {daysUntil === 0
+        ? 'today'
+        : `in ${daysUntil} day${daysUntil === 1 ? '' : 's'}`}{' '}
+      ({earningsDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}). Implied
+      volatility typically drops sharply after the report. Consider spreads or defined-risk
+      strategies instead of naked options to limit IV crush exposure.
+    </div>
+  )
+}
+
 export default function OptionsPage({
   ticker,
   analysis,
@@ -32,6 +51,7 @@ export default function OptionsPage({
   onWeightedToggle,
   loading,
   research,
+  fundamentals,
 }) {
   const [forecastOverlays, setForecastOverlays] = useState(DEFAULT_FORECAST_OVERLAYS)
   const [entryOverlays, setEntryOverlays] = useState(DEFAULT_ENTRY_OVERLAYS)
@@ -48,6 +68,7 @@ export default function OptionsPage({
 
   return (
     <div className="options-page">
+      <EarningsIvWarning fundamentals={fundamentals} />
       <section className="terminal-section">
         <div className="section-heading">
           <h2>Options Positioning</h2>

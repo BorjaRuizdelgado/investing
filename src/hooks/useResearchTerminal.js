@@ -5,6 +5,7 @@ import { deriveValuation } from '../lib/valuation.js'
 import { deriveQuality } from '../lib/quality.js'
 import { deriveRisk } from '../lib/risk.js'
 import { deriveBusiness } from '../lib/business.js'
+import { deriveTechnicals } from '../lib/technicals.js'
 import { deriveOpportunity, deriveOptionsSentiment, deriveSignals } from '../lib/signals.js'
 import { tickerFromPath } from '../lib/routes.js'
 
@@ -28,6 +29,7 @@ function deriveResearch(fundamentals, analysis, spot) {
     analystUpsidePct: valuation.analystUpsidePct,
   })
   const business = deriveBusiness(fundamentals)
+  const technicals = deriveTechnicals(analysis, spot)
   const fundamentalsHasData = Boolean(
     fundamentals &&
     Object.entries(fundamentals).some(([key, value]) => {
@@ -43,6 +45,7 @@ function deriveResearch(fundamentals, analysis, spot) {
     quality: Boolean(quality?.hasData),
     risk: Boolean(risk?.hasData),
     business: Boolean(business?.hasData),
+    technicals: Boolean(technicals?.hasData),
     options: Boolean(analysis),
     fundamentals: fundamentalsHasData,
   }
@@ -54,6 +57,7 @@ function deriveResearch(fundamentals, analysis, spot) {
     risk,
     options,
     business,
+    technicals,
     signals,
     availability,
   }

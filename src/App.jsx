@@ -5,6 +5,7 @@ import OverviewPage from './components/OverviewPage.jsx'
 import ValuePage from './components/ValuePage.jsx'
 import QualityPage from './components/QualityPage.jsx'
 import RiskPage from './components/RiskPage.jsx'
+import TechnicalsPage from './components/TechnicalsPage.jsx'
 import BusinessPage from './components/BusinessPage.jsx'
 import OptionsPage from './components/OptionsPage.jsx'
 import FundamentalsPanel from './components/FundamentalsPanel.jsx'
@@ -39,6 +40,7 @@ const TABS = [
   { id: 'value', label: 'Value', caption: 'Cheap or expensive' },
   { id: 'quality', label: 'Quality', caption: 'Business strength' },
   { id: 'risk', label: 'Risk', caption: 'Fragility and downside' },
+  { id: 'technicals', label: 'Technicals', caption: 'Price momentum' },
   { id: 'business', label: 'Business', caption: 'Financial trends' },
   { id: 'options', label: 'Options Forecasting', caption: 'Market pricing' },
   { id: 'fundamentals', label: 'Fundamentals', caption: 'Raw reference' },
@@ -230,7 +232,7 @@ export default function App() {
         )}
 
         {page === 'compare' && (
-          <div className="main-content">
+          <div className="main-content" key={theme}>
             <ComparePage tickers={compareTickersFromPath(currentPath())} />
             <div className="page-link-row">
               <a
@@ -294,7 +296,7 @@ export default function App() {
               />
             </div>
 
-            <div className="tab-content">
+            <div className="tab-content" key={theme}>
               {activeTab === 'overview' && (
                 <ErrorBoundary name="OverviewPage">
                   <OverviewPage
@@ -337,6 +339,11 @@ export default function App() {
                   <RiskPage research={research} fundamentals={fundamentals} />
                 </ErrorBoundary>
               )}
+              {activeTab === 'technicals' && (
+                <ErrorBoundary name="TechnicalsPage">
+                  <TechnicalsPage research={research} />
+                </ErrorBoundary>
+              )}
               {activeTab === 'business' && (
                 <ErrorBoundary name="BusinessPage">
                   <BusinessPage ticker={ticker} fundamentals={fundamentals} research={research} />
@@ -355,6 +362,7 @@ export default function App() {
                     onWeightedToggle={handleWeightedToggle}
                     loading={loading}
                     research={research}
+                    fundamentals={fundamentals}
                   />
                 </ErrorBoundary>
               )}

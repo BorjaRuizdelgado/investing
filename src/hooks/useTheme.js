@@ -22,7 +22,12 @@ export default function useTheme() {
   }, [theme])
 
   const toggle = useCallback(() => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
+    setTheme((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark'
+      // Apply immediately so CSS variables are current before React re-renders charts
+      document.documentElement.dataset.theme = next
+      return next
+    })
   }, [])
 
   return { theme, toggle }

@@ -50,6 +50,20 @@ export const METRIC_TIPS = {
     'Composite score from the available leverage, liquidity, volatility, and event-risk inputs only.',
   optionsScore: 'Composite score from the available options-implied positioning inputs only.',
   fundamentalsScore: 'Composite score from the available raw fundamental fields only.',
+  technicalsScore:
+    'Composite score from RSI momentum, MACD trend, Bollinger Band position, moving average alignment, and volume confirmation.',
+  rsi14:
+    'Relative Strength Index over 14 periods. Above 70 is overbought, below 30 is oversold.',
+  macd: 'Moving Average Convergence Divergence. Positive values indicate bullish momentum.',
+  macdSignal: 'MACD signal line (9-period EMA of MACD). Crossovers generate trade signals.',
+  bollingerBandwidth:
+    'Distance between upper and lower Bollinger Bands relative to the middle band. Narrow bandwidth signals a potential breakout (squeeze).',
+  bollingerPosition:
+    '%B measures where price sits within the bands. Above 1 = above upper band, below 0 = below lower band.',
+  maCrossover:
+    'Relationship between 50-day and 200-day simple moving averages. Golden cross (50 > 200) is bullish; death cross is bearish.',
+  volumeTrend:
+    'Ratio of 5-day average volume to 20-day average volume. Above 1.5 suggests unusual activity.',
   valuationVerdict: 'High-level interpretation of the current valuation inputs.',
   qualityVerdict: 'High-level interpretation of the current business quality inputs.',
   riskVerdict: 'High-level interpretation of the current risk inputs.',
