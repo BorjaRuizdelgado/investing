@@ -82,8 +82,8 @@ function PriceBBChart({ indicators }) {
   const layout = useMemo(
     () => ({
       ...LAYOUT_DEFAULTS,
-      title: { text: 'Price & Bollinger Bands', font: { size: 16 } },
       height: chartHeight(380),
+      margin: { l: 65, r: 30, t: 20, b: 55 },
       xaxis: { ...axisStyle(), type: 'date' },
       yaxis: { ...axisStyle(), title: 'Price' },
       legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' },
@@ -91,7 +91,12 @@ function PriceBBChart({ indicators }) {
     [],
   )
 
-  return <Plot data={data} layout={layout} config={PLOTLY_CONFIG} useResizeHandler style={{ width: '100%' }} />
+  return (
+    <>
+      <div className="section-heading"><h2>Price &amp; Bollinger Bands</h2></div>
+      <Plot data={data} layout={layout} config={PLOTLY_CONFIG} useResizeHandler style={{ width: '100%' }} />
+    </>
+  )
 }
 
 function RSIChart({ indicators }) {
@@ -127,8 +132,8 @@ function RSIChart({ indicators }) {
   const layout = useMemo(
     () => ({
       ...LAYOUT_DEFAULTS,
-      title: { text: 'RSI (14)', font: { size: 16 } },
       height: chartHeight(250),
+      margin: { l: 65, r: 30, t: 20, b: 55 },
       xaxis: { ...axisStyle(), type: 'date' },
       yaxis: { ...axisStyle(), title: 'RSI', range: [0, 100] },
       legend: { orientation: 'h', y: -0.2, x: 0.5, xanchor: 'center' },
@@ -149,7 +154,12 @@ function RSIChart({ indicators }) {
     [],
   )
 
-  return <Plot data={data} layout={layout} config={PLOTLY_CONFIG} useResizeHandler style={{ width: '100%' }} />
+  return (
+    <>
+      <div className="section-heading"><h2>RSI (14)</h2></div>
+      <Plot data={data} layout={layout} config={PLOTLY_CONFIG} useResizeHandler style={{ width: '100%' }} />
+    </>
+  )
 }
 
 function MACDChart({ indicators }) {
@@ -185,8 +195,8 @@ function MACDChart({ indicators }) {
   const layout = useMemo(
     () => ({
       ...LAYOUT_DEFAULTS,
-      title: { text: 'MACD (12/26/9)', font: { size: 16 } },
       height: chartHeight(250),
+      margin: { l: 65, r: 30, t: 20, b: 55 },
       xaxis: { ...axisStyle(), type: 'date' },
       yaxis: { ...axisStyle(), title: 'MACD' },
       legend: { orientation: 'h', y: -0.2, x: 0.5, xanchor: 'center' },
@@ -195,7 +205,12 @@ function MACDChart({ indicators }) {
     [],
   )
 
-  return <Plot data={data} layout={layout} config={PLOTLY_CONFIG} useResizeHandler style={{ width: '100%' }} />
+  return (
+    <>
+      <div className="section-heading"><h2>MACD (12 / 26 / 9)</h2></div>
+      <Plot data={data} layout={layout} config={PLOTLY_CONFIG} useResizeHandler style={{ width: '100%' }} />
+    </>
+  )
 }
 
 export default function TechnicalsPage({ research }) {
