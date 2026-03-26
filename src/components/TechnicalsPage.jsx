@@ -4,7 +4,7 @@ import ScoreCard from './ScoreCard.jsx'
 import MetricTable from './MetricTable.jsx'
 import ReasonList from './ReasonList.jsx'
 import { METRIC_TIPS } from '../lib/metricTips.js'
-import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight } from '../lib/theme.js'
+import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, getColors } from '../lib/theme.js'
 
 function tone(score) {
   if (!Number.isFinite(score)) return 'neutral'
@@ -86,7 +86,7 @@ function PriceBBChart({ indicators }) {
       margin: { l: 65, r: 30, t: 20, b: 55 },
       xaxis: { ...axisStyle(), type: 'date' },
       yaxis: { ...axisStyle(), title: 'Price' },
-      legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' },
+      legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center', font: { color: getColors().text } },
     }),
     [],
   )
@@ -136,7 +136,7 @@ function RSIChart({ indicators }) {
       margin: { l: 65, r: 30, t: 20, b: 55 },
       xaxis: { ...axisStyle(), type: 'date' },
       yaxis: { ...axisStyle(), title: 'RSI', range: [0, 100] },
-      legend: { orientation: 'h', y: -0.2, x: 0.5, xanchor: 'center' },
+      legend: { orientation: 'h', y: -0.2, x: 0.5, xanchor: 'center', font: { color: getColors().text } },
       shapes: [
         {
           type: 'rect',
@@ -199,7 +199,7 @@ function MACDChart({ indicators }) {
       margin: { l: 65, r: 30, t: 20, b: 55 },
       xaxis: { ...axisStyle(), type: 'date' },
       yaxis: { ...axisStyle(), title: 'MACD' },
-      legend: { orientation: 'h', y: -0.2, x: 0.5, xanchor: 'center' },
+      legend: { orientation: 'h', y: -0.2, x: 0.5, xanchor: 'center', font: { color: getColors().text } },
       bargap: 0.1,
     }),
     [],

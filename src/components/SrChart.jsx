@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import Plot from 'react-plotly.js'
-import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight } from '../lib/theme.js'
+import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, legendBg } from '../lib/theme.js'
 import { buildMaTracesAndAnnotations } from '../lib/ma.js'
 
 export default function SrChart({ ticker, history, spot, sr, entryInfo, overlays = {} }) {
@@ -105,7 +105,7 @@ export default function SrChart({ ticker, history, spot, sr, entryInfo, overlays
     }
 
     const annotations = []
-    const tag = { bgcolor: 'rgba(247,245,240,0.85)', borderpad: 3 }
+    const tag = { bgcolor: legendBg(0.85), borderpad: 3 }
 
     // Spot line
     shapes.push({
@@ -252,10 +252,10 @@ export default function SrChart({ ticker, history, spot, sr, entryInfo, overlays
       yaxis: { ...axisStyle(), title: 'Price ($)', tickprefix: '$', autorange: true },
       showlegend: true,
       legend: {
-        bgcolor: 'rgba(247,245,240,0.85)',
+        bgcolor: legendBg(0.85),
         bordercolor: COLORS.borderLight,
         borderwidth: 1,
-        font: { size: 12 },
+        font: { size: 12, color: COLORS.text },
         x: 0.01,
         y: 0.99,
         xanchor: 'left',

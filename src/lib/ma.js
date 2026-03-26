@@ -3,6 +3,7 @@
  *
  * Shared across ForecastChart and SrChart so the logic lives in one place.
  */
+import { legendBg } from './theme.js'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -139,7 +140,7 @@ export function buildMaTracesAndAnnotations({
         xanchor: isLeft ? 'left' : 'right',
         yshift,
         font: { size: 12, color: cfg.color },
-        bgcolor: 'rgba(247,245,240,0.85)',
+        bgcolor: legendBg(0.85),
         borderpad: 3,
       })
     }

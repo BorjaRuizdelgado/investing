@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import Plot from 'react-plotly.js'
-import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight } from '../lib/theme.js'
+import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, legendBg } from '../lib/theme.js'
 import { buildMaTracesAndAnnotations } from '../lib/ma.js'
 
 /**
@@ -129,7 +129,7 @@ export default function ForecastChart({
         x: [histDates[histDates.length - 1]],
         y: [histPrices[histPrices.length - 1]],
         mode: 'markers',
-        marker: { color: COLORS.accent, size: 8, line: { color: 'white', width: 1.5 } },
+        marker: { color: COLORS.accent, size: 8, line: { color: COLORS.bg, width: 1.5 } },
         name: `Current $${spot.toFixed(2)}`,
         hovertemplate: `<b>Current Price</b><br>$${spot.toFixed(2)}<extra></extra>`,
       })
@@ -198,7 +198,7 @@ export default function ForecastChart({
       },
     ]
 
-    const tagStyle = { bgcolor: 'rgba(247,245,240,0.85)', borderpad: 3 }
+    const tagStyle = { bgcolor: legendBg(0.85), borderpad: 3 }
     const annotations = [
       ...maAnnotations,
       {
@@ -272,10 +272,10 @@ export default function ForecastChart({
       yaxis: { ...axisStyle(), title: 'Price ($)', tickprefix: '$', autorange: true },
       showlegend: true,
       legend: {
-        bgcolor: 'rgba(247,245,240,0.90)',
+        bgcolor: legendBg(),
         bordercolor: COLORS.borderLight,
         borderwidth: 1,
-        font: { size: 13 },
+        font: { size: 13, color: COLORS.text },
         x: 0.01,
         y: 0.99,
         xanchor: 'left',

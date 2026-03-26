@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import Plot from 'react-plotly.js'
-import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight } from '../lib/theme.js'
+import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, legendBg } from '../lib/theme.js'
 
 export default function DistributionChart({ dist, spot, pctiles, mp }) {
   const { data, layout } = useMemo(() => {
@@ -85,7 +85,7 @@ export default function DistributionChart({ dist, spot, pctiles, mp }) {
 
     const shapes = []
     const annotations = []
-    const tagTop = { bgcolor: 'rgba(247,245,240,0.85)', borderpad: 3 }
+    const tagTop = { bgcolor: legendBg(0.85), borderpad: 3 }
 
     shapes.push({
       type: 'line',
@@ -214,10 +214,10 @@ export default function DistributionChart({ dist, spot, pctiles, mp }) {
       yaxis: { ...axisStyle(), title: 'Probability Density', showticklabels: false },
       showlegend: true,
       legend: {
-        bgcolor: 'rgba(247,245,240,0.90)',
+        bgcolor: legendBg(),
         bordercolor: COLORS.borderLight,
         borderwidth: 1,
-        font: { size: 12 },
+        font: { size: 12, color: COLORS.text },
         x: 0.01,
         y: 0.99,
         xanchor: 'left',

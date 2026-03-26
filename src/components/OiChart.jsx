@@ -6,6 +6,7 @@ import {
   axisStyle,
   PLOTLY_CONFIG_SMALL,
   chartHeight,
+  legendBg,
 } from '../lib/theme.js'
 
 export default function OiChart({ calls, puts, spot }) {
@@ -131,10 +132,10 @@ export default function OiChart({ calls, puts, spot }) {
       barmode: 'group',
       showlegend: true,
       legend: {
-        bgcolor: 'rgba(247,245,240,0.90)',
+        bgcolor: legendBg(),
         bordercolor: COLORS.borderLight,
         borderwidth: 1,
-        font: { size: 12 },
+        font: { size: 12, color: COLORS.text },
         x: 0.01,
         y: 0.99,
         xanchor: 'left',

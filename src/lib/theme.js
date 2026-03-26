@@ -105,6 +105,14 @@ export const LAYOUT_DEFAULTS = new Proxy(
   },
 )
 
+/** Semi-transparent bg for chart legends & annotation tags. */
+export function legendBg(opacity = 0.9) {
+  const theme = currentTheme()
+  return theme === 'dark'
+    ? `rgba(36,36,36,${opacity})`
+    : `rgba(247,245,240,${opacity})`
+}
+
 export function axisStyle() {
   const c = getColors()
   return {
