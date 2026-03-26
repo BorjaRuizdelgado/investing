@@ -250,6 +250,13 @@ export default function ComparePage({ tickers = [] }) {
         const t1 = results[1]?.ticker || activeTickers[1];
         const histA = results[0]?.analysis?.history || [];
         const histB = results[1]?.analysis?.history || [];
+
+        // Align both histories to overlapping dates only
+        const dateSetB = new Set(histB.map((h) => h.date));
+        const dateSetA = new Set(histA.map((h) => h.date));
+        const alignedA = histA.filter((h) => dateSetB.has(h.date));
+        const alignedB = histB.filter((h) => dateSetA.has(h.date));
+
         const corrResult = computeCorrelation(histA, histB);
         const corrVal = corrResult?.r ?? null;
         const corrDays = corrResult?.days ?? 0;
@@ -349,22 +356,25 @@ export default function ComparePage({ tickers = [] }) {
 
 
           {/* Price history overlay chart */}
-          {results[0]?.analysis?.history && results[1]?.analysis?.history && (
+          {alignedA.length > 5 && alignedB.length > 5 && (
             <section className="terminal-section">
               <div className="section-heading">
                 <h2>Price History</h2>
               </div>
               <div className="terminal-card">
                 <Plot
-                  data={results.map((r, i) => ({
-                    type: "scatter",
-                    mode: "lines",
-                    name: r.ticker,
-                    x: r.analysis.history.map((h) => h.date),
-                    y: r.analysis.history.map((h) => h.close),
-                    yaxis: i === 0 ? "y" : "y2",
-                    line: { color: i === 0 ? c.accent : c.accentWarm, width: 2 },
-                  }))}
+                  data={[
+                    {
+                      type: "scatter", mode: "lines", name: results[0].ticker,
+                      x: alignedA.map((h) => h.date), y: alignedA.map((h) => h.close),
+                      yaxis: "y", line: { color: c.accent, width: 2 },
+                    },
+                    {
+                      type: "scatter", mode: "lines", name: results[1].ticker,
+                      x: alignedB.map((h) => h.date), y: alignedB.map((h) => h.close),
+                      yaxis: "y2", line: { color: c.accentWarm, width: 2 },
+                    },
+                  ]}
                   layout={{
                     autosize: true,
                     height: 350,
