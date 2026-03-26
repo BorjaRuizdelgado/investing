@@ -163,27 +163,29 @@ function CompareInput({ onCompare, initialTickers }) {
 
   return (
     <form className="compare-form" onSubmit={handleSubmit}>
-      <input
-        type="text"
-        value={t1}
-        onChange={(e) => setT1(e.target.value.toUpperCase())}
-        placeholder="Ticker 1 — e.g. AAPL"
-        aria-label="First ticker"
-        autoComplete="off"
-        autoCapitalize="characters"
-        spellCheck="false"
-      />
-      <span className="compare-form__vs">vs</span>
-      <input
-        type="text"
-        value={t2}
-        onChange={(e) => setT2(e.target.value.toUpperCase())}
-        placeholder="Ticker 2 — e.g. MSFT"
-        aria-label="Second ticker"
-        autoComplete="off"
-        autoCapitalize="characters"
-        spellCheck="false"
-      />
+      <div className="compare-form__inputs">
+        <input
+          type="text"
+          value={t1}
+          onChange={(e) => setT1(e.target.value.toUpperCase())}
+          placeholder="e.g. AAPL"
+          aria-label="First ticker"
+          autoComplete="off"
+          autoCapitalize="characters"
+          spellCheck="false"
+        />
+        <span className="compare-form__vs">vs</span>
+        <input
+          type="text"
+          value={t2}
+          onChange={(e) => setT2(e.target.value.toUpperCase())}
+          placeholder="e.g. MSFT"
+          aria-label="Second ticker"
+          autoComplete="off"
+          autoCapitalize="characters"
+          spellCheck="false"
+        />
+      </div>
       <button className="compare-form__btn" type="submit" disabled={!t1.trim() || !t2.trim()}>
         Compare
       </button>

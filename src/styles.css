@@ -1617,17 +1617,21 @@ hr {
 
 .compare-form {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.compare-form__inputs {
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  margin-top: 1rem;
-  flex-wrap: wrap;
 }
 
 .compare-form input[type="text"] {
-  flex: 1;
-  min-width: 120px;
-  max-width: 240px;
+  width: 180px;
   padding: 0.55rem 0.85rem;
   border: 1.2px solid var(--border);
   background: var(--bg);
@@ -1636,6 +1640,7 @@ hr {
   font-size: 0.9rem;
   outline: none;
   transition: border-color var(--transition);
+  text-align: center;
 }
 
 .compare-form input[type="text"]:focus {
@@ -1646,10 +1651,11 @@ hr {
   font-size: 0.88rem;
   color: var(--text-muted);
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .compare-form__btn {
-  padding: 0.55rem 1.1rem;
+  padding: 0.55rem 1.5rem;
   background: var(--accent);
   color: #fff;
   border: 1.2px solid var(--accent);
