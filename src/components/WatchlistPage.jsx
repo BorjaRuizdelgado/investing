@@ -6,6 +6,7 @@ export default function WatchlistPage({ watchlist, onAnalyse }) {
 
   useEffect(() => {
     if (!watchlist.tickers.length) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuotes([])
       return
     }

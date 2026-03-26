@@ -6,9 +6,10 @@ import { METRIC_TIPS } from '../lib/metricTips.js'
 import { buildSectorMedians } from '../lib/sectorMedians.js'
 
 export default function RiskPage({ research, fundamentals }) {
-  if (!research?.risk?.hasData) return null
-
+  // useMemo must come before any conditional return (Rules of Hooks)
   const sectorMedians = React.useMemo(() => buildSectorMedians(fundamentals), [fundamentals])
+
+  if (!research?.risk?.hasData) return null
 
   return (
     <>

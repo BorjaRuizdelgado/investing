@@ -13,6 +13,7 @@ export default function TerminalTabs({ tabs, activeTab, onChange }) {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     updateScrollState()
     const el = containerRef.current
     if (!el) return

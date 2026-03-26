@@ -11,7 +11,7 @@ export default function ForecastChart({
   expiry,
   spot,
   dist,
-  em,
+  em: _em,
   pctiles,
   mp,
   history,
@@ -289,7 +289,7 @@ export default function ForecastChart({
     }
 
     return { data: traces, layout: lo }
-  }, [ticker, expiry, spot, dist, em, pctiles, mp, history, dte, overlays])
+  }, [ticker, expiry, spot, dist, pctiles, mp, history, dte, overlays])
 
   return (
     <div className="chart-section">

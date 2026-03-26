@@ -50,7 +50,7 @@ const Header = forwardRef(function Header(
     onNavigateCompare,
     theme,
     onToggleTheme,
-    hasAnalysis,
+    hasAnalysis: _hasAnalysis,
   },
   inputRef,
 ) {

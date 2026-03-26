@@ -12,7 +12,17 @@ export default [
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      'no-unused-vars': [
+        'warn',
+        {
+          // Ignore args prefixed with _
+          argsIgnorePattern: '^_',
+          // Ignore PascalCase names — React components are always PascalCase and
+          // ESLint can't detect JSX usage without eslint-plugin-react/jsx-uses-vars.
+          // This prevents hundreds of false-positive warnings on imported components.
+          varsIgnorePattern: '^[A-Z]',
+        },
+      ],
       'no-empty': ['warn', { allowEmptyCatch: true }],
       'react-hooks/set-state-in-effect': 'warn',
     },

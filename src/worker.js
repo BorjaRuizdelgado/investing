@@ -71,6 +71,22 @@ function jsonResp(data, status = 200) {
   })
 }
 
+/**
+ * Like jsonResp but adds a Cache-Control header so browsers (and Cloudflare's
+ * edge cache) serve repeated requests without hitting Yahoo / Bybit again.
+ * Use only for responses where a few minutes of staleness is acceptable.
+ */
+function cachedJsonResp(data, maxAgeSeconds) {
+  return new Response(JSON.stringify(data), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      ...CORS_HEADERS,
+      'Cache-Control': `public, max-age=${maxAgeSeconds}, stale-while-revalidate=${Math.floor(maxAgeSeconds / 2)}`,
+    },
+  })
+}
+
 // ======================================================================
 // Yahoo Finance (stocks/ETFs)
 // ======================================================================
@@ -421,7 +437,7 @@ async function handleHistory(ticker, days) {
     }))
     .filter((b) => b.close != null)
 
-  return jsonResp({ ticker: result.meta.symbol, bars })
+  return cachedJsonResp({ ticker: result.meta.symbol, bars }, 300) // 5-minute browser cache
 }
 
 async function handleRate() {
@@ -429,7 +445,7 @@ async function handleRate() {
     const data = await fetchYF(`/v8/finance/chart/%5EIRX?range=5d&interval=1d`)
     const closes = data.chart.result[0].indicators.quote[0].close.filter((v) => v != null)
     const rate = closes.length > 0 ? closes[closes.length - 1] / 100 : 0.05
-    return jsonResp({ rate })
+    return cachedJsonResp({ rate }, 3600) // interest rate barely changes; 1-hour cache
   } catch {
     return jsonResp({ rate: 0.05 })
   }
@@ -624,7 +640,7 @@ async function checkStockOptions(symbol) {
 
 async function handleTrending() {
   const now = Date.now()
-  if (cachedTrending && now < trendingExpiry) return jsonResp(cachedTrending)
+  if (cachedTrending && now < trendingExpiry) return cachedJsonResp(cachedTrending, 300)
 
   // 1. Get candidate stock symbols (trending or fallback)
   let stockSymbols = FALLBACK_STOCKS
@@ -670,7 +686,7 @@ async function handleTrending() {
   const stocks = optChecks
     .filter((s) => s.ok)
     .slice(0, 8)
-    .map(({ ok, ...s }) => s)
+    .map(({ ok: _ok, ...s }) => s)
 
   // If none passed (unlikely), use fallback symbols that always have options
   if (stocks.length === 0) {
@@ -683,7 +699,7 @@ async function handleTrending() {
   const result = { stocks, crypto }
   cachedTrending = result
   trendingExpiry = now + 5 * 60_000 // 5-minute cache
-  return jsonResp(result)
+  return cachedJsonResp(result, 300)
 }
 
 // ======================================================================

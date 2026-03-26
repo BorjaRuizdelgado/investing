@@ -21,10 +21,14 @@ import StrategySuggestions from './StrategySuggestions.jsx'
 const DEFAULT_FORECAST_OVERLAYS = { ma20: false, ma50: false, ma200: false }
 const DEFAULT_ENTRY_OVERLAYS = { ma20: false, ma50: false, ma200: false, gw: true, pivots: true }
 
+// Computed once at module load time — stable for the tab session and never called during render,
+// which satisfies the react-hooks/purity rule for EarningsIvWarning below.
+const PAGE_LOAD_TIMESTAMP = Date.now()
+
 function EarningsIvWarning({ fundamentals }) {
   if (!fundamentals?.earningsTimestamp) return null
   const earningsDate = new Date(fundamentals.earningsTimestamp * 1000)
-  const daysUntil = Math.ceil((earningsDate - Date.now()) / (1000 * 60 * 60 * 24))
+  const daysUntil = Math.ceil((earningsDate - PAGE_LOAD_TIMESTAMP) / (1000 * 60 * 60 * 24))
   if (daysUntil < 0 || daysUntil > 14) return null
 
   return (

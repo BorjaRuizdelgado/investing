@@ -198,7 +198,7 @@ function addReason(reasons, tone, title, detail) {
   reasons.push({ tone, title, detail })
 }
 
-export function deriveTechnicals(analysis, spot) {
+export function deriveTechnicals(analysis, _spot) {
   const history = analysis?.history
   if (!history || history.length < 50) {
     return { hasData: false, score: null, label: 'Unavailable', metrics: [], reasons: [], indicators: null }
@@ -214,7 +214,6 @@ export function deriveTechnicals(analysis, spot) {
   const bb = computeBollingerBands(closes)
   const sma50 = sma(closes, 50)
   const sma200 = sma(closes, 200)
-  const sma20 = bb.middle
 
   // Latest values
   const last = closes.length - 1

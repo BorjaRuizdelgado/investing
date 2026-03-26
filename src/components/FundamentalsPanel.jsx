@@ -10,12 +10,6 @@ function tsToDate(ts) {
   return new Date(ts * 1000).toLocaleDateString()
 }
 
-function toneFromSentiment(sentiment) {
-  if (sentiment === 'positive') return 'positive'
-  if (sentiment === 'negative') return 'negative'
-  return 'neutral'
-}
-
 function FundamentalsTableSection({ title, items }) {
   const visible = items.filter(Boolean)
   if (!visible.length) return null

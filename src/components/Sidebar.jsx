@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import SupportVault from './SupportVault.jsx'
 import { DISCLAIMER_PATH, tickerFromPath } from '../lib/routes.js'
 
-export default function Sidebar({ onAnalyse, loading, activeTicker, onNavigateDisclaimer }) {
+export default function Sidebar({ onAnalyse, loading, activeTicker: _activeTicker, onNavigateDisclaimer }) {
   const [ticker, setTicker] = useState(() => {
     return tickerFromPath(window.location.pathname) || ''
   })

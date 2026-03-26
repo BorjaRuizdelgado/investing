@@ -6,9 +6,10 @@ import { METRIC_TIPS } from '../lib/metricTips.js'
 import { buildSectorMedians } from '../lib/sectorMedians.js'
 
 export default function QualityPage({ research, fundamentals }) {
-  if (!research?.quality?.hasData) return null
-
+  // useMemo must come before any conditional return (Rules of Hooks)
   const sectorMedians = React.useMemo(() => buildSectorMedians(fundamentals), [fundamentals])
+
+  if (!research?.quality?.hasData) return null
 
   return (
     <>

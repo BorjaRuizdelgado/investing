@@ -165,10 +165,14 @@ function CompareInput({ onCompare, initialTickers }) {
   const [t2, setT2] = useState(initialTickers?.[1] || '')
 
   // Sync when initialTickers change (e.g. from URL)
+  const ticker0 = initialTickers?.[0]
+  const ticker1 = initialTickers?.[1]
   useEffect(() => {
-    if (initialTickers?.[0] && !t1) setT1(initialTickers[0])
-    if (initialTickers?.[1] && !t2) setT2(initialTickers[1])
-  }, [initialTickers?.[0], initialTickers?.[1]])
+    if (ticker0 && !t1) setT1(ticker0)
+    if (ticker1 && !t2) setT2(ticker1)
+  // t1/t2 intentionally omitted — only prefill on URL change, not on every keystroke
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticker0, ticker1])
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -224,26 +228,31 @@ export default function ComparePage({ tickers = [] }) {
     }
   }
 
+  const activeA = activeTickers[0]
+  const activeB = activeTickers[1]
   useEffect(() => {
-    if (activeTickers.length < 2) return
+    if (!activeA || !activeB) return
+    // Intentional: reset all fetch state synchronously before the async work begins
+    // so the UI immediately shows the loading indicator with no stale data visible.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
     setError(null)
     setResults([null, null])
 
     Promise.all([
-      analyseOneTicker(activeTickers[0]).catch((e) => ({
+      analyseOneTicker(activeA).catch((e) => ({
         error: e.message,
-        ticker: activeTickers[0],
+        ticker: activeA,
       })),
-      analyseOneTicker(activeTickers[1]).catch((e) => ({
+      analyseOneTicker(activeB).catch((e) => ({
         error: e.message,
-        ticker: activeTickers[1],
+        ticker: activeB,
       })),
     ])
       .then(([a, b]) => setResults([a, b]))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [activeTickers[0], activeTickers[1]])
+  }, [activeA, activeB])
 
   const c = getColors()
 

@@ -1,19 +1,23 @@
-import React, { useMemo, useState, useRef, useCallback } from 'react'
+import React, { lazy, Suspense, useMemo, useState, useRef, useCallback } from 'react'
 import Header from './components/Header.jsx'
 import TerminalTabs from './components/TerminalTabs.jsx'
 import OverviewPage from './components/OverviewPage.jsx'
 import ValuePage from './components/ValuePage.jsx'
 import QualityPage from './components/QualityPage.jsx'
 import RiskPage from './components/RiskPage.jsx'
-import TechnicalsPage from './components/TechnicalsPage.jsx'
-import BusinessPage from './components/BusinessPage.jsx'
-import OptionsPage from './components/OptionsPage.jsx'
-import FundamentalsPanel from './components/FundamentalsPanel.jsx'
-import DisclaimerPage from './components/DisclaimerPage.jsx'
-import DonationsPage from './components/DonationsPage.jsx'
 import TrendingTickers from './components/TrendingTickers.jsx'
 import SupportVault from './components/SupportVault.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
+
+// Heavy pages — deferred until first visit so Plotly stays out of the initial bundle
+const TechnicalsPage = lazy(() => import('./components/TechnicalsPage.jsx'))
+const BusinessPage = lazy(() => import('./components/BusinessPage.jsx'))
+const OptionsPage = lazy(() => import('./components/OptionsPage.jsx'))
+const FundamentalsPanel = lazy(() => import('./components/FundamentalsPanel.jsx'))
+const DisclaimerPage = lazy(() => import('./components/DisclaimerPage.jsx'))
+const DonationsPage = lazy(() => import('./components/DonationsPage.jsx'))
+const WatchlistPage = lazy(() => import('./components/WatchlistPage.jsx'))
+const ComparePage = lazy(() => import('./components/ComparePage.jsx'))
 import { daysToExpiry } from './lib/fetcher.js'
 import useResearchTerminal from './hooks/useResearchTerminal.js'
 import useTheme from './hooks/useTheme.js'
@@ -30,10 +34,8 @@ import {
   isComparePath,
   compareTickersFromPath,
 } from './lib/routes.js'
-import { OverviewSkeleton } from './components/SkeletonLayouts.jsx'
+import { OverviewSkeleton, ChartSkeleton } from './components/SkeletonLayouts.jsx'
 import ShortcutHelp from './components/ShortcutHelp.jsx'
-import WatchlistPage from './components/WatchlistPage.jsx'
-import ComparePage from './components/ComparePage.jsx'
 
 const TABS = [
   { id: 'overview', label: 'Overview', caption: 'Decision snapshot' },
@@ -113,7 +115,7 @@ export default function App() {
       if (activeTab !== desiredTabRef.current) setActiveTab(desiredTabRef.current)
       desiredTabRef.current = null
     }
-  }, [visibleTabs])
+  }, [visibleTabs, activeTab])
 
   React.useEffect(() => {
     const onPop = () => {
@@ -172,7 +174,9 @@ export default function App() {
       <main className="main">
         {page === 'disclaimer' && (
           <div className="main-content">
-            <DisclaimerPage />
+            <Suspense fallback={null}>
+              <DisclaimerPage />
+            </Suspense>
             <div className="page-link-row">
               <a
                 href="/"
@@ -190,7 +194,9 @@ export default function App() {
 
         {page === 'donate' && (
           <div className="main-content">
-            <DonationsPage />
+            <Suspense fallback={null}>
+              <DonationsPage />
+            </Suspense>
             <div className="page-link-row">
               <a
                 href="/"
@@ -208,14 +214,16 @@ export default function App() {
 
         {page === 'watchlist' && (
           <div className="main-content">
-            <WatchlistPage
-              watchlist={watchlist}
-              onAnalyse={(t) => {
-                setActiveTab('overview')
-                setPage('terminal')
-                handleAnalyse(t)
-              }}
-            />
+            <Suspense fallback={<OverviewSkeleton />}>
+              <WatchlistPage
+                watchlist={watchlist}
+                onAnalyse={(t) => {
+                  setActiveTab('overview')
+                  setPage('terminal')
+                  handleAnalyse(t)
+                }}
+              />
+            </Suspense>
             <div className="page-link-row">
               <a
                 href="/"
@@ -233,7 +241,9 @@ export default function App() {
 
         {page === 'compare' && (
           <div className="main-content" key={theme}>
-            <ComparePage tickers={compareTickersFromPath(currentPath())} />
+            <Suspense fallback={<OverviewSkeleton />}>
+              <ComparePage tickers={compareTickersFromPath(currentPath())} />
+            </Suspense>
             <div className="page-link-row">
               <a
                 href="/"
@@ -341,35 +351,43 @@ export default function App() {
               )}
               {activeTab === 'technicals' && (
                 <ErrorBoundary name="TechnicalsPage">
-                  <TechnicalsPage research={research} />
+                  <Suspense fallback={<ChartSkeleton />}>
+                    <TechnicalsPage research={research} />
+                  </Suspense>
                 </ErrorBoundary>
               )}
               {activeTab === 'business' && (
                 <ErrorBoundary name="BusinessPage">
-                  <BusinessPage ticker={ticker} fundamentals={fundamentals} research={research} />
+                  <Suspense fallback={<ChartSkeleton />}>
+                    <BusinessPage ticker={ticker} fundamentals={fundamentals} research={research} />
+                  </Suspense>
                 </ErrorBoundary>
               )}
               {activeTab === 'options' && (
                 <ErrorBoundary name="OptionsPage">
-                  <OptionsPage
-                    ticker={ticker}
-                    analysis={analysis}
-                    expirations={expirations}
-                    selectedExpiry={selectedExpiry}
-                    onExpiryChange={handleExpiryChange}
-                    daysToExpiry={daysToExpiry}
-                    weighted={weighted}
-                    onWeightedToggle={handleWeightedToggle}
-                    loading={loading}
-                    research={research}
-                    fundamentals={fundamentals}
-                  />
+                  <Suspense fallback={<ChartSkeleton />}>
+                    <OptionsPage
+                      ticker={ticker}
+                      analysis={analysis}
+                      expirations={expirations}
+                      selectedExpiry={selectedExpiry}
+                      onExpiryChange={handleExpiryChange}
+                      daysToExpiry={daysToExpiry}
+                      weighted={weighted}
+                      onWeightedToggle={handleWeightedToggle}
+                      loading={loading}
+                      research={research}
+                      fundamentals={fundamentals}
+                    />
+                  </Suspense>
                 </ErrorBoundary>
               )}
               {activeTab === 'fundamentals' && (
                 <ErrorBoundary name="FundamentalsPanel">
                   {fundamentals ? (
-                    <FundamentalsPanel fundamentals={fundamentals} />
+                    <Suspense fallback={<ChartSkeleton />}>
+                      <FundamentalsPanel fundamentals={fundamentals} />
+                    </Suspense>
                   ) : (
                     <div className="info-box">
                       Fundamental reference data is not available for this ticker.
