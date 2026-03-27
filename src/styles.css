@@ -1285,6 +1285,17 @@ hr {
   overflow: hidden;
 }
 
+.terminal-card > .js-plotly-plot {
+  width: 100% !important;
+  display: block !important;
+}
+
+.terminal-card .plot-container,
+.terminal-card .svg-container {
+  width: 100% !important;
+  max-width: 100%;
+}
+
 .terminal-card--compact {
   min-height: 168px;
 }

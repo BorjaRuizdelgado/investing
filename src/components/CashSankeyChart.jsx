@@ -195,14 +195,18 @@ export default function CashSankeyChart({ ticker }) {
     if (!links.length) return { data: null, layout: null }
 
     const c = getColors()
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1280
+    const isMobile = viewportWidth <= 640
+    const horizontalMargin = isMobile ? 12 : viewportWidth >= 1440 ? 84 : 96
+    const margin = { l: horizontalMargin, r: horizontalMargin, t: 16, b: 10 }
 
     const trace = {
       type: 'sankey',
       orientation: 'h',
       arrangement: 'snap',
       node: {
-        pad: 38,
-        thickness: 18,
+        pad: isMobile ? 18 : 38,
+        thickness: isMobile ? 14 : 18,
         line: { color: c.border, width: 0.4 },
         label: nodes.map((n) => n.label),
         color: nodes.map((n) => n.color),
@@ -225,7 +229,7 @@ export default function CashSankeyChart({ ticker }) {
       layout: {
         autosize: true,
         height,
-        margin: { l: 10, r: 220, t: 16, b: 10 },
+        margin,
         paper_bgcolor: c.bg,
         plot_bgcolor: c.bg,
         hoverlabel: {
@@ -236,7 +240,7 @@ export default function CashSankeyChart({ ticker }) {
         font: {
           family: 'DM Sans, Helvetica Neue, Helvetica, Arial, sans-serif',
           color: c.text,
-          size: 14,
+          size: isMobile ? 11 : 14,
         },
       },
     }
@@ -273,6 +277,7 @@ export default function CashSankeyChart({ ticker }) {
         data={data}
         layout={layout}
         config={{ displayModeBar: false, responsive: true }}
+        className="cash-sankey-chart"
         style={{ width: '100%' }}
         useResizeHandler
       />

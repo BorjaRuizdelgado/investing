@@ -23,6 +23,15 @@ export default function EarningsCalendar({ fundamentals }) {
   if (!earningsDate && epsHistory.length === 0) return null
 
   const c = getColors()
+  const epsValues = epsHistory.flatMap((q) => [q?.epsEstimate, q?.epsActual]).filter(Number.isFinite)
+  const epsMin = epsValues.length ? Math.min(...epsValues) : null
+  const epsMax = epsValues.length ? Math.max(...epsValues) : null
+  const epsSpan =
+    epsMin != null && epsMax != null ? Math.max(Math.abs(epsMax - epsMin), 0.1) : null
+  const epsRange =
+    epsMin != null && epsMax != null
+      ? [epsMin - epsSpan * 0.12, epsMax + epsSpan * (epsMax <= 0 ? 0.28 : 0.12)]
+      : undefined
 
   return (
     <section className="terminal-section">
@@ -84,15 +93,16 @@ export default function EarningsCalendar({ fundamentals }) {
                 barmode: 'group',
                 autosize: true,
                 height: 230,
-                margin: { l: 40, r: 12, t: 36, b: 40 },
+                margin: { l: 40, r: 12, t: 52, b: 40 },
                 paper_bgcolor: 'transparent',
                 plot_bgcolor: 'transparent',
                 font: { color: c.textLight, family: 'DM Sans, sans-serif', size: 12 },
-                legend: { orientation: 'h', y: 1.12, x: 0, font: { color: c.textLight } },
+                legend: { orientation: 'h', y: 1.16, x: 0, font: { color: c.textLight } },
                 xaxis: { fixedrange: true, tickfont: { color: c.textMuted } },
                 yaxis: {
                   fixedrange: true,
                   gridcolor: c.borderLight,
+                  range: epsRange,
                   tickfont: { color: c.textMuted },
                   tickprefix: '$',
                 },
