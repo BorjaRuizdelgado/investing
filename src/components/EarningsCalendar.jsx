@@ -83,12 +83,12 @@ export default function EarningsCalendar({ fundamentals }) {
               layout={{
                 barmode: 'group',
                 autosize: true,
-                height: 200,
-                margin: { l: 40, r: 12, t: 8, b: 40 },
+                height: 230,
+                margin: { l: 40, r: 12, t: 36, b: 40 },
                 paper_bgcolor: 'transparent',
                 plot_bgcolor: 'transparent',
                 font: { color: c.textLight, family: 'DM Sans, sans-serif', size: 12 },
-                legend: { orientation: 'h', y: 1.2, x: 0, font: { color: c.textLight } },
+                legend: { orientation: 'h', y: 1.12, x: 0, font: { color: c.textLight } },
                 xaxis: { fixedrange: true, tickfont: { color: c.textMuted } },
                 yaxis: {
                   fixedrange: true,
@@ -98,7 +98,7 @@ export default function EarningsCalendar({ fundamentals }) {
                 },
               }}
               config={{ displayModeBar: false, responsive: true }}
-              style={{ width: '100%' }}
+              style={{ width: '100%', height: '230px' }}
               useResizeHandler
             />
           </div>

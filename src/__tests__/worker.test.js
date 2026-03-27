@@ -161,7 +161,61 @@ function mockFetchImpl(url) {
     return Promise.resolve(new Response(JSON.stringify(YF_QUOTE), { status: 200 }))
   }
 
+  // SEC EDGAR endpoints
+  if (u.includes('sec.gov/files/company_tickers.json')) {
+    return Promise.resolve(
+      new Response(
+        JSON.stringify({
+          '0': { cik_str: 320193, ticker: 'AAPL', title: 'Apple Inc.' },
+          '1': { cik_str: 789019, ticker: 'MSFT', title: 'Microsoft Corp' },
+        }),
+        { status: 200 },
+      ),
+    )
+  }
+  if (u.includes('data.sec.gov/api/xbrl/companyfacts/CIK0000320193')) {
+    return Promise.resolve(new Response(JSON.stringify(SEC_AAPL_FACTS), { status: 200 }))
+  }
+
   return Promise.resolve(new Response('Not found', { status: 404 }))
+}
+
+// Minimal SEC EDGAR companyfacts mock for AAPL
+const SEC_AAPL_FACTS = {
+  facts: {
+    'us-gaap': {
+      NetIncomeLoss: {
+        units: { USD: [{ val: 97000000000, end: '2024-09-28', form: '10-K' }] },
+      },
+      DepreciationDepletionAndAmortization: {
+        units: { USD: [{ val: 11000000000, end: '2024-09-28', form: '10-K' }] },
+      },
+      ShareBasedCompensation: {
+        units: { USD: [{ val: 11700000000, end: '2024-09-28', form: '10-K' }] },
+      },
+      NetCashProvidedByUsedInOperatingActivities: {
+        units: { USD: [{ val: 118300000000, end: '2024-09-28', form: '10-K' }] },
+      },
+      PaymentsToAcquirePropertyPlantAndEquipment: {
+        units: { USD: [{ val: 9960000000, end: '2024-09-28', form: '10-K' }] },
+      },
+      NetCashProvidedByUsedInInvestingActivities: {
+        units: { USD: [{ val: -22800000000, end: '2024-09-28', form: '10-K' }] },
+      },
+      PaymentsForRepurchaseOfCommonStock: {
+        units: { USD: [{ val: 94900000000, end: '2024-09-28', form: '10-K' }] },
+      },
+      PaymentsOfDividends: {
+        units: { USD: [{ val: 15000000000, end: '2024-09-28', form: '10-K' }] },
+      },
+      NetCashProvidedByUsedInFinancingActivities: {
+        units: { USD: [{ val: -121100000000, end: '2024-09-28', form: '10-K' }] },
+      },
+      CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect: {
+        units: { USD: [{ val: -25600000000, end: '2024-09-28', form: '10-K' }] },
+      },
+    },
+  },
 }
 
 // Import worker handler
@@ -485,5 +539,51 @@ describe('Worker /api/options — crypto routing', () => {
     expect(res.status).toBe(200)
     const data = await res.json()
     expect(data.expirations.length).toBeGreaterThan(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Cash flow endpoint (SEC EDGAR)
+// ---------------------------------------------------------------------------
+
+describe('Worker /api/cashflow', () => {
+  it('returns detailed cash flow breakdown for a valid ticker', async () => {
+    const res = await callWorker('/api/cashflow?ticker=AAPL')
+    expect(res.status).toBe(200)
+    const data = await res.json()
+    expect(data.ticker).toBe('AAPL')
+    expect(data.endDate).toBe('2024-09-28')
+    expect(data.operatingCashflow).toBe(118300000000)
+    expect(data.netIncome).toBe(97000000000)
+    expect(data.investingCashflow).toBe(-22800000000)
+    expect(data.financingCashflow).toBe(-121100000000)
+  })
+
+  it('negates spending fields (capex, buybacks, dividends)', async () => {
+    const res = await callWorker('/api/cashflow?ticker=AAPL')
+    const data = await res.json()
+    expect(data.capitalExpenditures).toBeLessThan(0)
+    expect(data.stockBuybacks).toBeLessThan(0)
+    expect(data.dividendsPaid).toBeLessThan(0)
+  })
+
+  it('returns 400 for missing ticker', async () => {
+    const res = await callWorker('/api/cashflow')
+    expect(res.status).toBe(400)
+  })
+
+  it('returns 400 for invalid ticker', async () => {
+    const res = await callWorker('/api/cashflow?ticker=!!BAD!!')
+    expect(res.status).toBe(400)
+  })
+
+  it('returns 400 for crypto tickers', async () => {
+    const res = await callWorker('/api/cashflow?ticker=BTC')
+    expect(res.status).toBe(400)
+  })
+
+  it('returns 404 for unknown ticker', async () => {
+    const res = await callWorker('/api/cashflow?ticker=ZZZZZZ')
+    expect(res.status).toBe(404)
   })
 })

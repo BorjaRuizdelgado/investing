@@ -64,7 +64,7 @@ Routes follow `/{ticker}/{tab}` and are bookmarkable. Supported tabs: `overview`
 | **Value**               | Valuation score + bear/base/bull fair value range + metric table + reasons  |
 | **Quality**             | Profitability score + growth, margins, ROE/ROA, FCF margin                  |
 | **Risk**                | Safety score (inverted for clarity) + leverage, liquidity, beta, volatility |
-| **Business**            | Revenue, income, and cash flow charts over 3 fiscal years                   |
+| **Business**            | Cash flow Sankey diagram, revenue, income, and cash flow charts over 3 fiscal years |
 | **Options Forecasting** | Full options hub — forecast cone, distribution, IV smile, OI, S/R, entry    |
 | **Fundamentals**        | Raw fundamentals reference — all metrics in sortable tables                 |
 
@@ -114,7 +114,7 @@ Toggle this off in the sidebar to use only the single selected expiry chain.
 - **Profitability** — EPS, EBITDA, net income, gross profit, all margin types, ROE, ROA
 - **Growth** — revenue growth, earnings growth, quarterly earnings growth
 - **Balance Sheet** — total cash, total debt, debt/equity, current & quick ratio, book value, total assets/liabilities
-- **Cash Flow** — operating CF, CapEx, free cash flow (3 years of statement history)
+- **Cash Flow** — operating CF, CapEx, free cash flow (3 years of statement history), Sankey breakdown of inflows/outflows (via SEC EDGAR)
 - **Dividends** — yield, rate, payout ratio, 5-year avg yield, ex-dividend date
 - **Trading** — beta, 52-week range & change, volume, float, insider & institutional ownership
 - **Short Interest** — shares short, short ratio, short % of float, prior month comparison
@@ -144,6 +144,7 @@ When multi-expiry weighting is enabled (the default), steps 1-4 are repeated for
 | Yahoo Finance            | Options chains (cookie+crumb auth proxy), fundamentals, price history, risk-free rate (^IRX) |
 | Bybit public API         | Crypto options for BTC, ETH, SOL, XRP, DOGE                                                  |
 | Yahoo Finance (fallback) | Crypto price history                                                                         |
+| SEC EDGAR XBRL API       | Detailed cash flow statement breakdown for the Sankey diagram (US-listed companies)          |
 
 ## Tech Stack
 

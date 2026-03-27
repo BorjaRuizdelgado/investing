@@ -3,6 +3,7 @@ import Plot from 'react-plotly.js'
 import { fmtCompact } from '../lib/format.js'
 import { getColors } from '../lib/theme.js'
 import EarningsCalendar from './EarningsCalendar.jsx'
+import CashSankeyChart from './CashSankeyChart.jsx'
 
 function StatementChart({ title, series = [], keys = [], colors = [] }) {
   if (!series.length) return null
@@ -25,12 +26,12 @@ function StatementChart({ title, series = [], keys = [], colors = [] }) {
         layout={{
           barmode: 'group',
           autosize: true,
-          height: 320,
-          margin: { l: 40, r: 12, t: 12, b: 40 },
+          height: 350,
+          margin: { l: 40, r: 12, t: 40, b: 40 },
           paper_bgcolor: 'transparent',
           plot_bgcolor: 'transparent',
           font: { color: getColors().textLight, family: 'DM Sans, sans-serif', size: 12 },
-          legend: { orientation: 'h', y: 1.16, x: 0, font: { color: getColors().textLight } },
+          legend: { orientation: 'h', y: 1.08, x: 0, font: { color: getColors().textLight } },
           xaxis: { fixedrange: true, tickfont: { color: getColors().textMuted } },
           yaxis: {
             fixedrange: true,
@@ -39,7 +40,7 @@ function StatementChart({ title, series = [], keys = [], colors = [] }) {
           },
         }}
         config={{ displayModeBar: false, responsive: true }}
-        style={{ width: '100%' }}
+        style={{ width: '100%', height: '350px' }}
         useResizeHandler
       />
     </div>
@@ -92,6 +93,10 @@ export default function BusinessPage({ ticker, fundamentals, research }) {
             ))}
           </div>
         )}
+      </section>
+
+      <section className="terminal-section">
+        <CashSankeyChart ticker={ticker} />
       </section>
 
       {business?.hasFinancialSeries ? (
