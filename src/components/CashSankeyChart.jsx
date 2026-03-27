@@ -1,7 +1,19 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import Plot from 'react-plotly.js'
-import { fmtCompact } from '../lib/format.js'
-import { getColors, chartHeight } from '../lib/theme.js'
+import { getColors, chartHeight, hexToRgba } from '../lib/theme.js'
+import Skeleton from './Skeleton.jsx'
+
+/** Compact label format for Sankey nodes — 1 decimal place to keep labels short. */
+function fmtSankeyLabel(val) {
+  if (val == null || !Number.isFinite(val)) return ''
+  const abs = Math.abs(val)
+  const sign = val < 0 ? '-' : ''
+  if (abs >= 1e12) return `${sign}$${(abs / 1e12).toFixed(1)}T`
+  if (abs >= 1e9)  return `${sign}$${(abs / 1e9).toFixed(1)}B`
+  if (abs >= 1e6)  return `${sign}$${(abs / 1e6).toFixed(1)}M`
+  if (abs >= 1e3)  return `${sign}$${(abs / 1e3).toFixed(0)}K`
+  return `${sign}$${Math.round(abs)}`
+}
 
 /**
  * Builds Plotly Sankey node/link arrays from SEC EDGAR cash flow data.
@@ -18,8 +30,8 @@ function buildSankey(cf) {
 
   const addNode = (label, value, color) => {
     const i = idx++
-    const formatted = value != null ? fmtCompact(value) : ''
-    nodes.push({ label: `${label}<br>${formatted}`, color })
+    const formatted = fmtSankeyLabel(value)
+    nodes.push({ label: formatted ? `${label}  ${formatted}` : label, color })
     return i
   }
 
@@ -29,8 +41,8 @@ function buildSankey(cf) {
   }
 
   const c = getColors()
-  const greenFill = 'rgba(61,122,90,0.45)'
-  const redFill = 'rgba(176,80,64,0.45)'
+  const greenFill = hexToRgba(c.green, 0.55)
+  const redFill = hexToRgba(c.red, 0.55)
 
   // --- Aggregated nodes (middle/right) ---
   const nOperatingCF = addNode('Operating CF', cf.operatingCashflow,
@@ -51,30 +63,36 @@ function buildSankey(cf) {
   // Helper: add section items with residual ("Other") to balance the total
   function addSectionItems(items, totalKey, targetNode) {
     let itemsSum = 0
+    const resolved = []
     for (const item of items) {
       const val = cf[item.key]
       if (val == null || val === 0) continue
       itemsSum += val
-      const positive = val > 0
-      const ni = addNode(item.label, val, positive ? c.green : c.red)
-      if (positive) {
-        addLink(ni, targetNode, val, greenFill)
-      } else {
-        addLink(targetNode, ni, val, redFill)
-      }
+      resolved.push({ label: item.label, val })
     }
     // Add residual "Other" if items don't sum to the total
     const total = cf[totalKey]
     if (total != null) {
       const residual = total - itemsSum
-      if (Math.abs(residual) > 1e6) { // only show if > $1M
-        const positive = residual > 0
-        const ni = addNode('Other', residual, positive ? c.green : c.red)
-        if (positive) {
-          addLink(ni, targetNode, residual, greenFill)
-        } else {
-          addLink(targetNode, ni, residual, redFill)
-        }
+      if (Math.abs(residual) > 5e6) {
+        resolved.push({ label: 'Other', val: residual })
+      }
+    }
+    // Positives first (inflows, left side), then negatives (outflows, right side).
+    // Within each group, sort largest-to-smallest so the biggest bands sit next to
+    // each other and the Plotly layout engine can avoid crossings.
+    resolved.sort((a, b) => {
+      if (a.val > 0 && b.val <= 0) return -1
+      if (a.val <= 0 && b.val > 0) return 1
+      return Math.abs(b.val) - Math.abs(a.val)
+    })
+    for (const { label, val } of resolved) {
+      const positive = val > 0
+      const ni = addNode(label, val, positive ? c.green : c.red)
+      if (positive) {
+        addLink(ni, targetNode, val, greenFill)
+      } else {
+        addLink(targetNode, ni, Math.abs(val), redFill)
       }
     }
   }
@@ -183,11 +201,12 @@ export default function CashSankeyChart({ ticker }) {
       orientation: 'h',
       arrangement: 'snap',
       node: {
-        pad: 24,
-        thickness: 22,
-        line: { color: c.border, width: 0.5 },
+        pad: 38,
+        thickness: 18,
+        line: { color: c.border, width: 0.4 },
         label: nodes.map((n) => n.label),
         color: nodes.map((n) => n.color),
+        font: { color: c.text },
         hovertemplate: '%{label}<extra></extra>',
       },
       link: {
@@ -199,27 +218,49 @@ export default function CashSankeyChart({ ticker }) {
       },
     }
 
-    const height = chartHeight(620, 460)
+    const height = chartHeight(800, 580)
 
     return {
       data: [trace],
       layout: {
         autosize: true,
         height,
-        margin: { l: 10, r: 10, t: 10, b: 10 },
-        paper_bgcolor: 'transparent',
-        plot_bgcolor: 'transparent',
+        margin: { l: 10, r: 220, t: 16, b: 10 },
+        paper_bgcolor: c.bg,
+        plot_bgcolor: c.bg,
+        hoverlabel: {
+          bgcolor: c.bg,
+          bordercolor: c.border,
+          font: { color: c.text, size: 13, family: 'DM Sans, Helvetica Neue, Helvetica, Arial, sans-serif' },
+        },
         font: {
           family: 'DM Sans, Helvetica Neue, Helvetica, Arial, sans-serif',
           color: c.text,
-          size: 13,
+          size: 14,
         },
       },
     }
   }, [cf])
 
-  if (loading) return null
-  if (!data) return null
+  if (loading) {
+    return (
+      <div className="terminal-card">
+        <Skeleton height="2rem" width="40%" style={{ marginBottom: '1rem' }} />
+        <Skeleton height="500px" />
+      </div>
+    )
+  }
+
+  if (!data) {
+    return (
+      <div className="terminal-card">
+        <div className="terminal-eyebrow">Cash Flow Breakdown</div>
+        <div className="info-box" style={{ marginTop: '0.75rem' }}>
+          Cash flow data is not available for this ticker.
+        </div>
+      </div>
+    )
+  }
 
   const period = cf?.endDate || ''
 

@@ -64,7 +64,7 @@ export default function EarningsCalendar({ fundamentals }) {
                   name: 'Estimate',
                   x: epsHistory.map((q) => q.quarter || q.period || ''),
                   y: epsHistory.map((q) => q.epsEstimate),
-                  marker: { color: 'rgba(77,106,97,0.35)' },
+                  marker: { color: c.textMuted },
                   hovertemplate: 'Est: $%{y:.2f}<extra></extra>',
                 },
                 {

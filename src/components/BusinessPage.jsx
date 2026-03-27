@@ -1,7 +1,7 @@
 import React from 'react'
 import Plot from 'react-plotly.js'
 import { fmtCompact } from '../lib/format.js'
-import { getColors } from '../lib/theme.js'
+import { getColors, chartHeight } from '../lib/theme.js'
 import EarningsCalendar from './EarningsCalendar.jsx'
 import CashSankeyChart from './CashSankeyChart.jsx'
 
@@ -26,7 +26,7 @@ function StatementChart({ title, series = [], keys = [], colors = [] }) {
         layout={{
           barmode: 'group',
           autosize: true,
-          height: 350,
+          height: chartHeight(350, 260),
           margin: { l: 40, r: 12, t: 40, b: 40 },
           paper_bgcolor: 'transparent',
           plot_bgcolor: 'transparent',
@@ -40,7 +40,7 @@ function StatementChart({ title, series = [], keys = [], colors = [] }) {
           },
         }}
         config={{ displayModeBar: false, responsive: true }}
-        style={{ width: '100%', height: '350px' }}
+        style={{ width: '100%' }}
         useResizeHandler
       />
     </div>

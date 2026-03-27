@@ -152,3 +152,20 @@ export function mobileMargin(l = 65, r = 30, t = 20, b = 55, { mobileL = 44, mob
   const mob = window.innerWidth <= 640
   return mob ? { l: mobileL, r: mobileR, t, b: b > 28 ? b - 8 : b } : { l, r, t, b }
 }
+
+/**
+ * Convert a hex color string (e.g. "#3d7a5a" or "#3d7a5a") to an rgba() string.
+ * Falls back to the original value if parsing fails.
+ */
+export function hexToRgba(hex, alpha = 1) {
+  if (!hex) return `rgba(0,0,0,${alpha})`
+  const clean = hex.replace('#', '')
+  const full = clean.length === 3
+    ? clean.split('').map((c) => c + c).join('')
+    : clean
+  const r = parseInt(full.slice(0, 2), 16)
+  const g = parseInt(full.slice(2, 4), 16)
+  const b = parseInt(full.slice(4, 6), 16)
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return hex
+  return `rgba(${r},${g},${b},${alpha})`
+}
