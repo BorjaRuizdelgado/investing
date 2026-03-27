@@ -336,6 +336,18 @@ export function deriveTechnicals(analysis, _spot) {
     { key: 'volumeTrend', label: 'Vol Ratio (5d/20d)', value: volRatio, kind: 'ratio', tip: METRIC_TIPS.volumeTrend },
   ]
 
+  // Trim all series to the first index where every indicator is fully computed,
+  // so no line appears half-way through the chart.
+  const allSeries = [rsiSeries, macdLine, signalLine, histogram, bb.upper, bb.middle, bb.lower, sma50, sma200]
+  let warmupEnd = closes.length - 1 // fallback: only the last point
+  for (let i = 0; i < closes.length; i++) {
+    if (allSeries.every((s) => s[i] != null)) {
+      warmupEnd = i
+      break
+    }
+  }
+  const trim = (arr) => arr.slice(warmupEnd)
+
   return {
     hasData: validCount >= 2,
     score: finalScore,
@@ -343,17 +355,17 @@ export function deriveTechnicals(analysis, _spot) {
     metrics,
     reasons,
     indicators: {
-      dates,
-      closes,
-      rsi: rsiSeries,
-      macdLine,
-      signalLine,
-      histogram,
-      bbUpper: bb.upper,
-      bbMiddle: bb.middle,
-      bbLower: bb.lower,
-      sma50,
-      sma200,
+      dates: trim(dates),
+      closes: trim(closes),
+      rsi: trim(rsiSeries),
+      macdLine: trim(macdLine),
+      signalLine: trim(signalLine),
+      histogram: trim(histogram),
+      bbUpper: trim(bb.upper),
+      bbMiddle: trim(bb.middle),
+      bbLower: trim(bb.lower),
+      sma50: trim(sma50),
+      sma200: trim(sma200),
     },
   }
 }
