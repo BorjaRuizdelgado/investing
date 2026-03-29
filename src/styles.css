@@ -541,7 +541,7 @@ button {
 .main .subtitle {
   font-size: 0.95rem;
   color: var(--text-muted);
-  margin-bottom: 2rem;
+  margin-bottom: 1.2rem;
 }
 
 /* ---- KPI Row ---- */
@@ -1526,12 +1526,63 @@ hr {
   color: var(--text-light);
 }
 
+/* ---- Overview description ---- */
+.hero-description {
+  display: none;
+}
+
+.overview-description-wrap {
+  margin-top: 0rem;
+}
+
+.overview-description {
+  margin: 0 0 0.25rem;
+  font-size: 0.88rem;
+  color: var(--text-light);
+  line-height: 1.55;
+  max-width: 95%;
+  text-align: justify;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.overview-description--expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+.overview-description-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 0.25rem;
+  font-size: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.overview-description-toggle:hover {
+  opacity: 0.8;
+}
+
 /* ---- Overview watchlist button ---- */
+.hero-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
 .overview-watchlist-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  margin-top: 0.5rem;
   padding: 0.4rem 0.9rem;
   font-size: 0.82rem;
   font-weight: 500;
@@ -1892,7 +1943,7 @@ hr {
   .terminal-tabs-wrapper {
     position: relative;
     width: 100%;
-    touch-action: manipulation;
+    touch-action: pan-x;
   }
 
   .terminal-tabs {
@@ -1903,7 +1954,7 @@ hr {
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     padding-right: 96px;
-    touch-action: manipulation;
+    touch-action: pan-x;
   }
 
   .terminal-tabs::-webkit-scrollbar {

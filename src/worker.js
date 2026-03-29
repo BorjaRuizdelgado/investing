@@ -220,7 +220,8 @@ async function handleOptions(ticker) {
   const [data, summaryData, quoteData] = await Promise.all([
     fetchYF(`/v7/finance/options/${ticker}`).catch(() => null),
     fetchYF(
-      `/v10/finance/quoteSummary/${ticker}?modules=defaultKeyStatistics,financialData,incomeStatementHistory,balanceSheetHistory,cashflowStatementHistory,earningsHistory`,
+      `/v10/finance/quoteSummary/${ticker}?modules=assetProfile,defaultKeyStatistics,financialData,incomeStatementHistory,balanceSheetHistory,cashflowStatementHistory,earningsHistory`,
+
     ).catch(() => null),
     fetchYF(`/v7/finance/quote?symbols=${encodeURIComponent(ticker)}`).catch(() => null),
   ])
@@ -236,6 +237,7 @@ async function handleOptions(ticker) {
 
   // Extract detailed stats from quoteSummary modules
   const summaryResult = summaryData?.quoteSummary?.result?.[0] || {}
+  const assetProfile = summaryResult.assetProfile || {}
   const keyStats = summaryResult.defaultKeyStatistics || {}
   const finData = summaryResult.financialData || {}
   const incomeHist = summaryResult.incomeStatementHistory?.incomeStatementHistory?.[0] || {}
@@ -252,8 +254,9 @@ async function handleOptions(ticker) {
     // Identity
     name: quote.shortName || quote.longName || null,
     longName: quote.longName || null,
-    sector: quote.sector || null,
-    industry: quote.industry || null,
+    description: assetProfile.longBusinessSummary || null,
+    sector: quote.sector || assetProfile.sector || null,
+    industry: quote.industry || assetProfile.industry || null,
     exchange: quote.fullExchangeName || quote.exchange || null,
     currency: quote.currency || null,
     quoteType: quote.quoteType || null,

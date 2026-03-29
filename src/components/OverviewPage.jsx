@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { fmt, fmtCompact, fmtPct } from '../lib/format.js'
 import ScoreCard from './ScoreCard.jsx'
 import ReasonList from './ReasonList.jsx'
@@ -7,6 +7,20 @@ import ScenarioCard from './ScenarioCard.jsx'
 import EarningsCalendar from './EarningsCalendar.jsx'
 import MarketSentimentCard from './MarketSentimentCard.jsx'
 import { METRIC_TIPS } from '../lib/metricTips.js'
+
+function DescriptionBlock({ text }) {
+  const [expanded, setExpanded] = useState(false)
+  return (
+    <div className="overview-description-wrap">
+      <p className={`overview-description${expanded ? ' overview-description--expanded' : ''}`}>
+        {text}
+      </p>
+      <button className="overview-description-toggle" onClick={() => setExpanded((v) => !v)}>
+        {expanded ? 'Read less' : 'Read more'}
+      </button>
+    </div>
+  )
+}
 
 function tone(score) {
   if (!Number.isFinite(score)) return 'neutral'
@@ -189,18 +203,23 @@ export default function OverviewPage({
     <>
       <section className="terminal-hero">
         <div>
-          <h1>{ticker}</h1>
+          <div className="hero-title-row">
+            <h1>{ticker}</h1>
+            {onToggleWatchlist && (
+              <button
+                className={`overview-watchlist-btn${watchlistHas ? ' overview-watchlist-btn--active' : ''}`}
+                onClick={onToggleWatchlist}
+              >
+                {watchlistHas ? '\u2605 In watchlist' : '\u2606 Add to watchlist'}
+              </button>
+            )}
+          </div>
           <p className="subtitle">
             {title}
             {sectorLine ? ` · ${sectorLine}` : ''}
           </p>
-          {onToggleWatchlist && (
-            <button
-              className={`overview-watchlist-btn${watchlistHas ? ' overview-watchlist-btn--active' : ''}`}
-              onClick={onToggleWatchlist}
-            >
-              {watchlistHas ? '\u2605 In watchlist' : '\u2606 Add to watchlist'}
-            </button>
+          {fundamentals?.description && (
+            <DescriptionBlock text={fundamentals.description} />
           )}
         </div>
         <div className="hero-stats">
