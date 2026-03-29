@@ -245,7 +245,7 @@ export default function App() {
         )}
 
         {page === 'compare' && (
-          <div className="main-content" key={theme}>
+          <div className="main-content">
             <Suspense fallback={<OverviewSkeleton />}>
               <ComparePage tickers={compareTickersFromPath(currentPath())} />
             </Suspense>
