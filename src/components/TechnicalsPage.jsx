@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 import Plot from 'react-plotly.js'
 import ScoreCard from './ScoreCard.jsx'
+import MarketSentimentCard from './MarketSentimentCard.jsx'
 import MetricTable from './MetricTable.jsx'
 import ReasonList from './ReasonList.jsx'
 import { METRIC_TIPS } from '../lib/metricTips.js'
@@ -231,13 +232,7 @@ export default function TechnicalsPage({ research }) {
             detail={technicals.label}
             tooltip={METRIC_TIPS.technicalsScore}
           />
-          <div className="terminal-card">
-            <div className="terminal-eyebrow">Interpretation</div>
-            <p className="terminal-copy">
-              Combines RSI momentum, MACD trend, Bollinger Band position, moving average alignment,
-              and volume confirmation into a single directional read.
-            </p>
-          </div>
+          <MarketSentimentCard sentiment={research?.marketSentiment} />
         </div>
       </section>
 
