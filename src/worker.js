@@ -1216,13 +1216,13 @@ function buildCrawlerHtml(url, ticker, quote) {
   const qName = quote?.name || ticker
   const qPrice = quote?.price != null ? `$${quote.price.toFixed(2)}` : null
   const title = ticker
-    ? `${ticker} Options & Stock Analysis — Borja Ruizdelgado Investing Tools`
+    ? `${qName} (${ticker}) Analysis — Borja Ruizdelgado`
     : 'Borja Ruizdelgado — Free Options & Stock Analysis Tools'
   const description = ticker
     ? qPrice
-      ? `${qName} (${ticker}) trading at ${qPrice}. Free options-implied valuation analysis by Borja Ruizdelgado: price forecast, probability distribution, expected move, IV smile, fundamentals, and support/resistance levels.`
-      : `Free ${ticker} analysis by Borja Ruizdelgado: options-implied price forecast, probability distribution, expected move, IV smile, fundamentals (P/E, EBITDA, margins), analyst targets, and support/resistance levels.`
-    : 'Free investing tools by Borja Ruizdelgado: options-implied price forecasts, probability distributions, IV smile, stock fundamentals, and crypto options analysis.'
+      ? `${qName} at ${qPrice} — valuation, quality, risk, options forecasting, and fundamentals. Free analysis by Borja Ruizdelgado.`
+      : `${qName} — valuation, quality, risk, options forecasting, and fundamentals. Free analysis by Borja Ruizdelgado.`
+    : 'Free investing tools by Borja Ruizdelgado: options-implied price forecasts, stock fundamentals, valuation scoring, and crypto analysis.'
   const canonical = ticker ? `${origin}/${ticker}` : `${origin}/`
 
   return `<!DOCTYPE html>
@@ -1311,6 +1311,77 @@ function buildCrawlerHtml(url, ticker, quote) {
     <a href="${origin}/BTC">BTC</a> · <a href="${origin}/ETH">ETH</a>
   </p>`
   }
+  <p>Created by <a href="https://borjaruizdelgado.com">Borja Ruizdelgado</a></p>
+</body>
+</html>`
+}
+
+/**
+ * Build crawler HTML for compare pages (/compare/AAPL/MSFT).
+ */
+function buildCompareCrawlerHtml(url, tickerA, tickerB, quoteA, quoteB) {
+  const origin = url.origin
+  const nameA = quoteA?.name || tickerA
+  const nameB = quoteB?.name || tickerB
+  const priceA = quoteA?.price != null ? `$${quoteA.price.toFixed(2)}` : null
+  const priceB = quoteB?.price != null ? `$${quoteB.price.toFixed(2)}` : null
+  const title = `${tickerA} vs ${tickerB} — Stock Comparison — Borja Ruizdelgado Investing Tools`
+  const description = priceA && priceB
+    ? `Compare ${nameA} (${tickerA}) at ${priceA} vs ${nameB} (${tickerB}) at ${priceB}. Head-to-head valuation, growth, quality, risk, momentum scores, relative performance, and key metric spread.`
+    : `Compare ${tickerA} vs ${tickerB}: head-to-head valuation, growth, quality, risk, momentum scores, relative performance chart, and key financial metrics side by side.`
+  const canonical = `${origin}/compare/${tickerA}/${tickerB}`
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>${title}</title>
+  <meta name="description" content="${description}"/>
+  <meta name="author" content="Borja Ruizdelgado"/>
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large"/>
+  <link rel="canonical" href="${canonical}"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="${canonical}"/>
+  <meta property="og:title" content="${title}"/>
+  <meta property="og:description" content="${description}"/>
+  <meta property="og:image" content="${origin}/og-image.jpg"/>
+  <meta property="og:site_name" content="Borja Ruizdelgado — Investing Tools"/>
+  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:title" content="${title}"/>
+  <meta name="twitter:description" content="${description}"/>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebPage",
+    "name":"${title}",
+    "url":"${canonical}",
+    "description":"${description}",
+    "isPartOf":{"@type":"WebSite","name":"Borja Ruizdelgado — Investing Tools","url":"${origin}/"},
+    "breadcrumb":{"@type":"BreadcrumbList","itemListElement":[
+      {"@type":"ListItem","position":1,"name":"Home","item":"${origin}/"},
+      {"@type":"ListItem","position":2,"name":"Compare","item":"${origin}/compare"},
+      {"@type":"ListItem","position":3,"name":"${tickerA} vs ${tickerB}","item":"${canonical}"}
+    ]}
+  }
+  </script>
+</head>
+<body>
+  <h1>${tickerA} vs ${tickerB} — Stock Comparison</h1>
+  <p>${description}</p>
+  <h2>Compare Categories</h2>
+  <ul>
+    <li>Valuation — Forward P/E, EV/EBITDA, price-to-book</li>
+    <li>Growth — Revenue growth, earnings growth</li>
+    <li>Quality — Operating margins, ROE, profitability</li>
+    <li>Risk — Beta, debt-to-equity, volatility</li>
+    <li>Momentum — Sentiment and technical indicators</li>
+  </ul>
+  <h2>Individual Analysis</h2>
+  <ul>
+    <li><a href="${origin}/${tickerA}">${nameA} (${tickerA}) Full Analysis</a></li>
+    <li><a href="${origin}/${tickerB}">${nameB} (${tickerB}) Full Analysis</a></li>
+  </ul>
   <p>Created by <a href="https://borjaruizdelgado.com">Borja Ruizdelgado</a></p>
 </body>
 </html>`
@@ -1632,6 +1703,14 @@ export default {
           `<url><loc>${origin}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>`,
           `<url><loc>${origin}/disclaimer</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>`,
           `<url><loc>${origin}/donate</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>`,
+          `<url><loc>${origin}/compare</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.5</priority></url>`,
+          ...[
+            'AAPL/MSFT', 'TSLA/RIVN', 'NVDA/AMD', 'GOOGL/META', 'AMZN/WMT',
+            'SPY/QQQ', 'NFLX/DIS', 'JPM/GS', 'V/MA', 'BTC/ETH',
+          ].map(
+            (pair) =>
+              `<url><loc>${origin}/compare/${pair}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>`,
+          ),
           ...tickers.map(
             (t) =>
               `<url><loc>${origin}/${t}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`,
@@ -1676,10 +1755,27 @@ export default {
         const pathClean = url.pathname.replace(/^\//, '').replace(/\/$/, '')
         const parts = pathClean.split('/')
         const maybeTicker = parts[0] ? decodeURIComponent(parts[0]).toUpperCase() : null
-        const reserved = new Set(['DISCLAIMER', 'DONATE'])
+        const reserved = new Set(['DISCLAIMER', 'DONATE', 'WATCHLIST', 'COMPARE'])
+        const isCompare = maybeTicker === 'COMPARE'
+        const compareTickers = isCompare
+          ? parts.slice(1).map((p) => decodeURIComponent(p).toUpperCase()).filter(Boolean)
+          : []
 
+        // Crawler: compare page
+        if (isCrawler(request) && isCompare && compareTickers.length >= 2) {
+          const [qA, qB] = await Promise.all([
+            fetchQuickQuote(compareTickers[0]).catch(() => null),
+            fetchQuickQuote(compareTickers[1]).catch(() => null),
+          ])
+          const html = buildCompareCrawlerHtml(url, compareTickers[0], compareTickers[1], qA, qB)
+          return new Response(html, {
+            status: 200,
+            headers: { 'Content-Type': 'text/html;charset=UTF-8' },
+          })
+        }
+
+        // Crawler: ticker page
         if (isCrawler(request) && maybeTicker && !reserved.has(maybeTicker)) {
-          // Fetch live quote for enriched social card meta tags
           const quote = await fetchQuickQuote(maybeTicker).catch(() => null)
           const html = buildCrawlerHtml(url, maybeTicker, quote)
           return new Response(html, {
@@ -1688,6 +1784,7 @@ export default {
           })
         }
 
+        // Crawler: home / reserved pages
         if (isCrawler(request) && (!maybeTicker || reserved.has(maybeTicker))) {
           const html = buildCrawlerHtml(url, null, null)
           return new Response(html, {
@@ -1699,12 +1796,56 @@ export default {
         const indexReq = new Request(new URL('/', url.origin), request)
         const indexRes = await env.ASSETS.fetch(indexReq)
 
+        // Rewrite meta tags for compare pages so Google's JS renderer sees correct values
+        if (isCompare && compareTickers.length >= 2) {
+          const tA = compareTickers[0]
+          const tB = compareTickers[1]
+          const canonical = `${url.origin}/compare/${tA}/${tB}`
+          const title = `${tA} vs ${tB} — Stock Comparison — Borja Ruizdelgado Investing Tools`
+          const desc = `Head-to-head comparison of ${tA} and ${tB}: valuation, growth, quality, risk, momentum scores, relative performance, and key metric spread.`
+          let html = await indexRes.text()
+          html = html
+            .replace(
+              /<link rel="canonical"[^>]*>/,
+              `<link rel="canonical" href="${canonical}" id="canonical"/>`,
+            )
+            .replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`)
+            .replace(
+              /<meta name="description"[^>]*>/,
+              `<meta name="description" content="${desc}"/>`,
+            )
+            .replace(
+              /<meta property="og:url"[^>]*>/,
+              `<meta property="og:url" content="${canonical}"/>`,
+            )
+            .replace(
+              /<meta property="og:title"[^>]*>/,
+              `<meta property="og:title" content="${title}"/>`,
+            )
+            .replace(
+              /<meta property="og:description"[^>]*>/,
+              `<meta property="og:description" content="${desc}"/>`,
+            )
+            .replace(
+              /<meta name="twitter:title"[^>]*>/,
+              `<meta name="twitter:title" content="${title}"/>`,
+            )
+            .replace(
+              /<meta name="twitter:description"[^>]*>/,
+              `<meta name="twitter:description" content="${desc}"/>`,
+            )
+          return new Response(html, {
+            status: 200,
+            headers: { 'Content-Type': 'text/html;charset=UTF-8' },
+          })
+        }
+
         // Rewrite canonical, title, and meta description so Google's renderer
         // (which fetches as a normal user) sees the correct values for each ticker page.
         if (maybeTicker && !reserved.has(maybeTicker)) {
           const canonical = `${url.origin}/${maybeTicker}`
-          const title = `${maybeTicker} Options & Stock Analysis — Borja Ruizdelgado Investing Tools`
-          const desc = `Free ${maybeTicker} analysis: options-implied price forecast, probability distribution, expected move, IV smile, fundamentals (P/E, EBITDA, margins), analyst targets, and support/resistance levels.`
+          const title = `${maybeTicker} Analysis — Borja Ruizdelgado`
+          const desc = `${maybeTicker} — valuation, quality, risk, options forecasting, and fundamentals. Free analysis by Borja Ruizdelgado.`
           let html = await indexRes.text()
           html = html
             .replace(
