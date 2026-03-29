@@ -587,3 +587,217 @@ describe('Worker /api/cashflow', () => {
     expect(res.status).toBe(404)
   })
 })
+
+// ---------------------------------------------------------------------------
+// Sentiment endpoint (/api/sentiment)
+// ---------------------------------------------------------------------------
+
+// Yahoo Finance chart stub for equity/crypto sentiment (200 bars of rising closes)
+const YF_CHART_SENTIMENT = {
+  chart: {
+    result: [
+      {
+        meta: { symbol: 'SPY' },
+        timestamp: Array.from({ length: 200 }, (_, i) => 1700000000 + i * 86400),
+        indicators: {
+          quote: [
+            {
+              close: Array.from({ length: 200 }, (_, i) => 450 + i * 0.1),
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+
+function mockFetchImplSentimentEquity(url) {
+  const u = typeof url === 'string' ? url : url.toString()
+  if (u.includes('fc.yahoo.com')) {
+    return Promise.resolve(
+      new Response('', { status: 302, headers: { 'set-cookie': 'A3=d=test; path=/' } }),
+    )
+  }
+  if (u.includes('getcrumb')) {
+    return Promise.resolve(new Response(CRUMB_TEXT, { status: 200 }))
+  }
+  if (u.includes('/v8/finance/chart/')) {
+    return Promise.resolve(new Response(JSON.stringify(YF_CHART_SENTIMENT), { status: 200 }))
+  }
+  return Promise.resolve(new Response('Not found', { status: 404 }))
+}
+
+function mockFetchImplSentimentCrypto(url) {
+  const u = typeof url === 'string' ? url : url.toString()
+  if (u.includes('fc.yahoo.com')) {
+    return Promise.resolve(
+      new Response('', { status: 302, headers: { 'set-cookie': 'A3=d=test; path=/' } }),
+    )
+  }
+  if (u.includes('getcrumb')) {
+    return Promise.resolve(new Response(CRUMB_TEXT, { status: 200 }))
+  }
+  if (u.includes('/v8/finance/chart/')) {
+    return Promise.resolve(new Response(JSON.stringify(YF_CHART_SENTIMENT), { status: 200 }))
+  }
+  return Promise.resolve(new Response('Not found', { status: 404 }))
+}
+
+function mockFetchImplSentimentUpstreamFailure(url) {
+  const u = typeof url === 'string' ? url : url.toString()
+  if (u.includes('fc.yahoo.com')) {
+    return Promise.resolve(
+      new Response('', { status: 302, headers: { 'set-cookie': 'A3=d=test; path=/' } }),
+    )
+  }
+  if (u.includes('getcrumb')) {
+    return Promise.resolve(new Response(CRUMB_TEXT, { status: 200 }))
+  }
+  // All chart / alternative.me calls fail
+  return Promise.resolve(new Response('Service unavailable', { status: 503 }))
+}
+
+describe('Worker /api/sentiment — validation', () => {
+  it('returns 400 for missing ticker', async () => {
+    vi.stubGlobal('fetch', vi.fn(mockFetchImplSentimentEquity))
+    const res = await callWorker('/api/sentiment')
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toMatch(/ticker/i)
+  })
+
+  it('returns 400 for invalid ticker', async () => {
+    vi.stubGlobal('fetch', vi.fn(mockFetchImplSentimentEquity))
+    const res = await callWorker('/api/sentiment?ticker=!!BAD!!')
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toBe('Invalid ticker')
+  })
+})
+
+describe('Worker /api/sentiment — equity (house score)', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn(mockFetchImplSentimentEquity))
+  })
+
+  it('returns 200 for a valid equity ticker', async () => {
+    const res = await callWorker('/api/sentiment?ticker=AAPL')
+    expect(res.status).toBe(200)
+  })
+
+  it('response has required shape', async () => {
+    const res = await callWorker('/api/sentiment?ticker=AAPL')
+    const data = await res.json()
+    expect(data).toHaveProperty('scope', 'equity')
+    expect(data).toHaveProperty('source', 'house')
+    expect(data).toHaveProperty('name')
+    expect(data).toHaveProperty('score')
+    expect(data).toHaveProperty('classification')
+    expect(data).toHaveProperty('asOf')
+    expect(data).toHaveProperty('summary')
+    expect(data).toHaveProperty('components')
+    expect(data.attribution).toBeNull()
+  })
+
+  it('score is 0-100 integer', async () => {
+    const res = await callWorker('/api/sentiment?ticker=AAPL')
+    const data = await res.json()
+    expect(Number.isInteger(data.score)).toBe(true)
+    expect(data.score).toBeGreaterThanOrEqual(0)
+    expect(data.score).toBeLessThanOrEqual(100)
+  })
+
+  it('classification matches score thresholds', async () => {
+    const res = await callWorker('/api/sentiment?ticker=AAPL')
+    const data = await res.json()
+    const { score, classification } = data
+    const expected =
+      score <= 24
+        ? 'Extreme Fear'
+        : score <= 44
+          ? 'Fear'
+          : score <= 55
+            ? 'Neutral'
+            : score <= 75
+              ? 'Greed'
+              : 'Extreme Greed'
+    expect(classification).toBe(expected)
+  })
+
+  it('has 5 components each with score 0-100', async () => {
+    const res = await callWorker('/api/sentiment?ticker=AAPL')
+    const data = await res.json()
+    expect(data.components).toHaveLength(5)
+    for (const c of data.components) {
+      expect(c).toHaveProperty('label')
+      expect(c).toHaveProperty('score')
+      expect(c.score).toBeGreaterThanOrEqual(0)
+      expect(c.score).toBeLessThanOrEqual(100)
+      expect(Number.isInteger(c.score)).toBe(true)
+    }
+  })
+
+  it('score contains no NaN', async () => {
+    const res = await callWorker('/api/sentiment?ticker=AAPL')
+    const data = await res.json()
+    expect(Number.isNaN(data.score)).toBe(false)
+    for (const c of data.components) {
+      expect(Number.isNaN(c.score)).toBe(false)
+    }
+  })
+})
+
+describe('Worker /api/sentiment — crypto', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn(mockFetchImplSentimentCrypto))
+  })
+
+  it('returns 200 for a crypto ticker', async () => {
+    const res = await callWorker('/api/sentiment?ticker=BTC')
+    expect(res.status).toBe(200)
+  })
+
+  it('response has the same shape as equity (no attribution)', async () => {
+    const res = await callWorker('/api/sentiment?ticker=BTC')
+    const data = await res.json()
+    expect(data).toHaveProperty('scope', 'crypto')
+    expect(data).toHaveProperty('source', 'house')
+    expect(data).toHaveProperty('score')
+    expect(data).toHaveProperty('classification')
+    expect(data).toHaveProperty('components')
+    expect(data.attribution).toBeNull()
+  })
+
+  it('has 5 OHLCV-derived components', async () => {
+    const res = await callWorker('/api/sentiment?ticker=BTC')
+    const data = await res.json()
+    expect(data.components).toHaveLength(5)
+  })
+
+  it('score is 0-100 with no NaN', async () => {
+    const res = await callWorker('/api/sentiment?ticker=BTC')
+    const data = await res.json()
+    expect(Number.isNaN(data.score)).toBe(false)
+    expect(data.score).toBeGreaterThanOrEqual(0)
+    expect(data.score).toBeLessThanOrEqual(100)
+  })
+})
+
+describe('Worker /api/sentiment — upstream failure', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn(mockFetchImplSentimentUpstreamFailure))
+  })
+
+  it('returns 502 when the upstream chart call fails', async () => {
+    const res = await callWorker('/api/sentiment?ticker=SPY')
+    expect(res.status).toBe(502)
+  })
+
+  it('returns a JSON error body on failure', async () => {
+    const res = await callWorker('/api/sentiment?ticker=SPY')
+    const data = await res.json()
+    expect(data).toHaveProperty('error')
+    expect(typeof data.error).toBe('string')
+  })
+})
+

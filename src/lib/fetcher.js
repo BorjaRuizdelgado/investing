@@ -53,6 +53,14 @@ export async function fetchRate() {
 }
 
 /**
+ * Fetch market sentiment for a ticker.
+ * Returns { scope, source, name, score, classification, asOf, summary, components, attribution }
+ */
+export async function fetchSentiment(ticker) {
+  return get(`${API}/sentiment`, { ticker })
+}
+
+/**
  * Fetch trending tickers for the landing page.
  * Returns { stocks: [...], crypto: [...] }
  */

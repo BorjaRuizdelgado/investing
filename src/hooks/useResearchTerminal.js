@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { fetchOptions, fetchRate, fetchHistory, daysToExpiry } from '../lib/fetcher.js'
+import { fetchOptions, fetchRate, fetchHistory, fetchSentiment, daysToExpiry } from '../lib/fetcher.js'
 import { runSingleChain, runWeightedChains } from '../lib/chainRunner.js'
 import { deriveValuation } from '../lib/valuation.js'
 import { deriveQuality } from '../lib/quality.js'
@@ -9,7 +9,7 @@ import { deriveTechnicals } from '../lib/technicals.js'
 import { deriveOpportunity, deriveOptionsSentiment, deriveSignals } from '../lib/signals.js'
 import { tickerFromPath } from '../lib/routes.js'
 
-function deriveResearch(fundamentals, analysis, spot, historyBars = null) {
+function deriveResearch(fundamentals, analysis, spot, historyBars = null, marketSentiment = null) {
   const valuation = deriveValuation(fundamentals, spot)
   const quality = deriveQuality(fundamentals)
   const risk = deriveRisk(fundamentals, analysis)
@@ -62,6 +62,7 @@ function deriveResearch(fundamentals, analysis, spot, historyBars = null) {
     technicals,
     signals,
     availability,
+    marketSentiment,
   }
 }
 
@@ -78,7 +79,7 @@ export default function useResearchTerminal() {
   const [weighted, setWeighted] = useState(true)
 
   const runAnalysis = useCallback(
-    async (tickerVal, expiry, spotVal, r, allExpirations, useWeighted, fundData) => {
+    async (tickerVal, expiry, spotVal, r, allExpirations, useWeighted, fundData, sentiment) => {
       setLoading(true)
       setError(null)
 
@@ -87,7 +88,7 @@ export default function useResearchTerminal() {
           ? await runWeightedChains(tickerVal, expiry, spotVal, r, allExpirations)
           : await runSingleChain(tickerVal, expiry, spotVal, r)
         setAnalysis(result)
-        setResearch(deriveResearch(fundData || fundamentals, result, spotVal))
+        setResearch(deriveResearch(fundData || fundamentals, result, spotVal, null, sentiment))
       } catch (err) {
         setError(`Analysis failed: ${err.message}`)
       } finally {
@@ -113,6 +114,9 @@ export default function useResearchTerminal() {
         setSpot(optData.price)
         setFundamentals(optData.fundamentals || null)
 
+        // Fetch sentiment in parallel — non-fatal
+        const sentimentPromise = fetchSentiment(resolvedTicker).catch(() => null)
+
         const basePath = `/${encodeURIComponent(resolvedTicker)}`
         if (!window.location.pathname.startsWith(basePath)) {
           window.history.pushState(null, '', basePath)
@@ -133,12 +137,15 @@ export default function useResearchTerminal() {
           } catch {
             /* history unavailable */
           }
-          setResearch(deriveResearch(optData.fundamentals || null, null, optData.price, histBars))
+          const sentiment = await sentimentPromise
+          setResearch(deriveResearch(optData.fundamentals || null, null, optData.price, histBars, sentiment))
           return
         }
 
         setExpirations(validExps)
         setSelectedExpiry(validExps[0])
+
+        const sentiment = await sentimentPromise
 
         await runAnalysis(
           resolvedTicker,
@@ -148,6 +155,7 @@ export default function useResearchTerminal() {
           validExps,
           weighted,
           optData.fundamentals || null,
+          sentiment,
         )
       } catch (err) {
         setError(err.message)

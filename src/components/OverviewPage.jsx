@@ -5,6 +5,7 @@ import ReasonList from './ReasonList.jsx'
 import Tooltip from './Tooltip.jsx'
 import ScenarioCard from './ScenarioCard.jsx'
 import EarningsCalendar from './EarningsCalendar.jsx'
+import MarketSentimentCard from './MarketSentimentCard.jsx'
 import { METRIC_TIPS } from '../lib/metricTips.js'
 
 function tone(score) {
@@ -232,6 +233,10 @@ export default function OverviewPage({
                 />
               )
             })}
+            <MarketSentimentCard
+              sentiment={research?.marketSentiment}
+              onClick={onTabChange ? () => onTabChange('technicals') : undefined}
+            />
           </div>
         </section>
       )}
