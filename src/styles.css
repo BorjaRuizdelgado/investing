@@ -2064,6 +2064,17 @@ hr {
 
 /* Mobile: show burger, hide nav links inline, expand search below header */
 @media (max-width: 640px) {
+  .app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .app {
+    padding-top: 54px;
+  }
+
   .app-header__inner {
     padding: 0 1rem;
     height: 54px;
