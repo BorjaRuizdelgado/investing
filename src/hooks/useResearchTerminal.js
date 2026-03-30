@@ -75,6 +75,8 @@ export default function useResearchTerminal() {
   const [selectedExpiry, setSelectedExpiry] = useState(null)
   const [analysis, setAnalysis] = useState(null)
   const [fundamentals, setFundamentals] = useState(null)
+  const fundamentalsRef = useRef(fundamentals)
+  fundamentalsRef.current = fundamentals
   const [research, setResearch] = useState(null)
   const [weighted, setWeighted] = useState(true)
 
@@ -88,14 +90,14 @@ export default function useResearchTerminal() {
           ? await runWeightedChains(tickerVal, expiry, spotVal, r, allExpirations)
           : await runSingleChain(tickerVal, expiry, spotVal, r)
         setAnalysis(result)
-        setResearch(deriveResearch(fundData || fundamentals, result, spotVal, null, sentiment))
+        setResearch(deriveResearch(fundData || fundamentalsRef.current, result, spotVal, null, sentiment))
       } catch (err) {
         setError(`Analysis failed: ${err.message}`)
       } finally {
         setLoading(false)
       }
     },
-    [fundamentals],
+    [],
   )
 
   const handleAnalyse = useCallback(

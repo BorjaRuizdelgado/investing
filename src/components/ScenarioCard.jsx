@@ -3,7 +3,7 @@ import Tooltip from './Tooltip.jsx'
 import { fmt } from '../lib/format.js'
 import { METRIC_TIPS } from '../lib/metricTips.js'
 
-export default function ScenarioCard({ fairValue }) {
+export default React.memo(function ScenarioCard({ fairValue }) {
   if (!fairValue) return null
 
   return (
@@ -28,4 +28,4 @@ export default function ScenarioCard({ fairValue }) {
       </div>
     </div>
   )
-}
+})

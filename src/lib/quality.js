@@ -24,10 +24,7 @@ import {
   QUAL_FCF_MARGIN_BAD,
   QUAL_FCF_MARGIN_GOOD,
 } from './constants.js'
-
-function addReason(reasons, tone, title, detail) {
-  reasons.push({ tone, title, detail })
-}
+import { addReason } from './reasons.js'
 
 export function deriveQuality(fundamentals) {
   if (!fundamentals) {

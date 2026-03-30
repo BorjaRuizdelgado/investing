@@ -24,10 +24,7 @@ import {
   VAL_FCF_BAD,
   VAL_FCF_GOOD,
 } from './constants.js'
-
-function addReason(reasons, tone, title, detail) {
-  reasons.push({ tone, title, detail })
-}
+import { addReason } from './reasons.js'
 
 export function deriveValuation(fundamentals, spot) {
   if (!fundamentals || !Number.isFinite(spot)) {

@@ -1,16 +1,17 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useCallback } from 'react'
 
 export default function TerminalTabs({ tabs, activeTab, onChange }) {
   const containerRef = useRef(null)
   const [showScrollBtn, setShowScrollBtn] = useState(false)
+  const rafId = useRef(0)
 
-  function updateScrollState() {
+  const updateScrollState = useCallback(() => {
     const el = containerRef.current
     if (!el) return setShowScrollBtn(false)
     const overflow = el.scrollWidth > el.clientWidth + 1
     const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1
     setShowScrollBtn(overflow && !atEnd)
-  }
+  }, [])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -18,22 +19,23 @@ export default function TerminalTabs({ tabs, activeTab, onChange }) {
     const el = containerRef.current
     if (!el) return
 
-    function onResize() {
-      updateScrollState()
+    function throttled() {
+      if (rafId.current) return
+      rafId.current = requestAnimationFrame(() => {
+        rafId.current = 0
+        updateScrollState()
+      })
     }
 
-    function onScroll() {
-      updateScrollState()
-    }
-
-    window.addEventListener('resize', onResize)
-    el.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', throttled)
+    el.addEventListener('scroll', throttled, { passive: true })
 
     return () => {
-      window.removeEventListener('resize', onResize)
-      el.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', throttled)
+      el.removeEventListener('scroll', throttled)
+      cancelAnimationFrame(rafId.current)
     }
-  }, [tabs])
+  }, [tabs, updateScrollState])
 
   function scrollRight() {
     const el = containerRef.current

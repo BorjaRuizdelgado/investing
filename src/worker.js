@@ -1065,7 +1065,7 @@ async function computeTickerSentiment(yfTicker, displayTicker, scope) {
     attribution: null,
   }
 
-  equitySentimentCache.set(yfTicker, { result: sentimentResult, expiry: now + 15 * 60_000 })
+  equitySentimentCache.set(yfTicker, { result: sentimentResult, expiry: now + 60 * 60_000 })
   return sentimentResult
 }
 

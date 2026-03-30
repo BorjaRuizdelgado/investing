@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function ReasonList({ title = 'What matters', reasons = [] }) {
+export default React.memo(function ReasonList({ title = 'What matters', reasons = [] }) {
   if (!reasons.length) return null
 
   return (
@@ -21,4 +21,4 @@ export default function ReasonList({ title = 'What matters', reasons = [] }) {
       </div>
     </section>
   )
-}
+})

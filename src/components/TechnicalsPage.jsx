@@ -56,7 +56,7 @@ function PriceBBChart({ indicators }) {
       y: closes,
       mode: 'lines',
       name: 'Close',
-      line: { color: COLORS.text, width: 2.5 },
+      line: { color: COLORS.green, width: 2.5 },
     })
 
     // SMA 50

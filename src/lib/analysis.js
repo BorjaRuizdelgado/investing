@@ -50,6 +50,7 @@ function searchSorted(arr, val) {
 }
 
 function nearestStrike(options, target) {
+  if (!options || options.length === 0) return target
   let best = options[0].strike
   let bestDist = Math.abs(best - target)
   for (const o of options) {
@@ -307,97 +308,114 @@ export function ivSmile(calls, puts, spot) {
 // Support & Resistance levels
 // =================================================================
 
-export function supportResistanceLevels(
-  history,
-  calls,
-  puts,
-  spot,
-  nLevels = SR_LEVEL_COUNT,
-  pivotWindow = 5,
-) {
-  const levels = []
-  const movingAvgs = { 20: null, 50: null, 200: null }
+// ---- support/resistance helpers ----
 
-  if (history && history.length > 0) {
-    const closes = history.map((b) => b.close)
-
-    // 1. Moving averages
-    for (const period of [20, 50, 200]) {
-      if (closes.length >= period) {
-        const slice = closes.slice(-period)
-        const ma = slice.reduce((a, b) => a + b, 0) / slice.length
-        movingAvgs[period] = ma
-        const srType = ma < spot ? 'support' : 'resistance'
-        const strength = period === 20 ? 1 : period === 50 ? 2 : 3
-        levels.push({ price: ma, type: srType, source: `MA${period}`, strength })
-      }
-    }
-
-    // 2. Pivot highs/lows
-    const highs = history.map((b) => b.high || b.close)
-    const lows = history.map((b) => b.low || b.close)
-    const n = closes.length
-    const pw = Math.min(pivotWindow, Math.max(Math.floor(n / 10), 1))
-    const pivotHighs = []
-    const pivotLows = []
-
-    for (let i = pw; i < n - pw; i++) {
-      let isHigh = true
-      let isLow = true
-      for (let j = i - pw; j < i; j++) {
-        if (highs[i] < highs[j]) isHigh = false
-        if (lows[i] > lows[j]) isLow = false
-      }
-      for (let j = i + 1; j <= i + pw; j++) {
-        if (highs[i] < highs[j]) isHigh = false
-        if (lows[i] > lows[j]) isLow = false
-      }
-      if (isHigh) pivotHighs.push(highs[i])
-      if (isLow) pivotLows.push(lows[i])
-    }
-
-    function cluster(prices, tol = 0.015) {
-      if (!prices.length) return []
-      const sorted = [...new Set(prices)].sort((a, b) => a - b)
-      const clusters = []
-      let current = [sorted[0]]
-      for (let i = 1; i < sorted.length; i++) {
-        if ((sorted[i] - current[0]) / current[0] < tol) {
-          current.push(sorted[i])
-        } else {
-          clusters.push(current.reduce((a, b) => a + b, 0) / current.length)
-          current = [sorted[i]]
-        }
-      }
+function cluster(prices, tol = 0.015) {
+  if (!prices.length) return []
+  const sorted = [...new Set(prices)].sort((a, b) => a - b)
+  const clusters = []
+  let current = [sorted[0]]
+  for (let i = 1; i < sorted.length; i++) {
+    if ((sorted[i] - current[0]) / current[0] < tol) {
+      current.push(sorted[i])
+    } else {
       clusters.push(current.reduce((a, b) => a + b, 0) / current.length)
-      return clusters
-    }
-
-    for (const ph of cluster(pivotHighs).sort((a, b) => Math.abs(a - spot) - Math.abs(b - spot))) {
-      if (Math.abs(ph - spot) / spot < 0.2) {
-        levels.push({
-          price: ph,
-          type: ph >= spot ? 'resistance' : 'support',
-          source: 'pivot',
-          strength: 2,
-        })
-      }
-    }
-
-    for (const pl of cluster(pivotLows).sort((a, b) => Math.abs(a - spot) - Math.abs(b - spot))) {
-      if (Math.abs(pl - spot) / spot < 0.2) {
-        levels.push({
-          price: pl,
-          type: pl <= spot ? 'support' : 'resistance',
-          source: 'pivot',
-          strength: 2,
-        })
-      }
+      current = [sorted[i]]
     }
   }
+  clusters.push(current.reduce((a, b) => a + b, 0) / current.length)
+  return clusters
+}
 
-  // 3. Gamma walls (high-OI strikes)
+function mergeLevels(raw, tol = 0.0075) {
+  if (!raw.length) return []
+  const sorted = [...raw].sort((a, b) => a.price - b.price)
+  const merged = []
+  let i = 0
+  while (i < sorted.length) {
+    const group = [sorted[i]]
+    let j = i + 1
+    while (
+      j < sorted.length &&
+      Math.abs(sorted[j].price - sorted[i].price) / sorted[i].price < tol
+    ) {
+      group.push(sorted[j])
+      j++
+    }
+    const best = group.reduce((a, b) => (a.strength >= b.strength ? a : b))
+    const avgPrice = group.reduce((sum, g) => sum + g.price, 0) / group.length
+    merged.push({ ...best, price: avgPrice })
+    i = j
+  }
+  return merged
+}
+
+function computeMovingAverages(closes, spot) {
+  const movingAvgs = { 20: null, 50: null, 200: null }
+  const levels = []
+  for (const period of [20, 50, 200]) {
+    if (closes.length >= period) {
+      const slice = closes.slice(-period)
+      const ma = slice.reduce((a, b) => a + b, 0) / slice.length
+      movingAvgs[period] = ma
+      const srType = ma < spot ? 'support' : 'resistance'
+      const strength = period === 20 ? 1 : period === 50 ? 2 : 3
+      levels.push({ price: ma, type: srType, source: `MA${period}`, strength })
+    }
+  }
+  return { movingAvgs, levels }
+}
+
+function detectPivots(history, spot, pivotWindow) {
+  const highs = history.map((b) => b.high || b.close)
+  const lows = history.map((b) => b.low || b.close)
+  const n = history.length
+  const pw = Math.min(pivotWindow, Math.max(Math.floor(n / 10), 1))
+  const pivotHighs = []
+  const pivotLows = []
+
+  for (let i = pw; i < n - pw; i++) {
+    let isHigh = true
+    let isLow = true
+    for (let j = i - pw; j < i; j++) {
+      if (highs[i] < highs[j]) isHigh = false
+      if (lows[i] > lows[j]) isLow = false
+    }
+    for (let j = i + 1; j <= i + pw; j++) {
+      if (highs[i] < highs[j]) isHigh = false
+      if (lows[i] > lows[j]) isLow = false
+    }
+    if (isHigh) pivotHighs.push(highs[i])
+    if (isLow) pivotLows.push(lows[i])
+  }
+
+  const levels = []
+  for (const ph of cluster(pivotHighs).sort((a, b) => Math.abs(a - spot) - Math.abs(b - spot))) {
+    if (Math.abs(ph - spot) / spot < 0.2) {
+      levels.push({
+        price: ph,
+        type: ph >= spot ? 'resistance' : 'support',
+        source: 'pivot',
+        strength: 2,
+      })
+    }
+  }
+  for (const pl of cluster(pivotLows).sort((a, b) => Math.abs(a - spot) - Math.abs(b - spot))) {
+    if (Math.abs(pl - spot) / spot < 0.2) {
+      levels.push({
+        price: pl,
+        type: pl <= spot ? 'support' : 'resistance',
+        source: 'pivot',
+        strength: 2,
+      })
+    }
+  }
+  return levels
+}
+
+function detectGammaWalls(calls, puts, spot) {
   const gammaWalls = []
+  const levels = []
   const oiMap = new Map()
   for (const c of calls) {
     const oi = c.openInterest || 0
@@ -421,30 +439,30 @@ export function supportResistanceLevels(
       })
     }
   }
+  return { gammaWalls: gammaWalls.sort((a, b) => a - b), levels }
+}
 
-  // Deduplicate: merge within 0.75%
-  function mergeLevels(raw, tol = 0.0075) {
-    if (!raw.length) return []
-    const sorted = [...raw].sort((a, b) => a.price - b.price)
-    const merged = []
-    let i = 0
-    while (i < sorted.length) {
-      const group = [sorted[i]]
-      let j = i + 1
-      while (
-        j < sorted.length &&
-        Math.abs(sorted[j].price - sorted[i].price) / sorted[i].price < tol
-      ) {
-        group.push(sorted[j])
-        j++
-      }
-      const best = group.reduce((a, b) => (a.strength >= b.strength ? a : b))
-      const avgPrice = group.reduce((sum, g) => sum + g.price, 0) / group.length
-      merged.push({ ...best, price: avgPrice })
-      i = j
-    }
-    return merged
+export function supportResistanceLevels(
+  history,
+  calls,
+  puts,
+  spot,
+  nLevels = SR_LEVEL_COUNT,
+  pivotWindow = 5,
+) {
+  let levels = []
+  let movingAvgs = { 20: null, 50: null, 200: null }
+
+  if (history && history.length > 0) {
+    const closes = history.map((b) => b.close)
+    const maResult = computeMovingAverages(closes, spot)
+    movingAvgs = maResult.movingAvgs
+    levels.push(...maResult.levels)
+    levels.push(...detectPivots(history, spot, pivotWindow))
   }
+
+  const gamma = detectGammaWalls(calls, puts, spot)
+  levels.push(...gamma.levels)
 
   const merged = mergeLevels(levels)
   const below = merged
@@ -459,7 +477,7 @@ export function supportResistanceLevels(
   return {
     levels: [...below, ...above],
     movingAvgs,
-    gammaWalls: gammaWalls.sort((a, b) => a - b),
+    gammaWalls: gamma.gammaWalls,
   }
 }
 
