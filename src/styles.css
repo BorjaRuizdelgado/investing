@@ -2484,10 +2484,6 @@ hr {
   .metrics-grid.cols-4 {
     grid-template-columns: repeat(2, 1fr);
   }
-
-  .fundamentals-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* Mobile: show burger, hide nav links inline, expand search below header */
@@ -2652,6 +2648,15 @@ hr {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .fundamentals .kpi-row {
+    grid-template-columns: 1fr;
+  }
+
+  .fundamentals-table th:first-child,
+  .fundamentals-table td:first-child {
+    width: 45%;
+  }
+
   .hero-stats,
   .score-grid {
     grid-template-columns: 1fr;
@@ -2665,6 +2670,19 @@ hr {
 @media (max-width: 480px) {
   .kpi-row {
     grid-template-columns: 1fr;
+  }
+
+  .fundamentals .kpi-row {
+    grid-template-columns: 1fr;
+  }
+
+  .fundamentals-table {
+    table-layout: auto;
+  }
+
+  .fundamentals-table-value {
+    white-space: normal;
+    word-break: break-word;
   }
 
   .kpi-card {
@@ -2763,6 +2781,12 @@ hr {
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem 1.5rem;
   align-items: start;
+}
+
+@media (max-width: 900px) {
+  .fundamentals-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .fundamentals-grid .terminal-section {

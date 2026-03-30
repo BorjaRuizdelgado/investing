@@ -35,7 +35,7 @@ function PriceBBChart({ indicators }) {
       y: bbLower,
       mode: 'lines',
       fill: 'tonexty',
-      fillcolor: `${COLORS.accent}15`,
+      fillcolor: `${COLORS.green}15`,
       line: { width: 0 },
       showlegend: false,
       hoverinfo: 'skip',
@@ -47,7 +47,7 @@ function PriceBBChart({ indicators }) {
       y: bbMiddle,
       mode: 'lines',
       name: 'SMA 20',
-      line: { color: COLORS.accent, width: 1.5, dash: 'dot' },
+      line: { color: COLORS.green, width: 1.5, dash: 'dot' },
     })
 
     // Close price
@@ -56,7 +56,7 @@ function PriceBBChart({ indicators }) {
       y: closes,
       mode: 'lines',
       name: 'Close',
-      line: { color: COLORS.text, width: 2.5 },
+      line: { color: COLORS.accent, width: 2.5 },
     })
 
     // SMA 50
@@ -166,7 +166,7 @@ function RSIChart({ indicators }) {
 function MACDChart({ indicators }) {
   const data = useMemo(() => {
     const { dates, macdLine, signalLine, histogram } = indicators
-    const barColors = histogram.map((v) => (v != null && v >= 0 ? COLORS.green : COLORS.red))
+    const barColors = histogram.map((v) => (v != null && v >= 0 ? COLORS.accent : COLORS.red))
 
     return [
       {

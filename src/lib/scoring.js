@@ -71,73 +71,47 @@ export function valuationLabel(score) {
   return 'Undervalued'
 }
 
+// Threshold-based sentiment rules per metric.
+// { pos, neg } — if only `pos` is a function or thresholds, the metric is sign-based.
+const METRIC_RULES = {
+  trailingPE:             { pos: (v) => v < 15,   neg: (v) => v > 30 },
+  forwardPE:              { pos: (v) => v < 15,   neg: (v) => v > 30 },
+  priceToBook:            { pos: (v) => v < 1.5,  neg: (v) => v > 5 },
+  priceToSales:           { pos: (v) => v < 2,    neg: (v) => v > 10 },
+  eps:                    { pos: (v) => v > 0,     neg: (v) => v <= 0 },
+  epsForward:             { pos: (v) => v > 0,     neg: (v) => v <= 0 },
+  ebitda:                 { pos: (v) => v > 0,     neg: (v) => v <= 0 },
+  netIncome:              { pos: (v) => v > 0,     neg: (v) => v <= 0 },
+  grossProfit:            { pos: (v) => v > 0,     neg: (v) => v <= 0 },
+  operatingIncome:        { pos: (v) => v > 0,     neg: (v) => v <= 0 },
+  operatingCashflow:      { pos: (v) => v > 0,     neg: (v) => v <= 0 },
+  freeCashflow:           { pos: (v) => v > 0,     neg: (v) => v <= 0 },
+  revenueGrowth:          { pos: (v) => v > 0,     neg: (v) => v <= 0 },
+  earningsGrowth:         { pos: (v) => v > 0,     neg: (v) => v <= 0 },
+  earningsQuarterlyGrowth:{ pos: (v) => v > 0,     neg: (v) => v <= 0 },
+  profitMargins:          { pos: (v) => v > 0.15,  neg: (v) => v < 0 },
+  grossMargins:           { pos: (v) => v > 0.15,  neg: (v) => v < 0 },
+  ebitdaMargins:          { pos: (v) => v > 0.15,  neg: (v) => v < 0 },
+  operatingMargins:       { pos: (v) => v > 0.15,  neg: (v) => v < 0 },
+  returnOnEquity:         { pos: (v) => v > 0.15,  neg: (v) => v < 0 },
+  returnOnAssets:         { pos: (v) => v > 0.05,  neg: (v) => v < 0 },
+  debtToEquity:           { pos: (v) => v < 50,    neg: (v) => v > 150 },
+  currentRatio:           { pos: (v) => v > 1.5,   neg: (v) => v < 1 },
+  quickRatio:             { pos: (v) => v > 1.5,   neg: (v) => v < 1 },
+  dividendYield:          { pos: (v) => v > 2,     neg: () => false },
+  payoutRatio:            { pos: (v) => v > 0 && v < 0.6, neg: (v) => v > 0.9 },
+  beta:                   { pos: (v) => v >= 0.8 && v <= 1.2, neg: (v) => v > 1.5 || v < 0.5 },
+  shortPercentOfFloat:    { pos: (v) => v < 5,     neg: (v) => v > 20 },
+  fiftyTwoWeekChange:     { pos: (v) => v > 0,     neg: (v) => v <= 0 },
+}
+
 export function metricSentiment(key, val) {
   if (val == null || typeof val !== 'number' || isNaN(val)) return null
-  switch (key) {
-    case 'trailingPE':
-    case 'forwardPE':
-      if (val < 15) return 'positive'
-      if (val > 30) return 'negative'
-      return null
-    case 'priceToBook':
-      if (val < 1.5) return 'positive'
-      if (val > 5) return 'negative'
-      return null
-    case 'priceToSales':
-      if (val < 2) return 'positive'
-      if (val > 10) return 'negative'
-      return null
-    case 'eps':
-    case 'epsForward':
-    case 'ebitda':
-    case 'netIncome':
-    case 'grossProfit':
-    case 'operatingIncome':
-    case 'operatingCashflow':
-    case 'freeCashflow':
-      return val > 0 ? 'positive' : 'negative'
-    case 'revenueGrowth':
-    case 'earningsGrowth':
-    case 'earningsQuarterlyGrowth':
-      return val > 0 ? 'positive' : 'negative'
-    case 'profitMargins':
-    case 'grossMargins':
-    case 'ebitdaMargins':
-    case 'operatingMargins':
-      return val > 0.15 ? 'positive' : val < 0 ? 'negative' : null
-    case 'returnOnEquity':
-      return val > 0.15 ? 'positive' : val < 0 ? 'negative' : null
-    case 'returnOnAssets':
-      return val > 0.05 ? 'positive' : val < 0 ? 'negative' : null
-    case 'debtToEquity':
-      if (val < 50) return 'positive'
-      if (val > 150) return 'negative'
-      return null
-    case 'currentRatio':
-    case 'quickRatio':
-      if (val > 1.5) return 'positive'
-      if (val < 1) return 'negative'
-      return null
-    case 'dividendYield':
-      if (val > 2) return 'positive'
-      return null
-    case 'payoutRatio':
-      if (val > 0 && val < 0.6) return 'positive'
-      if (val > 0.9) return 'negative'
-      return null
-    case 'beta':
-      if (val >= 0.8 && val <= 1.2) return 'positive'
-      if (val > 1.5 || val < 0.5) return 'negative'
-      return null
-    case 'shortPercentOfFloat':
-      if (val > 20) return 'negative'
-      if (val < 5) return 'positive'
-      return null
-    case 'fiftyTwoWeekChange':
-      return val > 0 ? 'positive' : 'negative'
-    default:
-      return null
-  }
+  const rule = METRIC_RULES[key]
+  if (!rule) return null
+  if (rule.pos(val)) return 'positive'
+  if (rule.neg(val)) return 'negative'
+  return null
 }
 
 export function buildFundamentalsScore(f) {

@@ -49,6 +49,9 @@ export default [
         HTMLElement: 'readonly',
         navigator: 'readonly',
         getComputedStyle: 'readonly',
+        requestAnimationFrame: 'readonly',
+        cancelAnimationFrame: 'readonly',
+        requestIdleCallback: 'readonly',
       },
       parserOptions: {
         ecmaFeatures: { jsx: true },

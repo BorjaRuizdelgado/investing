@@ -23,12 +23,14 @@ import {
 
 // ---- helpers ----
 
+/** Rolling-sum SMA — O(n) instead of O(n×period). */
 function sma(values, period) {
   const result = new Array(values.length).fill(null)
-  for (let i = period - 1; i < values.length; i++) {
-    let sum = 0
-    for (let j = i - period + 1; j <= i; j++) sum += values[j]
-    result[i] = sum / period
+  let sum = 0
+  for (let i = 0; i < values.length; i++) {
+    sum += values[i]
+    if (i >= period) sum -= values[i - period]
+    if (i >= period - 1) result[i] = sum / period
   }
   return result
 }
@@ -46,15 +48,23 @@ function ema(values, period) {
   return result
 }
 
+/** Rolling stdDev — two-pass per window replaced with running sums. */
 function stdDev(values, period) {
   const result = new Array(values.length).fill(null)
-  for (let i = period - 1; i < values.length; i++) {
-    let sum = 0
-    for (let j = i - period + 1; j <= i; j++) sum += values[j]
-    const mean = sum / period
-    let sqSum = 0
-    for (let j = i - period + 1; j <= i; j++) sqSum += (values[j] - mean) ** 2
-    result[i] = Math.sqrt(sqSum / period)
+  let sum = 0
+  let sqSum = 0
+  for (let i = 0; i < values.length; i++) {
+    sum += values[i]
+    sqSum += values[i] * values[i]
+    if (i >= period) {
+      sum -= values[i - period]
+      sqSum -= values[i - period] * values[i - period]
+    }
+    if (i >= period - 1) {
+      const mean = sum / period
+      const variance = sqSum / period - mean * mean
+      result[i] = Math.sqrt(Math.max(0, variance))
+    }
   }
   return result
 }
@@ -194,9 +204,7 @@ function scoreVolumeTrend(ratio, priceUp) {
 
 // ---- main derive function ----
 
-function addReason(reasons, tone, title, detail) {
-  reasons.push({ tone, title, detail })
-}
+import { addReason } from './reasons.js'
 
 export function deriveTechnicals(analysis, _spot) {
   const history = analysis?.history

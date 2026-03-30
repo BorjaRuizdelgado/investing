@@ -24,10 +24,7 @@ import {
   RISK_MOVE_GOOD,
   RISK_MOVE_BAD,
 } from './constants.js'
-
-function addReason(reasons, tone, title, detail) {
-  reasons.push({ tone, title, detail })
-}
+import { addReason } from './reasons.js'
 
 export function deriveRisk(fundamentals, analysis) {
   const f = fundamentals || {}

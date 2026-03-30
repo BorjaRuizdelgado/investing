@@ -36,6 +36,7 @@ import {
 } from './lib/routes.js'
 import { OverviewSkeleton, ChartSkeleton } from './components/SkeletonLayouts.jsx'
 import ShortcutHelp from './components/ShortcutHelp.jsx'
+import { prefetchLazyChunks } from './lib/prefetch.js'
 
 const TABS = [
   { id: 'overview', label: 'Overview', caption: 'Decision snapshot' },
@@ -100,6 +101,9 @@ export default function App() {
     activeTab,
     setActiveTab,
   })
+
+  // Prefetch lazy chunks once the initial paint is done
+  React.useEffect(() => { prefetchLazyChunks() }, [])
 
   React.useEffect(() => {
     if (!visibleTabs.some((tab) => tab.id === activeTab) && visibleTabs[0]) {

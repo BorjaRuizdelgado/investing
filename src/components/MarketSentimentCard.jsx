@@ -15,7 +15,7 @@ function sentimentTone(score) {
  * Per-ticker Fear/Greed card. Works for both equities and crypto.
  * Pass onClick to make the card navigable (e.g. to the Technicals tab).
  */
-export default function MarketSentimentCard({ sentiment, onClick }) {
+export default React.memo(function MarketSentimentCard({ sentiment, onClick }) {
   if (!sentiment || !Number.isFinite(sentiment.score)) return null
 
   const { name, score, classification, attribution } = sentiment
@@ -50,4 +50,4 @@ export default function MarketSentimentCard({ sentiment, onClick }) {
       )}
     </Tag>
   )
-}
+})

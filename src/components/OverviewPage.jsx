@@ -1,12 +1,15 @@
-import React, { useState } from 'react'
+import React, { lazy, Suspense, useState, useMemo } from 'react'
 import { fmt, fmtCompact, fmtPct } from '../lib/format.js'
 import ScoreCard from './ScoreCard.jsx'
 import ReasonList from './ReasonList.jsx'
 import Tooltip from './Tooltip.jsx'
 import ScenarioCard from './ScenarioCard.jsx'
-import EarningsCalendar from './EarningsCalendar.jsx'
 import MarketSentimentCard from './MarketSentimentCard.jsx'
 import { METRIC_TIPS } from '../lib/metricTips.js'
+
+// Lazy-load EarningsCalendar — it imports Plotly (~3 MB) for the EPS chart.
+// Deferring it keeps the initial bundle small for the Overview tab.
+const EarningsCalendar = lazy(() => import('./EarningsCalendar.jsx'))
 
 function DescriptionBlock({ text }) {
   const [expanded, setExpanded] = useState(false)
@@ -162,8 +165,8 @@ export default function OverviewPage({
 }) {
   const title = fundamentals?.longName || fundamentals?.name || ticker
   const sectorLine = [fundamentals?.sector, fundamentals?.industry].filter(Boolean).join(' · ')
-  const scoreCards = availableScoreCards(research)
-  const verdicts = [
+  const scoreCards = useMemo(() => availableScoreCards(research), [research])
+  const verdicts = useMemo(() => [
     research?.valuation?.hasData
       ? {
           label: 'Valuation Verdict',
@@ -196,8 +199,17 @@ export default function OverviewPage({
               : 'No options move estimate',
         }
       : null,
-  ].filter(Boolean)
-  const reasonPool = buildOverviewScoreReasons(research)
+  ].filter(Boolean), [research, fundamentals, analysis])
+  const reasonPool = useMemo(() => buildOverviewScoreReasons(research), [research])
+
+  // Stable callback map so memoized children don't re-render due to new arrow functions
+  const tabCallbacks = useMemo(() => {
+    if (!onTabChange) return {}
+    const ids = ['value', 'quality', 'risk', 'technicals', 'options']
+    const map = {}
+    for (const id of ids) map[id] = () => onTabChange(id)
+    return map
+  }, [onTabChange])
 
   return (
     <>
@@ -248,13 +260,13 @@ export default function OverviewPage({
                   tone={card._origScore != null ? tone(card._origScore) : tone(card.value)}
                   detail={card.detail}
                   tooltip={card.tooltip}
-                  onClick={tabId && onTabChange ? () => onTabChange(tabId) : undefined}
+                  onClick={tabId ? tabCallbacks[tabId] : undefined}
                 />
               )
             })}
             <MarketSentimentCard
               sentiment={research?.marketSentiment}
-              onClick={onTabChange ? () => onTabChange('technicals') : undefined}
+              onClick={tabCallbacks.technicals}
             />
           </div>
         </section>
@@ -272,7 +284,7 @@ export default function OverviewPage({
                 <VerdictCard
                   key={verdict.label}
                   {...verdict}
-                  onClick={tabId && onTabChange ? () => onTabChange(tabId) : undefined}
+                  onClick={tabId ? tabCallbacks[tabId] : undefined}
                 />
               )
             })}
@@ -289,7 +301,9 @@ export default function OverviewPage({
         </section>
       )}
 
-      <EarningsCalendar fundamentals={fundamentals} />
+      <Suspense fallback={null}>
+        <EarningsCalendar fundamentals={fundamentals} />
+      </Suspense>
 
       <ReasonList title="Key Signals" reasons={research?.signals || []} />
       <ReasonList title="Why These Scores" reasons={reasonPool} />

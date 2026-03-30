@@ -24,8 +24,12 @@ window.onunhandledrejection = (event) => {
   })
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const root = ReactDOM.createRoot(document.getElementById('root'))
+const app = import.meta.env.DEV ? (
   <React.StrictMode>
     <App />
-  </React.StrictMode>,
+  </React.StrictMode>
+) : (
+  <App />
 )
+root.render(app)

@@ -1,7 +1,7 @@
 import React from 'react'
 import Tooltip from './Tooltip.jsx'
 
-export default function ScoreCard({ label, score, tone = 'neutral', detail, tooltip, onClick }) {
+export default React.memo(function ScoreCard({ label, score, tone = 'neutral', detail, tooltip, onClick }) {
   const rounded = Number.isFinite(score) ? Math.round(score) : null
   const Tag = onClick ? 'button' : 'div'
   return (
@@ -23,4 +23,4 @@ export default function ScoreCard({ label, score, tone = 'neutral', detail, tool
       {detail && <p className="score-card-detail">{detail}</p>}
     </Tag>
   )
-}
+})
