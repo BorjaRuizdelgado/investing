@@ -2,93 +2,105 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://investing.borjaruizdelgado.com/</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://investing.borjaruizdelgado.com/disclaimer</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://investing.borjaruizdelgado.com/donate</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://investing.borjaruizdelgado.com/compare</loc>
+    <lastmod>2026-03-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://investing.borjaruizdelgado.com/watchlist</loc>
+    <lastmod>2026-03-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
   </url>
   <!-- Popular stock tickers -->
   <url>
     <loc>https://investing.borjaruizdelgado.com/AAPL</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://investing.borjaruizdelgado.com/TSLA</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://investing.borjaruizdelgado.com/SPY</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://investing.borjaruizdelgado.com/MSFT</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://investing.borjaruizdelgado.com/NVDA</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://investing.borjaruizdelgado.com/AMZN</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://investing.borjaruizdelgado.com/GOOGL</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://investing.borjaruizdelgado.com/META</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://investing.borjaruizdelgado.com/QQQ</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <!-- Crypto -->
   <url>
     <loc>https://investing.borjaruizdelgado.com/BTC</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://investing.borjaruizdelgado.com/ETH</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://investing.borjaruizdelgado.com/SOL</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
