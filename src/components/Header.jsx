@@ -1,5 +1,5 @@
 import React, { useState, forwardRef } from 'react'
-import { DISCLAIMER_PATH, DONATE_PATH, WATCHLIST_PATH, tickerFromPath } from '../lib/routes.js'
+import { DISCLAIMER_PATH, DONATE_PATH, WATCHLIST_PATH, SCREENER_PATH, tickerFromPath } from '../lib/routes.js'
 
 const SunIcon = () => (
   <svg
@@ -47,6 +47,7 @@ const Header = forwardRef(function Header(
     onNavigateDisclaimer,
     onNavigateDonate,
     onNavigateWatchlist,
+    onNavigateScreener,
     onNavigateCompare,
     theme,
     onToggleTheme,
@@ -129,6 +130,18 @@ const Header = forwardRef(function Header(
               Watchlist
             </a>
           )}
+          {onNavigateScreener && (
+            <a
+              href={SCREENER_PATH}
+              className="app-header__nav-link"
+              onClick={(e) => {
+                e.preventDefault()
+                onNavigateScreener()
+              }}
+            >
+              Screener
+            </a>
+          )}
           <a
             href={DONATE_PATH}
             className="app-header__nav-link"
@@ -205,6 +218,11 @@ const Header = forwardRef(function Header(
           {onNavigateWatchlist && (
             <button className="app-header__menu-link" onClick={() => go(onNavigateWatchlist)}>
               Watchlist
+            </button>
+          )}
+          {onNavigateScreener && (
+            <button className="app-header__menu-link" onClick={() => go(onNavigateScreener)}>
+              Screener
             </button>
           )}
           <button className="app-header__menu-link" onClick={() => go(onNavigateDonate)}>

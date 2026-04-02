@@ -18,6 +18,7 @@ const DisclaimerPage = lazy(() => import('./components/DisclaimerPage.jsx'))
 const DonationsPage = lazy(() => import('./components/DonationsPage.jsx'))
 const WatchlistPage = lazy(() => import('./components/WatchlistPage.jsx'))
 const ComparePage = lazy(() => import('./components/ComparePage.jsx'))
+const ScreenerPage = lazy(() => import('./components/ScreenerPage.jsx'))
 import { daysToExpiry } from './lib/fetcher.js'
 import useResearchTerminal from './hooks/useResearchTerminal.js'
 import useTheme from './hooks/useTheme.js'
@@ -28,6 +29,7 @@ import {
   DISCLAIMER_PATH,
   DONATE_PATH,
   WATCHLIST_PATH,
+  SCREENER_PATH,
   COMPARE_PREFIX,
   currentPath,
   tabFromPath,
@@ -61,6 +63,7 @@ export default function App() {
     if (p === DISCLAIMER_PATH) return 'disclaimer'
     if (p === DONATE_PATH) return 'donate'
     if (p === WATCHLIST_PATH) return 'watchlist'
+    if (p === SCREENER_PATH) return 'screener'
     if (isComparePath(p)) return 'compare'
     return 'terminal'
   })
@@ -128,6 +131,7 @@ export default function App() {
       if (p === DISCLAIMER_PATH) setPage('disclaimer')
       else if (p === DONATE_PATH) setPage('donate')
       else if (p === WATCHLIST_PATH) setPage('watchlist')
+      else if (p === SCREENER_PATH) setPage('screener')
       else if (isComparePath(p)) setPage('compare')
       else {
         setPage('terminal')
@@ -174,6 +178,7 @@ export default function App() {
         onNavigateDisclaimer={() => navigate(DISCLAIMER_PATH, 'disclaimer')}
         onNavigateDonate={() => navigate(DONATE_PATH, 'donate')}
         onNavigateWatchlist={() => navigate(WATCHLIST_PATH, 'watchlist')}
+        onNavigateScreener={() => navigate(SCREENER_PATH, 'screener')}
         onNavigateCompare={handleNavigateCompare}
         theme={theme}
         onToggleTheme={handleThemeToggle}
@@ -252,6 +257,33 @@ export default function App() {
           <div className="main-content">
             <Suspense fallback={<OverviewSkeleton />}>
               <ComparePage tickers={compareTickersFromPath(currentPath())} />
+            </Suspense>
+            <div className="page-link-row">
+              <a
+                href="/"
+                className="page-link"
+                onClick={(e) => {
+                  e.preventDefault()
+                  navigate('/', 'terminal')
+                }}
+              >
+                Back to terminal
+              </a>
+            </div>
+          </div>
+        )}
+
+        {page === 'screener' && (
+          <div className="main-content">
+            <Suspense fallback={<OverviewSkeleton />}>
+              <ScreenerPage
+                onAnalyse={(t) => {
+                  setActiveTab('overview')
+                  setPage('terminal')
+                  handleAnalyse(t)
+                }}
+                watchlist={watchlist}
+              />
             </Suspense>
             <div className="page-link-row">
               <a

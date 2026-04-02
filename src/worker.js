@@ -156,6 +156,44 @@ async function fetchYF(path) {
   return res.json()
 }
 
+/**
+ * POST to Yahoo Finance screener API with auth + retry.
+ */
+async function fetchYFScreener(body) {
+  const auth = await getAuth()
+  const path = '/v1/finance/screener'
+  const url = auth.crumb
+    ? `${YF_BASE}${path}?crumb=${encodeURIComponent(auth.crumb)}`
+    : `${YF_BASE}${path}`
+  const opts = {
+    method: 'POST',
+    headers: {
+      'User-Agent': UA,
+      Cookie: auth.cookie,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  }
+  const res = await fetch(url, opts)
+  if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      cachedAuth = null
+      authExpiry = 0
+      const retry = await getAuth()
+      const retryUrl = retry.crumb
+        ? `${YF_BASE}${path}?crumb=${encodeURIComponent(retry.crumb)}`
+        : `${YF_BASE}${path}`
+      opts.headers.Cookie = retry.cookie
+      const res2 = await fetch(retryUrl, opts)
+      if (!res2.ok) throw new Error(`Yahoo Finance ${res2.status}: ${res2.statusText}`)
+      return res2.json()
+    }
+    throw new Error(`Yahoo Finance ${res.status}: ${res.statusText}`)
+  }
+  return res.json()
+}
+
 // ======================================================================
 // Bybit (crypto options)
 // ======================================================================
@@ -1177,6 +1215,157 @@ async function handleTrending() {
 }
 
 // ======================================================================
+// Screener — dynamic discovery via Yahoo Finance screener API
+// ======================================================================
+
+let cachedScreener = null
+let screenerExpiry = 0
+
+/** Build a screener POST body for a given quoteType and market-cap floor. */
+function screenerBody(quoteType, minMarketCap, offset, size = 250) {
+  return {
+    size,
+    offset,
+    sortField: 'intradaymarketcap',
+    sortType: 'DESC',
+    quoteType,
+    query: {
+      operator: 'AND',
+      operands: [
+        { operator: 'EQ', operand: ['region', 'us'] },
+        { operator: 'GT', operand: ['intradaymarketcap', minMarketCap] },
+      ],
+    },
+    userId: '',
+    userIdType: 'guid',
+  }
+}
+
+/** Map a raw Yahoo quote object to our screener shape. */
+function mapQuote(q) {
+  return {
+    ticker: q.symbol,
+    name: q.shortName || q.longName || q.symbol,
+    price: q.regularMarketPrice ?? null,
+    change: q.regularMarketChange ?? null,
+    changePct: q.regularMarketChangePercent ?? null,
+    marketCap: q.marketCap ?? null,
+    trailingPE: q.trailingPE ?? null,
+    forwardPE: q.forwardPE ?? null,
+    priceToBook: q.priceToBook ?? null,
+    dividendYield: q.dividendYield ?? null,
+    profitMargins: q.profitMargins ?? null,
+    sector: q.sector || null,
+    industry: q.industry || null,
+    fiftyTwoWeekHigh: q.fiftyTwoWeekHigh ?? null,
+    fiftyTwoWeekLow: q.fiftyTwoWeekLow ?? null,
+    beta: q.beta ?? null,
+    eps: q.epsTrailingTwelveMonths ?? null,
+    avgVolume: q.averageDailyVolume3Month ?? null,
+    returnOnEquity: q.returnOnEquity ?? null,
+    debtToEquity: q.debtToEquity ?? null,
+    quoteType: q.quoteType || null,
+  }
+}
+
+async function handleScreener() {
+  const now = Date.now()
+  if (cachedScreener && now < screenerExpiry) return cachedJsonResp(cachedScreener, 900)
+
+  const seen = new Set()
+  const allStocks = []
+  const push = (q) => {
+    if (q.symbol && !seen.has(q.symbol)) {
+      seen.add(q.symbol)
+      allStocks.push(mapQuote(q))
+    }
+  }
+
+  // ── Strategy A: Yahoo screener POST API (equities + ETFs) ──────────
+  let screenerWorked = false
+  try {
+    // Equities: up to 750 stocks (3 pages × 250), market cap > $300 M
+    for (let offset = 0; offset < 750; offset += 250) {
+      const data = await fetchYFScreener(screenerBody('EQUITY', 300_000_000, offset))
+      const quotes = data?.finance?.result?.[0]?.quotes || []
+      for (const q of quotes) push(q)
+      if (quotes.length < 250) break
+    }
+    // ETFs: top 250 by AUM (> $500 M)
+    const etfData = await fetchYFScreener(screenerBody('ETF', 500_000_000, 0))
+    for (const q of (etfData?.finance?.result?.[0]?.quotes || [])) push(q)
+    screenerWorked = allStocks.length > 50
+  } catch {
+    screenerWorked = false
+  }
+
+  // ── Strategy B: predefined screener GET endpoints ────────────────────
+  if (!screenerWorked) {
+    const predefined = [
+      'most_actives', 'day_gainers', 'day_losers',
+      'undervalued_large_caps', 'growth_technology_stocks',
+      'undervalued_growth_stocks', 'small_cap_gainers',
+      'aggressive_small_caps',
+    ]
+    for (let i = 0; i < predefined.length; i += 3) {
+      const batch = predefined.slice(i, i + 3)
+      const results = await Promise.all(
+        batch.map((name) =>
+          fetchYF(`/v1/finance/screener/predefined/${name}?count=250`)
+            .then((d) => d?.finance?.result?.[0]?.quotes || [])
+            .catch(() => []),
+        ),
+      )
+      for (const quotes of results) for (const q of quotes) push(q)
+    }
+  }
+
+  // ── Strategy C: batch quote fallback with well-known tickers ────────
+  if (allStocks.length < 50) {
+    const fallbackTickers = [
+      'AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','BRK-B','AVGO','JPM',
+      'LLY','V','UNH','MA','XOM','COST','HD','PG','JNJ','ABBV',
+      'NFLX','CRM','BAC','AMD','ORCL','ADBE','KO','PEP','TMO','MRK',
+      'ACN','CSCO','WMT','ABT','LIN','PM','MCD','DIS','NOW','IBM',
+      'GE','ISRG','INTU','QCOM','TXN','AMGN','HON','CAT','AMAT','BKNG',
+      'GS','AXP','UBER','MS','BLK','SBUX','PFE','SYK','SCHW','LOW',
+      'DE','GILD','MDLZ','REGN','PANW','CB','ADI','VRTX','SO','CME',
+      'BX','LRCX','PYPL','MU','PLTR','COIN','SOFI','ARM','SNOW','CRWD',
+      'DDOG','NET','ZS','MRVL','ABNB','DASH','RBLX','SHOP','SQ','ROKU',
+      'CVX','COP','SLB','OXY','EOG','NEE','DUK','AEP','D','SRE',
+      'T','VZ','CMCSA','TMUS','RTX','LMT','GD','NOC','BA','UNP',
+      'FDX','UPS','NKE','LULU','TJX','CMG','YUM','MAR','HLT','RCL',
+      'PLD','AMT','CCI','EQIX','SPG','O','PSA','DLR','WELL','AVB',
+      'CI','ELV','MCK','CVS','MMC','AIG','TRV','MET','PRU','PGR',
+      'NVO','SAP','TM','SONY','MELI','BABA','NIO','NU','AZN','GSK',
+      'FCX','NEM','APD','SHW','NUE','CL','KMB','MNST','GIS','HSY',
+      'SPY','QQQ','IWM','DIA','VOO','VTI','ARKK','XLF','XLE','XLK',
+      'GLD','SLV','TLT','HYG','SOXX','SMH','XBI','XLV','XLI','XLP',
+    ]
+    const CHUNK = 50
+    const chunks = []
+    for (let i = 0; i < fallbackTickers.length; i += CHUNK) {
+      chunks.push(fallbackTickers.slice(i, i + CHUNK))
+    }
+    for (let w = 0; w < chunks.length; w += 3) {
+      const wave = chunks.slice(w, w + 3)
+      const results = await Promise.all(
+        wave.map((chunk) =>
+          fetchYF(`/v7/finance/quote?symbols=${encodeURIComponent(chunk.join(','))}`)
+            .then((d) => d?.quoteResponse?.result || [])
+            .catch(() => []),
+        ),
+      )
+      for (const batch of results) for (const q of batch) push(q)
+    }
+  }
+
+  cachedScreener = { stocks: allStocks, fetchedAt: new Date().toISOString() }
+  screenerExpiry = now + 15 * 60_000
+  return cachedJsonResp(cachedScreener, 900)
+}
+
+// ======================================================================
 // SEO: Crawler detection & dynamic meta tags
 // ======================================================================
 
@@ -1560,6 +1749,10 @@ export default {
         return await handleTrending()
       }
 
+      if (url.pathname === '/api/screener') {
+        return await handleScreener()
+      }
+
       // Dynamic sitemap with popular tickers so Google discovers more pages
       if (url.pathname === '/sitemap.xml') {
         const today = new Date().toISOString().slice(0, 10)
@@ -1703,6 +1896,7 @@ export default {
           `<url><loc>${origin}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>`,
           `<url><loc>${origin}/disclaimer</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>`,
           `<url><loc>${origin}/donate</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>`,
+          `<url><loc>${origin}/screener</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>`,
           `<url><loc>${origin}/compare</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.5</priority></url>`,
           ...[
             'AAPL/MSFT', 'TSLA/RIVN', 'NVDA/AMD', 'GOOGL/META', 'AMZN/WMT',
@@ -1755,7 +1949,7 @@ export default {
         const pathClean = url.pathname.replace(/^\//, '').replace(/\/$/, '')
         const parts = pathClean.split('/')
         const maybeTicker = parts[0] ? decodeURIComponent(parts[0]).toUpperCase() : null
-        const reserved = new Set(['DISCLAIMER', 'DONATE', 'WATCHLIST', 'COMPARE'])
+        const reserved = new Set(['DISCLAIMER', 'DONATE', 'WATCHLIST', 'COMPARE', 'SCREENER'])
         const isCompare = maybeTicker === 'COMPARE'
         const compareTickers = isCompare
           ? parts.slice(1).map((p) => decodeURIComponent(p).toUpperCase()).filter(Boolean)

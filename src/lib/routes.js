@@ -1,6 +1,7 @@
 export const DISCLAIMER_PATH = '/disclaimer'
 export const DONATE_PATH = '/donate'
 export const WATCHLIST_PATH = '/watchlist'
+export const SCREENER_PATH = '/screener'
 export const COMPARE_PREFIX = '/compare/'
 
 export function currentPath() {
@@ -13,6 +14,7 @@ export function isReservedPath(pathname) {
     p === DISCLAIMER_PATH ||
     p === DONATE_PATH ||
     p === WATCHLIST_PATH ||
+    p === SCREENER_PATH ||
     p === '/compare' ||
     p.startsWith(COMPARE_PREFIX)
   )

@@ -69,6 +69,14 @@ export async function fetchTrending() {
 }
 
 /**
+ * Fetch screener universe with enriched quote data.
+ * Returns { stocks: [...] }
+ */
+export async function fetchScreener() {
+  return get(`${API}/screener`)
+}
+
+/**
  * Days from today to expiry string "YYYY-MM-DD".
  *
  * Uses calendar-day DTE (industry standard): expiry tomorrow = 1, day-after = 2, etc.
