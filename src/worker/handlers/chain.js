@@ -7,7 +7,10 @@ import { jsonResp } from '../utils.js'
 
 export async function handleChain(ticker, expTimestamp) {
   const data = await fetchYF(`/v7/finance/options/${ticker}?date=${expTimestamp}`)
-  const result = data.optionChain.result[0]
+  const result = data?.optionChain?.result?.[0]
+  if (!result) {
+    return jsonResp({ error: 'No option chain data available for this ticker/expiry' }, 404)
+  }
   const quote = result.quote || {}
 
   function cleanOption(o) {

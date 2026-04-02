@@ -2,6 +2,39 @@
  * Shared constants, validation helpers, CORS, and response builders.
  */
 
+// ---- Per-IP sliding-window rate limiter ----
+
+const RATE_LIMIT_WINDOW_MS = 60_000 // 1 minute
+const RATE_LIMIT_MAX = 60 // max requests per window per IP
+const ipHits = new Map() // IP → { count, resetAt }
+
+let lastPrune = 0
+
+/**
+ * Returns true if the request should be allowed, false if rate-limited.
+ * Uses a simple fixed-window counter per IP, pruned lazily on access.
+ */
+export function rateLimit(ip) {
+  const now = Date.now()
+
+  // Lazily prune stale entries so the Map doesn't grow unbounded.
+  if (now - lastPrune >= RATE_LIMIT_WINDOW_MS) {
+    lastPrune = now
+    for (const [key, entry] of ipHits) {
+      if (now >= entry.resetAt) ipHits.delete(key)
+    }
+  }
+
+  const entry = ipHits.get(ip)
+  if (!entry || now >= entry.resetAt) {
+    ipHits.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
+    return true
+  }
+  entry.count += 1
+  if (entry.count > RATE_LIMIT_MAX) return false
+  return true
+}
+
 export const YF_BASE = 'https://query2.finance.yahoo.com'
 export const BYBIT_BASE = 'https://api.bybit.com/v5/market'
 export const DERIBIT_BASE = 'https://www.deribit.com/api/v2/public'

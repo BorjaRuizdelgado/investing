@@ -801,3 +801,89 @@ describe('Worker /api/sentiment — upstream failure', () => {
   })
 })
 
+// ---------------------------------------------------------------------------
+// Rate limiting
+// ---------------------------------------------------------------------------
+
+describe('Worker rate limiting', () => {
+  it('returns 429 after exceeding the per-IP limit', async () => {
+    // 60 requests succeed, then the 61st should be blocked
+    const results = []
+    for (let i = 0; i < 62; i++) {
+      const request = new Request('https://test.example.com/api/rate', {
+        headers: { 'CF-Connecting-IP': '10.0.0.99' },
+      })
+      const res = await worker.fetch(request, { ASSETS: mockAssets })
+      results.push(res.status)
+    }
+    // First 60 should succeed
+    expect(results.slice(0, 60).every((s) => s === 200)).toBe(true)
+    // 61st and 62nd should be rate-limited
+    expect(results[60]).toBe(429)
+    expect(results[61]).toBe(429)
+  })
+
+  it('rate limit response includes an error message', async () => {
+    // Exhaust the window from a fresh IP
+    for (let i = 0; i < 61; i++) {
+      const request = new Request('https://test.example.com/api/rate', {
+        headers: { 'CF-Connecting-IP': '10.0.0.100' },
+      })
+      await worker.fetch(request, { ASSETS: mockAssets })
+    }
+    const request = new Request('https://test.example.com/api/rate', {
+      headers: { 'CF-Connecting-IP': '10.0.0.100' },
+    })
+    const res = await worker.fetch(request, { ASSETS: mockAssets })
+    expect(res.status).toBe(429)
+    const data = await res.json()
+    expect(data.error).toMatch(/too many requests/i)
+  })
+
+  it('does not rate-limit non-API paths', async () => {
+    for (let i = 0; i < 70; i++) {
+      const request = new Request('https://test.example.com/AAPL', {
+        headers: { 'CF-Connecting-IP': '10.0.0.101' },
+      })
+      const res = await worker.fetch(request, { ASSETS: mockAssets })
+      // Non-API paths should never return 429
+      expect(res.status).not.toBe(429)
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Chain handler — null result guard
+// ---------------------------------------------------------------------------
+
+const YF_CHAIN_EMPTY = {
+  optionChain: { result: [] },
+}
+
+describe('Worker /api/chain — null result guard', () => {
+  beforeEach(() => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url) => {
+        const u = typeof url === 'string' ? url : url.toString()
+        if (u.includes('fc.yahoo.com'))
+          return Promise.resolve(
+            new Response('', { status: 302, headers: { 'set-cookie': 'A3=d=test; path=/' } }),
+          )
+        if (u.includes('getcrumb'))
+          return Promise.resolve(new Response(CRUMB_TEXT, { status: 200 }))
+        if (u.includes('/v7/finance/options/'))
+          return Promise.resolve(new Response(JSON.stringify(YF_CHAIN_EMPTY), { status: 200 }))
+        return Promise.resolve(new Response('Not found', { status: 404 }))
+      }),
+    )
+  })
+
+  it('returns 404 instead of crashing when result[0] is missing', async () => {
+    const res = await callWorker('/api/chain?ticker=ZZZZ&exp=1720000000')
+    expect(res.status).toBe(404)
+    const data = await res.json()
+    expect(data.error).toMatch(/no option chain/i)
+  })
+})
+

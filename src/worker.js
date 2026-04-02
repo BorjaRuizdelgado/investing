@@ -14,7 +14,7 @@
  */
 
 import { isCrypto, isBybitSupported, isDeribitSupported, normalizeTicker, stripCryptoSuffix } from './lib/tickers.js'
-import { validateTicker, validateDays, logError, CORS_HEADERS, jsonResp } from './worker/utils.js'
+import { validateTicker, validateDays, logError, CORS_HEADERS, jsonResp, rateLimit } from './worker/utils.js'
 import { fetchYF } from './worker/yahoo.js'
 import { handleOptions } from './worker/handlers/options.js'
 import { handleChain } from './worker/handlers/chain.js'
@@ -38,6 +38,14 @@ export default {
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: CORS_HEADERS })
+    }
+
+    // Rate-limit API routes per client IP
+    if (url.pathname.startsWith('/api/')) {
+      const ip = request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For') || 'unknown'
+      if (!rateLimit(ip)) {
+        return jsonResp({ error: 'Too many requests — please try again shortly' }, 429)
+      }
     }
 
     try {
