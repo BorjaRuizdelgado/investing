@@ -55,61 +55,6 @@ vi.mock('../../lib/routes.js', () => ({
   tickerFromPath: () => null,
 }))
 
-// ---------------------------------------------------------------------------
-// Minimal React hook test harness (no jsdom needed)
-// ---------------------------------------------------------------------------
-// We simulate React's useState/useCallback/useEffect/useRef manually so we
-// can exercise the hook logic in a plain Node environment.
-// ---------------------------------------------------------------------------
-
-let hookState
-let hookCallbacks
-let effects
-
-function createMockReact() {
-  let stateIndex = 0
-  let cbIndex = 0
-  let refIndex = 0
-  const states = []
-  const refs = []
-  const cbs = []
-  effects = []
-
-  return {
-    useState(init) {
-      const idx = stateIndex++
-      if (states[idx] === undefined) {
-        states[idx] = typeof init === 'function' ? init() : init
-      }
-      const setter = (val) => {
-        states[idx] = typeof val === 'function' ? val(states[idx]) : val
-      }
-      return [states[idx], setter]
-    },
-    useCallback(fn, _deps) {
-      const idx = cbIndex++
-      cbs[idx] = fn
-      return fn
-    },
-    useEffect(fn, _deps) {
-      effects.push(fn)
-    },
-    useRef(init) {
-      const idx = refIndex++
-      if (refs[idx] === undefined) refs[idx] = { current: init }
-      return refs[idx]
-    },
-    _states: states,
-    _cbs: cbs,
-    _reset() {
-      stateIndex = 0
-      cbIndex = 0
-      refIndex = 0
-      effects = []
-    },
-  }
-}
-
 // We'll import the hook factory and call it through a wrapper that patches React
 let useResearchTerminal
 
