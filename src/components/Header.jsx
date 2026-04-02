@@ -222,7 +222,7 @@ const Header = forwardRef(function Header(
           )}
           {onNavigateScreener && (
             <button className="app-header__menu-link" onClick={() => go(onNavigateScreener)}>
-              Screener
+              Discover
             </button>
           )}
           <button className="app-header__menu-link" onClick={() => go(onNavigateDonate)}>
