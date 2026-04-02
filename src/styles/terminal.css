@@ -1,0 +1,368 @@
+/* ---- Research Terminal ---- */
+
+/* Sticky tab bar sits directly below the header */
+.terminal-tabs-bar {
+  position: sticky;
+  top: 60px;
+  z-index: 90;
+  background: var(--bg);
+  border-bottom: 1.2px solid var(--border);
+}
+
+.terminal-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  width: 85%;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.terminal-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* hide the scroll button by default (shown only in mobile media rules) */
+.terminal-tabs-scroll-btn {
+  display: none;
+}
+
+.terminal-tab {
+  flex-shrink: 0;
+  padding: 0 1.1rem;
+  height: 44px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-light);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+  letter-spacing: 0.01em;
+  margin-bottom: -1px;
+}
+
+.terminal-tab:hover {
+  color: var(--text);
+}
+
+.terminal-tab--active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+/* Content area under tabs */
+.tab-content {
+  padding: 2rem 0;
+  max-width: 100%;
+  width: 85%;
+  margin: 0 auto;
+}
+
+.terminal-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+
+.hero-stats,
+.terminal-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.hero-stats {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.terminal-grid--2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.terminal-grid--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.terminal-section {
+  margin-bottom: 1.75rem;
+}
+
+.section-heading {
+  margin-bottom: 0.85rem;
+}
+
+.section-heading h2 {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 400;
+  margin-bottom: 0.15rem;
+}
+
+.section-heading p {
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.terminal-card {
+  border: 1.2px solid var(--border);
+  background: var(--bg);
+  padding: 1rem 1.1rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.terminal-card > .js-plotly-plot {
+  width: 100% !important;
+  display: block !important;
+}
+
+.terminal-card .plot-container,
+.terminal-card .svg-container {
+  width: 100% !important;
+  max-width: 100%;
+}
+
+.terminal-card--compact {
+  min-height: 168px;
+}
+
+.terminal-card--clickable {
+  cursor: pointer;
+  transition:
+    border-color 0.25s var(--ease),
+    box-shadow 0.25s var(--ease);
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.terminal-card--clickable:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.terminal-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.35rem;
+  text-align: left;
+}
+
+.terminal-stat {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1.15;
+  min-height: 3.3rem;
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.terminal-caption,
+.terminal-copy,
+.terminal-line span {
+  font-size: 0.88rem;
+  color: var(--text-light);
+  text-align: left;
+}
+
+.scenario-card {
+  width: 100%;
+  max-width: none;
+}
+
+.scenario-table {
+  width: 100%;
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.55rem;
+}
+
+/* layout for each scenario row — label at left, value aligned right like a tab */
+.scenario-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1.2px solid var(--border-light);
+}
+
+.scenario-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.scenario-label {
+  font-size: 0.92rem;
+  color: var(--text-light);
+}
+
+.scenario-value {
+  font-size: 1.1rem;
+  color: var(--text);
+  justify-self: end;
+  font-weight: 600;
+}
+
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.score-card {
+  border: 1.2px solid var(--border);
+  background: var(--bg);
+  padding: 0.95rem 1rem;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* ensure cards across rows share a consistent minimum height */
+  min-height: 8.5rem;
+}
+
+
+.score-card--clickable {
+  cursor: pointer;
+  transition:
+    border-color 0.25s var(--ease),
+    box-shadow 0.25s var(--ease);
+}
+
+.score-card--clickable:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.score-card--positive {
+  border-color: var(--green);
+}
+
+.score-card--negative {
+  border-color: var(--red);
+}
+
+.score-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.score-card-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.score-card-value {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.score-bar {
+  height: 8px;
+  background: var(--border-light);
+  margin: 0.7rem 0 0.55rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.score-bar::before {
+  /* full-width gradient anchored to the bar */
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background: var(--accent);
+  z-index: 1;
+}
+
+.score-bar-fill {
+  position: relative;
+  height: 100%;
+  width: var(--fill, 0%);
+  z-index: 2;
+  /* keep fill element transparent — gradient comes from ::before */
+  background: transparent;
+}
+
+.score-bar::after {
+  /* overlay to hide the unfilled portion */
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: calc(100% - var(--fill, 0%));
+  background: var(--border-light);
+  z-index: 3;
+}
+
+.score-card-detail {
+  font-size: 0.84rem;
+  color: var(--text-light);
+}
+
+.reason-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.reason-item {
+  padding: 0.85rem 0.95rem;
+}
+
+.reason-item--positive {
+  border-left: 3px solid var(--green);
+}
+
+.reason-item--negative {
+  border-left: 3px solid var(--red);
+}
+
+.reason-item--neutral {
+  border-left: 3px solid var(--accent);
+}
+
+.reason-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.15rem;
+}
+
+.reason-detail {
+  font-size: 0.88rem;
+  color: var(--text-light);
+}

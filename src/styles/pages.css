@@ -1,0 +1,232 @@
+/* ---- Overview description ---- */
+.hero-description {
+  display: none;
+}
+
+.overview-description-wrap {
+  margin-top: 0rem;
+}
+
+.overview-description {
+  margin: 0 0 0.25rem;
+  font-size: 0.88rem;
+  color: var(--text-light);
+  line-height: 1.55;
+  max-width: 95%;
+  text-align: justify;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.overview-description--expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+.overview-description-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 0.25rem;
+  font-size: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.overview-description-toggle:hover {
+  opacity: 0.8;
+}
+
+/* ---- Overview watchlist button ---- */
+.hero-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  max-width: 95%;
+}
+
+.overview-watchlist-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  border: 1.2px solid var(--border);
+  background: none;
+  cursor: pointer;
+  transition: all 0.25s var(--ease);
+  font-family: inherit;
+  letter-spacing: 0.03em;
+}
+
+.overview-watchlist-btn:hover {
+  border-color: var(--accent-warm);
+  color: var(--accent-warm);
+}
+
+.overview-watchlist-btn--active {
+  color: var(--accent-warm);
+  border-color: var(--accent-warm);
+}
+
+/* ---- Strategy suggestions ---- */
+.strategy-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.strategy-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.strategy-legs {
+  width: 100%;
+  font-size: 0.82rem;
+  border-collapse: collapse;
+  margin: 0.25rem 0;
+}
+
+.strategy-legs th {
+  text-align: left;
+  padding: 0.3rem 0.5rem;
+  font-weight: 600;
+  color: var(--text-light);
+  border-bottom: 1.2px solid var(--border);
+  font-size: 0.78rem;
+}
+
+.strategy-legs td {
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1.2px solid var(--border-light);
+  color: var(--text-light);
+}
+
+.strategy-sell {
+  color: var(--red);
+  font-weight: 600;
+}
+.strategy-buy {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.strategy-meta {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.82rem;
+  color: var(--text-light);
+  margin-top: 0.25rem;
+}
+
+.strategy-rationale {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ---- Watchlist ---- */
+.watchlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.watchlist-grid--saved {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.watchlist-grid--saved > .watchlist-card {
+  flex: 0 1 320px;
+  width: min(320px, 100%);
+}
+
+.watchlist-card {
+  cursor: pointer;
+  transition:
+    border-color 0.35s var(--ease),
+    box-shadow 0.35s var(--ease);
+}
+
+.watchlist-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.watchlist-card--saved {
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding-bottom: 1.25rem;
+  position: relative;
+}
+
+.watchlist-card__header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.watchlist-card__ticker {
+  font-size: 1.2rem;
+}
+
+.watchlist-card__name {
+  max-width: 100%;
+  font-size: 0.92rem;
+}
+
+.watchlist-card__price {
+  font-size: 1.45rem;
+}
+
+.watchlist-card__change {
+  font-size: 0.95rem;
+}
+
+.watchlist-card__fallback {
+  margin-top: 0.65rem;
+}
+
+.watchlist-card__remove {
+  all: unset;
+  font-size: 1rem;
+  color: var(--text-muted);
+  padding: 0.1rem 0.35rem;
+  cursor: pointer;
+  line-height: 1;
+  border-radius: 999px;
+}
+
+.watchlist-card__remove:hover,
+.watchlist-card__remove:focus-visible {
+  color: var(--red);
+  outline: none;
+}
+
+.watchlist-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+}

@@ -139,7 +139,7 @@ const Header = forwardRef(function Header(
                 onNavigateScreener()
               }}
             >
-              Screener
+              Discover
             </a>
           )}
           <a

@@ -1,0 +1,98 @@
+/* ---- Landing ---- */
+
+.landing {
+  /* match the terminal/content container so homepage spacing is consistent */
+  width: 85%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 48vh;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.landing h1 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  margin-bottom: 0.25rem;
+}
+
+.landing-subtitle {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-style: italic;
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  color: var(--text-light);
+  letter-spacing: -0.01em;
+  margin-bottom: 1.5rem;
+}
+
+.landing-desc {
+  max-width: 640px;
+  font-size: 0.95rem;
+  color: var(--text-light);
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}
+
+.landing .info-box {
+  max-width: 480px;
+}
+
+.options-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.options-page > .label-strip {
+  margin-bottom: 1.25rem;
+}
+
+.options-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  padding: 1rem 1.1rem;
+}
+
+.options-controls .field {
+  min-width: 220px;
+  flex: 0 1 280px;
+}
+
+.options-controls label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-light);
+  letter-spacing: 0.02em;
+  margin-bottom: 0.45rem;
+}
+
+.options-controls select {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border: 1.2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  outline: none;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.options-controls select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(77, 106, 97, 0.08);
+}
+
+.options-toggle {
+  margin-top: 0;
+  padding-top: 1.45rem;
+}
