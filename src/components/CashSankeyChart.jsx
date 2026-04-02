@@ -206,7 +206,7 @@ export default function CashSankeyChart({ ticker }) {
     const trace = {
       type: 'sankey',
       orientation: 'h',
-      arrangement: 'snap',
+      arrangement: 'freeform',
       node: {
         pad: 38,
         thickness: 18,
