@@ -8,6 +8,11 @@
     display: none;
   }
 
+  /* Hide tab captions on smaller screens to save space */
+  .terminal-tab__caption {
+    display: none;
+  }
+
   .tab-content {
     padding: 1.5rem 1.25rem 2rem;
     width: 100%;

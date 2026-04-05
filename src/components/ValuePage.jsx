@@ -3,17 +3,21 @@ import ScoreCard from './ScoreCard.jsx'
 import MetricTable from './MetricTable.jsx'
 import ReasonList from './ReasonList.jsx'
 import ScenarioCard from './ScenarioCard.jsx'
+import TldrBanner from './TldrBanner.jsx'
 import { METRIC_TIPS } from '../lib/metricTips.js'
 import { buildSectorMedians } from '../lib/sectorMedians.js'
+import { valuationTldr } from '../lib/tldr.js'
 
 export default function ValuePage({ research, fundamentals }) {
   // useMemo must come before any conditional return (Rules of Hooks)
   const sectorMedians = React.useMemo(() => buildSectorMedians(fundamentals), [fundamentals])
+  const tldr = React.useMemo(() => valuationTldr(research, fundamentals), [research, fundamentals])
 
   if (!research?.valuation?.hasData) return null
 
   return (
     <>
+      {tldr && <TldrBanner text={tldr.text} tone={tldr.tone} />}
       <section className="terminal-section">
         <div className="section-heading">
           <h2>Valuation</h2>

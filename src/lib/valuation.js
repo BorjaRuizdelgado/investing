@@ -153,7 +153,7 @@ export function deriveValuation(fundamentals, spot) {
     },
     {
       key: 'fcfYield',
-      label: 'FCF Yield',
+      label: 'Free Cash Flow Yield',
       value: fcfYield,
       kind: 'pct',
       tip: METRIC_TIPS.fcfYield,

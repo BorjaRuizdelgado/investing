@@ -338,10 +338,10 @@ export function deriveTechnicals(analysis, _spot) {
     { key: 'rsi14', label: 'RSI (14)', value: rsiVal, kind: 'ratio', tip: METRIC_TIPS.rsi14 },
     { key: 'macd', label: 'MACD', value: macdVal, kind: 'ratio', tip: METRIC_TIPS.macd },
     { key: 'macdSignal', label: 'Signal', value: signalVal, kind: 'ratio', tip: METRIC_TIPS.macdSignal },
-    { key: 'bollingerPosition', label: '%B', value: bbPercentB, kind: 'ratio', tip: METRIC_TIPS.bollingerPosition },
-    { key: 'bollingerBandwidth', label: 'BB Width', value: bbBandwidth, kind: 'ratio', tip: METRIC_TIPS.bollingerBandwidth },
-    { key: 'maCrossover', label: 'MA Cross', value: crossoverSignal, kind: 'text', tip: METRIC_TIPS.maCrossover },
-    { key: 'volumeTrend', label: 'Vol Ratio (5d/20d)', value: volRatio, kind: 'ratio', tip: METRIC_TIPS.volumeTrend },
+    { key: 'bollingerPosition', label: 'Bollinger %B', value: bbPercentB, kind: 'ratio', tip: METRIC_TIPS.bollingerPosition },
+    { key: 'bollingerBandwidth', label: 'Bollinger Width', value: bbBandwidth, kind: 'ratio', tip: METRIC_TIPS.bollingerBandwidth },
+    { key: 'maCrossover', label: 'Moving Avg Cross', value: crossoverSignal, kind: 'text', tip: METRIC_TIPS.maCrossover },
+    { key: 'volumeTrend', label: 'Volume Trend', value: volRatio, kind: 'ratio', tip: METRIC_TIPS.volumeTrend },
   ]
 
   // Trim all series to the first index where every indicator is fully computed,

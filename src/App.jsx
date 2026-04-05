@@ -348,6 +348,15 @@ export default function App() {
             </div>
 
             <div className="tab-content" key={theme}>
+              {ticker && activeTab && (
+                <nav className="breadcrumb" aria-label="Breadcrumb">
+                  <span className="breadcrumb__ticker">{ticker}</span>
+                  <span className="breadcrumb__sep" aria-hidden="true">›</span>
+                  <span className="breadcrumb__tab">
+                    {visibleTabs.find((t) => t.id === activeTab)?.label || activeTab}
+                  </span>
+                </nav>
+              )}
               {activeTab === 'overview' && (
                 <ErrorBoundary name="OverviewPage">
                   <OverviewPage
@@ -431,7 +440,7 @@ export default function App() {
                     </Suspense>
                   ) : (
                     <div className="info-box">
-                      Fundamental reference data is not available for this ticker.
+                      Fundamental data isn't available for this ticker yet. Try a stock listed on a major exchange (NYSE, NASDAQ).
                     </div>
                   )}
                 </ErrorBoundary>

@@ -39,7 +39,7 @@ export const COMPARE_METRIC_DEFS = [
   { key: 'forwardPE', label: 'Forward P/E', kind: 'ratio', lowerBetter: true },
   { key: 'revenueGrowth', label: 'Revenue Growth', kind: 'pct' },
   { key: 'operatingMargins', label: 'Operating Margin', kind: 'pct' },
-  { key: 'returnOnEquity', label: 'ROE', kind: 'pct' },
+  { key: 'returnOnEquity', label: 'Return on Equity', kind: 'pct' },
   { key: 'debtToEquity', label: 'Debt / Equity', kind: 'ratio', lowerBetter: true },
   { key: 'beta', label: 'Beta', kind: 'ratio', lowerBetter: true },
 ]

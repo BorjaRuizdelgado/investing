@@ -25,9 +25,12 @@ export default class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
+      const section = this.props.name || 'this section'
       return (
         <div className="error-boundary-fallback">
-          <p className="error-boundary-fallback__msg">Something went wrong loading this section.</p>
+          <p className="error-boundary-fallback__msg">
+            We couldn't load {section}. This is usually a temporary issue — try again or switch to another tab.
+          </p>
           <button className="error-boundary-fallback__btn" onClick={this.handleRetry}>
             Retry
           </button>

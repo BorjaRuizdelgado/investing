@@ -30,8 +30,7 @@
 
 .terminal-tab {
   flex-shrink: 0;
-  padding: 0 1.1rem;
-  height: 44px;
+  padding: 0.45rem 1.1rem;
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -46,6 +45,24 @@
     border-color 0.2s var(--ease);
   letter-spacing: 0.01em;
   margin-bottom: -1px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  text-align: center;
+}
+
+.terminal-tab__label {
+  display: block;
+}
+
+.terminal-tab__caption {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  text-transform: none;
 }
 
 .terminal-tab:hover {
@@ -64,6 +81,31 @@
   max-width: 100%;
   width: 85%;
   margin: 0 auto;
+}
+
+/* Breadcrumb — shows TICKER › Tab so users always know where they are */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.02em;
+}
+
+.breadcrumb__ticker {
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.breadcrumb__sep {
+  color: var(--border);
+}
+
+.breadcrumb__tab {
+  color: var(--text-light);
 }
 
 .terminal-hero {
@@ -259,10 +301,12 @@
 
 .score-card--positive {
   border-color: var(--green);
+  background: var(--green-bg);
 }
 
 .score-card--negative {
   border-color: var(--red);
+  background: var(--red-bg);
 }
 
 .score-card-header {
@@ -286,7 +330,18 @@
   font-size: 1.6rem;
   font-weight: 600;
   color: var(--accent);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
 }
+
+.score-card-tone-icon {
+  font-size: 0.65rem;
+}
+
+.score-card-tone-icon--positive { color: var(--green); }
+.score-card-tone-icon--negative { color: var(--red); }
+.score-card-tone-icon--neutral { color: var(--text-muted); }
 
 .score-bar {
   height: 8px;

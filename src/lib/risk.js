@@ -106,7 +106,7 @@ export function deriveRisk(fundamentals, analysis) {
     { key: 'beta', label: 'Beta', value: f.beta, kind: 'ratio', tip: METRIC_TIPS.beta },
     {
       key: 'shortPercentOfFloat',
-      label: 'Short % Float',
+      label: 'Short Interest (% Float)',
       value: f.shortPercentOfFloat,
       kind: 'pct-whole',
       tip: METRIC_TIPS.shortPercentOfFloat,

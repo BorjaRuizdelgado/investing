@@ -72,8 +72,8 @@ export default function OptionsPage({
     return (
       <div className="options-page">
         <div className="info-box info-box--muted">
-          <strong>No options data available.</strong> Listed options were not found for this ticker.
-          Fundamental analysis tabs are still available above.
+          <strong>No options data available.</strong> This ticker doesn't appear to have listed options.
+          You can still explore valuation, quality, and risk using the tabs above.
         </div>
       </div>
     )

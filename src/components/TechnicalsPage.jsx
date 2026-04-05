@@ -4,8 +4,10 @@ import ScoreCard from './ScoreCard.jsx'
 import MarketSentimentCard from './MarketSentimentCard.jsx'
 import MetricTable from './MetricTable.jsx'
 import ReasonList from './ReasonList.jsx'
+import TldrBanner from './TldrBanner.jsx'
 import { METRIC_TIPS } from '../lib/metricTips.js'
 import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, getColors, mobileMargin } from '../lib/theme.js'
+import { technicalsTldr } from '../lib/tldr.js'
 
 function tone(score) {
   if (!Number.isFinite(score)) return 'neutral'
@@ -216,10 +218,12 @@ function MACDChart({ indicators }) {
 
 export default function TechnicalsPage({ research }) {
   const technicals = research?.technicals
+  const tldr = useMemo(() => technicalsTldr(research), [research])
   if (!technicals?.hasData) return null
 
   return (
     <>
+      {tldr && <TldrBanner text={tldr.text} tone={tldr.tone} />}
       <section className="terminal-section">
         <div className="section-heading">
           <h2>Technical Analysis</h2>

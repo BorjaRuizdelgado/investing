@@ -60,7 +60,8 @@ export default function TerminalTabs({ tabs, activeTab, onChange }) {
             role="tab"
             aria-selected={activeTab === tab.id}
           >
-            {tab.label}
+            <span className="terminal-tab__label">{tab.label}</span>
+            {tab.caption && <span className="terminal-tab__caption">{tab.caption}</span>}
           </button>
         ))}
       </div>
