@@ -2,13 +2,6 @@
  * screener.js — Collections, filtering, and formatting for the stock screener.
  */
 
-const POPULAR_SET = new Set([
-  'AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','BRK-B','JPM','V',
-  'UNH','JNJ','PG','HD','KO','DIS','NFLX','PEP','COST','BA',
-  'AMD','INTC','WMT','NKE','SBUX','MCD','PYPL','SQ','COIN','UBER',
-  'SPY','QQQ','VOO','VTI','ARKK','GLD',
-])
-
 export const COLLECTIONS = [
   {
     id: 'all',
@@ -61,25 +54,11 @@ export const COLLECTIONS = [
     filter: (s) => s.marketCap != null && s.marketCap >= 200e9,
   },
   {
-    id: 'midcap',
-    label: 'Mid Caps',
-    tagline: '$10 B – $200 B',
-    icon: '◐',
-    filter: (s) => s.marketCap != null && s.marketCap >= 10e9 && s.marketCap < 200e9,
-  },
-  {
     id: 'smallcap',
     label: 'Small Caps',
     tagline: '$100 M – $10 B',
     icon: '○',
     filter: (s) => s.marketCap != null && s.marketCap >= 100e6 && s.marketCap < 10e9,
-  },
-  {
-    id: 'popular',
-    label: 'Popular',
-    tagline: 'Well-known blue chips',
-    icon: '★',
-    filter: (s) => POPULAR_SET.has(s.ticker),
   },
   {
     id: 'etf',

@@ -2,31 +2,11 @@
  * /api/screener — dynamic stock discovery via Yahoo Finance screener API.
  */
 
-import { fetchYF, fetchYFScreener } from '../yahoo.js'
-import { cachedJsonResp } from '../utils.js'
+import { fetchYF } from '../yahoo.js'
+import { cachedJsonResp, logError } from '../utils.js'
 
 let cachedScreener = null
 let screenerExpiry = 0
-
-/** Build a screener POST body for a given quoteType and market-cap floor. */
-function screenerBody(quoteType, minMarketCap, offset, size = 250) {
-  return {
-    size,
-    offset,
-    sortField: 'intradaymarketcap',
-    sortType: 'DESC',
-    quoteType,
-    query: {
-      operator: 'AND',
-      operands: [
-        { operator: 'EQ', operand: ['region', 'us'] },
-        { operator: 'GT', operand: ['intradaymarketcap', minMarketCap] },
-      ],
-    },
-    userId: '',
-    userIdType: 'guid',
-  }
-}
 
 /** Map a raw Yahoo quote object to our screener shape. */
 function mapQuote(q) {
@@ -68,47 +48,41 @@ export async function handleScreener() {
     }
   }
 
-  // ── Strategy A: Yahoo screener POST API (equities + ETFs) ──────────
-  try {
-    // Equities: up to 5000 stocks (20 pages × 250), market cap > $100 M
-    for (let offset = 0; offset < 5000; offset += 250) {
-      const data = await fetchYFScreener(screenerBody('EQUITY', 100_000_000, offset))
-      const quotes = data?.finance?.result?.[0]?.quotes || []
-      for (const q of quotes) push(q)
-      if (quotes.length < 250) break
-    }
-    // ETFs: up to 750 by AUM (> $100 M)
-    for (let offset = 0; offset < 750; offset += 250) {
-      const data = await fetchYFScreener(screenerBody('ETF', 100_000_000, offset))
-      const quotes = data?.finance?.result?.[0]?.quotes || []
-      for (const q of quotes) push(q)
-      if (quotes.length < 250) break
-    }
-  } catch { /* continue to next strategies */ }
-
-  // ── Strategy B: predefined screener GET endpoints (always merge) ────
+  // ── Strategy A: predefined screener GET endpoints ───────────────────
+  // Yahoo Finance's /v1/finance/screener/predefined/saved endpoint returns
+  // up to 250 stocks per screener category. We fetch many categories in
+  // batches of 4 to build a diverse universe.
   try {
     const predefined = [
       'most_actives', 'day_gainers', 'day_losers',
       'undervalued_large_caps', 'growth_technology_stocks',
       'undervalued_growth_stocks', 'small_cap_gainers',
-      'aggressive_small_caps',
-      'most_shorted_stocks', 'portfolio_anchors',
+      'aggressive_small_caps', 'most_shorted_stocks',
+      'portfolio_anchors', 'top_mutual_funds',
+      'high_yield_bond', 'conservative_foreign_funds',
+      'solid_large_growth_funds', 'solid_midcap_growth_funds',
     ]
     for (let i = 0; i < predefined.length; i += 4) {
       const batch = predefined.slice(i, i + 4)
       const results = await Promise.all(
-        batch.map((name) =>
-          fetchYF(`/v1/finance/screener/predefined/${name}?count=250`)
+        batch.map((scrId) =>
+          fetchYF(`/v1/finance/screener/predefined/saved?scrIds=${scrId}&count=250`)
             .then((d) => d?.finance?.result?.[0]?.quotes || [])
-            .catch(() => []),
+            .catch((e) => {
+              console.error(`[Screener] Predefined "${scrId}" failed:`, e.message)
+              return []
+            }),
         ),
       )
       for (const quotes of results) for (const q of quotes) push(q)
     }
-  } catch { /* continue */ }
+    console.log(`[Screener] Strategy A: ${allStocks.length} stocks from predefined screeners`)
+  } catch (e) {
+    logError('/api/screener', e, { upstreamStatus: e.message })
+    console.error('[Screener] Strategy A (predefined screeners) failed:', e.message)
+  }
 
-  // ── Strategy C: batch quote for well-known tickers (always merge) ──
+  // ── Strategy B: batch quote for well-known tickers (always merge) ──
   {
     const coreTickers = [
       // Mega / Large Cap Tech
@@ -209,6 +183,7 @@ export async function handleScreener() {
     }
   }
 
+  console.log(`[Screener] Final: ${allStocks.length} stocks (${seen.size} unique)`)
   cachedScreener = { stocks: allStocks, fetchedAt: new Date().toISOString() }
   screenerExpiry = now + 15 * 60_000
   return cachedJsonResp(cachedScreener, 900)

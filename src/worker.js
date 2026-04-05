@@ -15,7 +15,7 @@
 
 import { isCrypto, isBybitSupported, isDeribitSupported, normalizeTicker, stripCryptoSuffix } from './lib/tickers.js'
 import { validateTicker, validateDays, logError, CORS_HEADERS, jsonResp, rateLimit } from './worker/utils.js'
-import { fetchYF } from './worker/yahoo.js'
+import { fetchYF, getAuth } from './worker/yahoo.js'
 import { handleOptions } from './worker/handlers/options.js'
 import { handleChain } from './worker/handlers/chain.js'
 import { handleHistory } from './worker/handlers/history.js'
@@ -212,6 +212,21 @@ export default {
 
       if (url.pathname === '/api/screener') {
         return await handleScreener()
+      }
+
+      // Diagnostic: check if Yahoo Finance auth is working
+      if (url.pathname === '/api/auth-check') {
+        try {
+          const auth = await getAuth()
+          return jsonResp({
+            hasCookie: !!auth.cookie,
+            hasCrumb: !!auth.crumb,
+            cookieLength: auth.cookie.length,
+            crumbLength: auth.crumb.length,
+          })
+        } catch (e) {
+          return jsonResp({ error: e.message }, 500)
+        }
       }
 
       if (url.pathname === '/api/search') {
