@@ -11,6 +11,35 @@ import { METRIC_TIPS } from '../lib/metricTips.js'
 // Deferring it keeps the initial bundle small for the Overview tab.
 const EarningsCalendar = lazy(() => import('./EarningsCalendar.jsx'))
 
+function CollapsedReasonList({ title, reasons = [] }) {
+  const [expanded, setExpanded] = useState(false)
+  if (!reasons.length) return null
+  const visible = expanded ? reasons : reasons.slice(0, 3)
+  return (
+    <section className="terminal-section">
+      <div className="section-heading">
+        <h2>{title}</h2>
+      </div>
+      <div className="reason-list">
+        {visible.map((reason) => (
+          <div
+            key={`${reason.title}-${reason.detail}`}
+            className={`reason-item reason-item--${reason.tone || 'neutral'}`}
+          >
+            <div className="reason-title">{reason.title}</div>
+            <div className="reason-detail">{reason.detail}</div>
+          </div>
+        ))}
+      </div>
+      {reasons.length > 3 && (
+        <button className="overview-description-toggle" onClick={() => setExpanded((v) => !v)}>
+          {expanded ? 'Show less' : `Show all ${reasons.length} signals`}
+        </button>
+      )}
+    </section>
+  )
+}
+
 function DescriptionBlock({ text }) {
   const [expanded, setExpanded] = useState(false)
   return (
@@ -34,6 +63,12 @@ function tone(score) {
 
 function VerdictCard({ label, value, caption, tooltip, onClick }) {
   const Tag = onClick ? 'button' : 'div'
+  const chipClass =
+    value === 'Undervalued' || value === 'Strong' || value === 'Safe'
+      ? 'verdict-chip--positive'
+      : value === 'Overvalued' || value === 'Weak' || value === 'Risky'
+        ? 'verdict-chip--negative'
+        : 'verdict-chip--neutral'
   return (
     <Tag
       className={`terminal-card terminal-card--compact${onClick ? ' terminal-card--clickable' : ''}`}
@@ -44,7 +79,10 @@ function VerdictCard({ label, value, caption, tooltip, onClick }) {
         {label}
         {tooltip && <Tooltip text={tooltip} />}
       </div>
-      <div className="terminal-stat">{value}</div>
+      <div className="terminal-stat">
+        <span className={`verdict-chip ${chipClass}`} />
+        {value}
+      </div>
       {caption && <div className="terminal-caption">{caption}</div>}
     </Tag>
   )
@@ -235,12 +273,16 @@ export default function OverviewPage({
           )}
         </div>
         <div className="hero-stats">
-          <VerdictCard label="Price" value={fmt(spot)} caption={fundamentals?.currency || 'USD'} />
-          <VerdictCard
-            label="Market Cap"
-            value={fmtCompact(fundamentals?.marketCap)}
-            caption={fundamentals?.exchange || 'Market'}
-          />
+          <div className="terminal-card terminal-card--compact">
+            <div className="terminal-eyebrow">Price</div>
+            <div className="terminal-stat">{fmt(spot)}</div>
+            <div className="terminal-caption">{fundamentals?.currency || 'USD'}</div>
+          </div>
+          <div className="terminal-card terminal-card--compact">
+            <div className="terminal-eyebrow">Market Cap</div>
+            <div className="terminal-stat">{fmtCompact(fundamentals?.marketCap)}</div>
+            <div className="terminal-caption">{fundamentals?.exchange || 'Market'}</div>
+          </div>
         </div>
       </section>
 
@@ -305,8 +347,8 @@ export default function OverviewPage({
         <EarningsCalendar fundamentals={fundamentals} />
       </Suspense>
 
-      <ReasonList title="Key Signals" reasons={research?.signals || []} />
-      <ReasonList title="Why These Scores" reasons={reasonPool} />
+      <CollapsedReasonList title="Key Signals" reasons={research?.signals || []} />
+      <CollapsedReasonList title="Why These Scores" reasons={reasonPool} />
     </>
   )
 }

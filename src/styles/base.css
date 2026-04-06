@@ -38,10 +38,10 @@
   --accent-warm: #e0a86e;
   --border: #4a4a4a;
   --border-light: #3a3a3a;
-  --green: #6aca9a;
-  --red: #e07060;
-  --green-bg: rgba(106, 202, 154, 0.1);
-  --red-bg: rgba(224, 112, 96, 0.1);
+  --green: #7ade9e;
+  --red: #f08070;
+  --green-bg: rgba(122, 222, 158, 0.1);
+  --red-bg: rgba(240, 128, 112, 0.1);
 }
 
 [data-theme='dark'] ::selection {
@@ -63,6 +63,20 @@
 
 [data-theme='dark'] .overlay-pill--active:hover {
   background: #5a8a7e;
+}
+
+[data-theme='dark'] .tldr-banner {
+  background: rgba(125, 179, 165, 0.06);
+}
+
+[data-theme='dark'] .score-card--positive {
+  border-color: var(--green);
+  background: var(--green-bg);
+}
+
+[data-theme='dark'] .score-card--negative {
+  border-color: var(--red);
+  background: var(--red-bg);
 }
 
 [data-theme='dark'] .support-vault {

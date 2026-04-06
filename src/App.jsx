@@ -1,12 +1,12 @@
 import React, { lazy, Suspense, useMemo, useState, useRef, useCallback } from 'react'
 import Header from './components/Header.jsx'
+import Footer from './components/Footer.jsx'
 import TerminalTabs from './components/TerminalTabs.jsx'
 import OverviewPage from './components/OverviewPage.jsx'
 import ValuePage from './components/ValuePage.jsx'
 import QualityPage from './components/QualityPage.jsx'
 import RiskPage from './components/RiskPage.jsx'
 import TrendingTickers from './components/TrendingTickers.jsx'
-import SupportVault from './components/SupportVault.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import TldrBanner from './components/TldrBanner.jsx'
 
@@ -190,8 +190,6 @@ export default function App() {
         loading={loading}
         activeTicker={ticker}
         activePage={page}
-        onNavigateDisclaimer={() => navigate(DISCLAIMER_PATH, 'disclaimer')}
-        onNavigateDonate={() => navigate(DONATE_PATH, 'donate')}
         onNavigateWatchlist={() => navigate(WATCHLIST_PATH, 'watchlist')}
         onNavigateScreener={() => navigate(SCREENER_PATH, 'screener')}
         onNavigateCompare={handleNavigateCompare}
@@ -206,18 +204,6 @@ export default function App() {
             <Suspense fallback={null}>
               <DisclaimerPage />
             </Suspense>
-            <div className="page-link-row">
-              <a
-                href="/"
-                className="page-link"
-                onClick={(e) => {
-                  e.preventDefault()
-                  navigate('/', 'terminal')
-                }}
-              >
-                Back to terminal
-              </a>
-            </div>
           </div>
         )}
 
@@ -226,18 +212,6 @@ export default function App() {
             <Suspense fallback={null}>
               <DonationsPage />
             </Suspense>
-            <div className="page-link-row">
-              <a
-                href="/"
-                className="page-link"
-                onClick={(e) => {
-                  e.preventDefault()
-                  navigate('/', 'terminal')
-                }}
-              >
-                Back to terminal
-              </a>
-            </div>
           </div>
         )}
 
@@ -253,18 +227,6 @@ export default function App() {
                 }}
               />
             </Suspense>
-            <div className="page-link-row">
-              <a
-                href="/"
-                className="page-link"
-                onClick={(e) => {
-                  e.preventDefault()
-                  navigate('/', 'terminal')
-                }}
-              >
-                Back to terminal
-              </a>
-            </div>
           </div>
         )}
 
@@ -273,18 +235,6 @@ export default function App() {
             <Suspense fallback={<OverviewSkeleton />}>
               <ComparePage tickers={compareTickersFromPath(currentPath())} />
             </Suspense>
-            <div className="page-link-row">
-              <a
-                href="/"
-                className="page-link"
-                onClick={(e) => {
-                  e.preventDefault()
-                  navigate('/', 'terminal')
-                }}
-              >
-                Back to terminal
-              </a>
-            </div>
           </div>
         )}
 
@@ -300,29 +250,27 @@ export default function App() {
                 watchlist={watchlist}
               />
             </Suspense>
-            <div className="page-link-row">
-              <a
-                href="/"
-                className="page-link"
-                onClick={(e) => {
-                  e.preventDefault()
-                  navigate('/', 'terminal')
-                }}
-              >
-                Back to terminal
-              </a>
-            </div>
           </div>
         )}
 
         {page === 'terminal' && !ticker && !loading && !error && (
           <div className="landing">
-            <h1>Borja Ruizdelgado's - Investing Tools</h1>
-            <p className="landing-desc">
-              A browser-based investing workspace for valuation, business quality, downside risk,
-              and options-implied market pricing. Search a ticker or start from the live trending
-              list.
-            </p>
+            <h1>Borja Ruizdelgado's Trading Tools</h1>
+            <p className="landing-subtitle">Search any ticker to get started</p>
+            <div className="landing-steps">
+              <div className="landing-step">
+                <span className="landing-step__num">1</span>
+                <span className="landing-step__text">Search a stock or crypto</span>
+              </div>
+              <div className="landing-step">
+                <span className="landing-step__num">2</span>
+                <span className="landing-step__text">Read the scores &amp; verdicts</span>
+              </div>
+              <div className="landing-step">
+                <span className="landing-step__num">3</span>
+                <span className="landing-step__text">Explore the deep-dive tabs</span>
+              </div>
+            </div>
             <TrendingTickers
               onTickerClick={(nextTicker) => {
                 setActiveTab('overview')
@@ -453,24 +401,12 @@ export default function App() {
                 </ErrorBoundary>
               )}
 
-              <hr />
-              <div className="page-link-row">
-                <a
-                  href={DISCLAIMER_PATH}
-                  className="page-link"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    navigate(DISCLAIMER_PATH, 'disclaimer')
-                  }}
-                >
-                  Disclaimer
-                </a>
-              </div>
-              <SupportVault />
             </div>
           </>
         )}
       </main>
+
+      <Footer onNavigate={navigate} />
 
       {showHelp && <ShortcutHelp onClose={() => setShowHelp(false)} />}
     </div>

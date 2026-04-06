@@ -1,4 +1,11 @@
 /* ---- Responsive ---- */
+@media (max-width: 1199px) {
+  .landing-steps {
+    flex-wrap: wrap;
+    padding: 0 1rem;
+  }
+}
+
 @media (max-width: 900px) {
   :root {
     --section-gap: 88px;
@@ -184,6 +191,10 @@
 
 /* Mobile: show burger, hide nav links inline, expand search below header */
 @media (max-width: 640px) {
+  .landing-steps {
+    padding: 0;
+  }
+
   .app-header {
     position: fixed;
     top: 0;
@@ -348,10 +359,6 @@
 }
 
 @media (max-width: 600px) {
-  .trending-grid > .ticker-summary-card {
-    width: calc(50% - 0.375rem);
-  }
-
   .kpi-row {
     grid-template-columns: repeat(2, 1fr);
   }

@@ -110,11 +110,11 @@
 }
 
 .terminal-section {
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.5rem;
 }
 
 .section-heading {
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.75rem;
 }
 
 .section-heading h2 {
@@ -122,6 +122,8 @@
   font-size: 1.4rem;
   font-weight: 400;
   margin-bottom: 0.15rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .section-heading p {
@@ -186,11 +188,25 @@
   line-height: 1.15;
   min-height: 3.3rem;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  gap: 0.45rem;
   width: 100%;
   text-align: left;
   overflow-wrap: anywhere;
 }
+
+/* Verdict color chip */
+.verdict-chip {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.verdict-chip--positive { background: var(--green); }
+.verdict-chip--negative { background: var(--red); }
+.verdict-chip--neutral { background: var(--accent); }
 
 .terminal-caption,
 .terminal-copy,
@@ -307,6 +323,11 @@
   color: var(--accent);
 }
 
+@keyframes score-fill {
+  from { width: 0%; }
+  to { width: var(--fill, 0%); }
+}
+
 .score-bar {
   height: 8px;
   background: var(--border-light);
@@ -332,8 +353,8 @@
   height: 100%;
   width: var(--fill, 0%);
   z-index: 2;
-  /* keep fill element transparent — gradient comes from ::before */
   background: transparent;
+  animation: score-fill 0.6s ease-out;
 }
 
 .score-bar::after {

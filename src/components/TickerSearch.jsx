@@ -25,6 +25,7 @@ export default function TickerSearch({
   const [results, setResults] = useState([])
   const [open, setOpen] = useState(false)
   const [activeIdx, setActiveIdx] = useState(-1)
+  const [userTyping, setUserTyping] = useState(false)
   const timerRef = useRef(null)
   const wrapperRef = useRef(null)
   const internalRef = useRef(null)
@@ -51,9 +52,9 @@ export default function TickerSearch({
     }, 250)
   }, [])
 
-  // When value changes externally, trigger search
+  // When value changes from user typing, trigger search
   // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: debounced fetch updates results
-  useEffect(() => { search(value) }, [value, search])
+  useEffect(() => { if (userTyping) search(value) }, [value, search, userTyping])
 
   // Close on outside click
   useEffect(() => {
@@ -86,6 +87,7 @@ export default function TickerSearch({
   function pick(item) {
     setOpen(false)
     setResults([])
+    setUserTyping(false)
     onSelect(item.symbol)
   }
 
@@ -95,7 +97,10 @@ export default function TickerSearch({
         ref={inputEl}
         type="text"
         value={value}
-        onChange={(e) => onChange(e.target.value.toUpperCase())}
+        onChange={(e) => {
+          setUserTyping(true)
+          onChange(e.target.value.toUpperCase())
+        }}
         onFocus={() => { if (results.length > 0) setOpen(true) }}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}

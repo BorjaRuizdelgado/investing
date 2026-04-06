@@ -1,5 +1,5 @@
 import React, { useState, forwardRef } from 'react'
-import { DISCLAIMER_PATH, DONATE_PATH, WATCHLIST_PATH, SCREENER_PATH, tickerFromPath } from '../lib/routes.js'
+import { WATCHLIST_PATH, SCREENER_PATH, tickerFromPath } from '../lib/routes.js'
 import TickerSearch from './TickerSearch.jsx'
 
 const SunIcon = () => (
@@ -46,8 +46,6 @@ const Header = forwardRef(function Header(
     loading,
     activeTicker,
     activePage,
-    onNavigateDisclaimer,
-    onNavigateDonate,
     onNavigateWatchlist,
     onNavigateScreener,
     onNavigateCompare,
@@ -151,26 +149,6 @@ const Header = forwardRef(function Header(
               Discover
             </a>
           )}
-          <a
-            href={DONATE_PATH}
-            className={navCls('donate')}
-            onClick={(e) => {
-              e.preventDefault()
-              onNavigateDonate()
-            }}
-          >
-            Support
-          </a>
-          <a
-            href={DISCLAIMER_PATH}
-            className={navCls('disclaimer')}
-            onClick={(e) => {
-              e.preventDefault()
-              onNavigateDisclaimer()
-            }}
-          >
-            Disclaimer
-          </a>
           <button
             className="app-header__nav-link app-header__theme-btn"
             onClick={onToggleTheme}
@@ -231,12 +209,6 @@ const Header = forwardRef(function Header(
               Discover
             </button>
           )}
-          <button className="app-header__menu-link" onClick={() => go(onNavigateDonate)}>
-            Support
-          </button>
-          <button className="app-header__menu-link" onClick={() => go(onNavigateDisclaimer)}>
-            Disclaimer
-          </button>
           <button
             className="app-header__menu-link"
             onClick={() => {
