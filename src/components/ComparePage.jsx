@@ -191,17 +191,21 @@ export default function ComparePage({ tickers = [] }) {
 
   return (
     <div className="compare-page">
-      <h1>Stock Compare</h1>
-      <p className="subtitle">
-        Visual head-to-head built for decisions, not spreadsheet fatigue.
-      </p>
+      <div className="compare-hero-header">
+        <h1>Stock Compare</h1>
+        <p className="compare-hero-header__sub">
+          Visual head-to-head built for decisions, not spreadsheet fatigue.
+        </p>
 
-      <CompareInput onCompare={handleCompare} initialTickers={tickers} />
+        <CompareInput onCompare={handleCompare} initialTickers={tickers} />
+      </div>
 
       {!activeTickers.length && (
-        <div className="terminal-card compare-empty-state">
-          <div className="terminal-eyebrow">Popular Comparisons</div>
-          <p>Pick two tickers above, or try one of these popular matchups:</p>
+        <section className="compare-empty-state">
+          <div className="compare-empty-state__label">Popular Comparisons</div>
+          <p className="compare-empty-state__text">
+            Pick two tickers above, or try one of these popular matchups:
+          </p>
           <div className="compare-suggestions">
             {POPULAR_COMPARISONS.map(([a, b]) => (
               <button
@@ -213,7 +217,7 @@ export default function ComparePage({ tickers = [] }) {
               </button>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {loading && (
