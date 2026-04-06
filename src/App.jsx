@@ -7,6 +7,7 @@ import ValuePage from './components/ValuePage.jsx'
 import QualityPage from './components/QualityPage.jsx'
 import RiskPage from './components/RiskPage.jsx'
 import TrendingTickers from './components/TrendingTickers.jsx'
+import SupportVault from './components/SupportVault.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import TldrBanner from './components/TldrBanner.jsx'
 
@@ -414,6 +415,7 @@ export default function App() {
                 </ErrorBoundary>
               )}
 
+              <SupportVault />
             </div>
           </>
         )}
