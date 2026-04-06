@@ -15,6 +15,7 @@ import {
 } from '../lib/compare.js'
 import { COMPARE_PREFIX } from '../lib/routes.js'
 import TickerSearch from './TickerSearch.jsx'
+import Expander from './Expander.jsx'
 import CompareHero from './compare/CompareHero.jsx'
 import CompareScoreboard from './compare/CompareScoreboard.jsx'
 import ComparePerformanceChart from './compare/ComparePerformanceChart.jsx'
@@ -235,54 +236,53 @@ export default function ComparePage({ tickers = [] }) {
       )}
 
       {ready && matchup && (
-        <>
+        <div className="compare-results">
           <CompareHero left={left} right={right} summary={matchup} />
+
           <CompareScoreboard left={left} right={right} rows={matchup.rows} />
           <ComparePerformanceChart left={left} right={right} range={range} onRangeChange={setRange} />
+
           <CompareMetricDumbbells left={left} right={right} />
           <CompareInsights left={left} right={right} corrResult={corrResult} />
 
           <section className="terminal-section">
-            <div className="section-heading">
-              <h2>Raw Comparison Table</h2>
-              <p>For when you want the exact numbers behind the visual verdict.</p>
-            </div>
+            <Expander title="Raw Comparison Table">
+              <div className="terminal-card">
+                <table className="data-table compare-table">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>{left.ticker}</th>
+                      <th>{right.ticker}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {RAW_ROWS.map((row) => {
+                      const leftValue = metricValue(left, row.key)
+                      const rightValue = metricValue(right, row.key)
+                      const winner = getWinner(leftValue, rightValue, {
+                        lowerBetter: row.lowerBetter,
+                        tieThreshold: row.kind === 'score' ? 2 : 0,
+                      })
 
-            <div className="terminal-card">
-              <table className="data-table compare-table">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>{left.ticker}</th>
-                    <th>{right.ticker}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {RAW_ROWS.map((row) => {
-                    const leftValue = metricValue(left, row.key)
-                    const rightValue = metricValue(right, row.key)
-                    const winner = getWinner(leftValue, rightValue, {
-                      lowerBetter: row.lowerBetter,
-                      tieThreshold: row.kind === 'score' ? 2 : 0,
-                    })
-
-                    return (
-                      <tr key={row.key}>
-                        <td>{row.label}</td>
-                        <td className={winner === 'a' ? 'metric-better' : winner === 'b' ? 'metric-worse' : ''}>
-                          {formatCompareValue(leftValue, row.kind)}
-                        </td>
-                        <td className={winner === 'b' ? 'metric-better' : winner === 'a' ? 'metric-worse' : ''}>
-                          {formatCompareValue(rightValue, row.kind)}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+                      return (
+                        <tr key={row.key}>
+                          <td>{row.label}</td>
+                          <td className={winner === 'a' ? 'metric-better' : winner === 'b' ? 'metric-worse' : ''}>
+                            {formatCompareValue(leftValue, row.kind)}
+                          </td>
+                          <td className={winner === 'b' ? 'metric-better' : winner === 'a' ? 'metric-worse' : ''}>
+                            {formatCompareValue(rightValue, row.kind)}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </Expander>
           </section>
-        </>
+        </div>
       )}
     </div>
   )

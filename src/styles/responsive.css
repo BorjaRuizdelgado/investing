@@ -140,7 +140,9 @@
   }
 
   .compare-battle,
-  .compare-relationship-grid {
+  .compare-relationship-grid,
+  .compare-mid-grid,
+  .compare-insight-grid {
     grid-template-columns: 1fr;
   }
 

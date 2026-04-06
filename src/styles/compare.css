@@ -618,3 +618,23 @@
   padding: 3rem;
   color: var(--text-light);
 }
+
+/* ---------- Mid-grid: Scoreboard + Chart side-by-side ---------- */
+.compare-mid-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* ---------- Insight 2-col layout ---------- */
+.compare-insight-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.compare-insight-grid__edges {
+  display: grid;
+  gap: 1rem;
+}

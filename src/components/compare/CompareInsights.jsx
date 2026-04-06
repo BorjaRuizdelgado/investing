@@ -46,9 +46,11 @@ export default function CompareInsights({ left, right, corrResult }) {
         <p>Fast takeaways on where each stock has the edge and how differently they trade.</p>
       </div>
 
-      <div className="terminal-grid terminal-grid--3">
-        <InsightList title="Why It Leads" items={leftEdges} ticker={left.ticker} />
-        <InsightList title="Why It Leads" items={rightEdges} ticker={right.ticker} />
+      <div className="compare-insight-grid">
+        <div className="compare-insight-grid__edges">
+          <InsightList title="Why It Leads" items={leftEdges} ticker={left.ticker} />
+          <InsightList title="Why It Leads" items={rightEdges} ticker={right.ticker} />
+        </div>
         <div className="terminal-card compare-insight-card">
           <div className="terminal-eyebrow">Market Relationship</div>
           <h3>{corrVal != null ? corrVal.toFixed(2) : 'N/A'}</h3>
