@@ -157,7 +157,7 @@
 
 .terminal-card--clickable:hover {
   border-color: var(--accent);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-card-strong);
 }
 
 .terminal-eyebrow {
@@ -297,7 +297,7 @@
   padding: 0.45rem 0.65rem;
   border-radius: 4px;
   font-size: 0.82rem;
-  background: rgba(77, 106, 97, 0.06);
+  background: var(--accent-subtle);
 }
 
 .scenario-gap--positive {
@@ -350,7 +350,7 @@
 
 .score-card--clickable:hover {
   border-color: var(--accent);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-card-strong);
 }
 
 .score-card--positive {

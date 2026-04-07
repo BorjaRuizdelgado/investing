@@ -1,5 +1,6 @@
 import React, { lazy, Suspense, useState, useMemo } from 'react'
 import { fmt, fmtCompact, fmtPct } from '../lib/format.js'
+import { tone } from '../lib/scoring.js'
 import ScoreCard from './ScoreCard.jsx'
 import ReasonList from './ReasonList.jsx'
 import Tooltip from './Tooltip.jsx'
@@ -53,13 +54,6 @@ function DescriptionBlock({ text }) {
       </button>
     </div>
   )
-}
-
-function tone(score) {
-  if (!Number.isFinite(score)) return 'neutral'
-  if (score >= 70) return 'positive'
-  if (score < 40) return 'negative'
-  return 'neutral'
 }
 
 function VerdictCard({ label, value, caption, tooltip, onClick }) {

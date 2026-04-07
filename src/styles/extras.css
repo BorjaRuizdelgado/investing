@@ -235,7 +235,7 @@
 
 .trending-card:hover {
   border-color: var(--accent);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-card);
 }
 
 .trending-card:focus-visible {
@@ -297,13 +297,13 @@
   width: 100%;
   max-width: 720px;
   margin: 1.5rem auto;
-  border: 1px dashed #b5b0a5;
-  background: #e9e5dc;
-  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.04);
+  border: 1px dashed var(--border);
+  background: var(--bg-alt);
+  box-shadow: var(--shadow-card);
 }
 
 .support-vault[open] {
-  background: #e5e0d5;
+  background: var(--bg-alt);
 }
 
 .support-vault__summary {

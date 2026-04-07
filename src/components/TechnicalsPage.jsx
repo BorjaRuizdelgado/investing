@@ -5,14 +5,8 @@ import MarketSentimentCard from './MarketSentimentCard.jsx'
 import MetricTable from './MetricTable.jsx'
 import ReasonList from './ReasonList.jsx'
 import { METRIC_TIPS } from '../lib/metricTips.js'
+import { tone } from '../lib/scoring.js'
 import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, getColors, mobileMargin } from '../lib/theme.js'
-
-function tone(score) {
-  if (!Number.isFinite(score)) return 'neutral'
-  if (score >= 70) return 'positive'
-  if (score < 40) return 'negative'
-  return 'neutral'
-}
 
 function PriceBBChart({ indicators }) {
   const data = useMemo(() => {
