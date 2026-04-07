@@ -423,6 +423,10 @@
   line-height: 1.7;
 }
 
+.expander-body--chart {
+  padding: 0.25rem 0 0.5rem;
+}
+
 /* ---- Tables ---- */
 .data-table {
   width: 100%;

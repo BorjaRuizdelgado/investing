@@ -652,4 +652,7 @@
   .screener-card__metrics {
     gap: 0.35rem;
   }
+  .screener-card__range {
+    display: none;
+  }
 }

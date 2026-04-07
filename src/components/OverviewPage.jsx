@@ -348,7 +348,7 @@ export default function OverviewPage({
           <div className="section-heading">
             <h2>Fair Value Scenario</h2>
           </div>
-          <ScenarioCard fairValue={research.valuation.fairValue} />
+          <ScenarioCard fairValue={research.valuation.fairValue} spot={spot} />
         </section>
       )}
 
