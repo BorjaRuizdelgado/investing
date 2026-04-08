@@ -24,11 +24,11 @@ function buildSentence(ticker, score, signals) {
 export default React.memo(function DecisionCard({ ticker, score, signals }) {
   const t = tone(score, 65)
   const text = buildSentence(ticker, score, signals)
-  const icon = t === 'positive' ? '✓' : t === 'negative' ? '✗' : '—'
+  const icon = t === 'positive' ? '↑' : t === 'negative' ? '↓' : '—'
 
   return (
     <div className={`decision-card decision-card--${t}`}>
-      <div className="decision-card__icon" aria-hidden="true">{icon}</div>
+      <span className="decision-card__icon" aria-hidden="true">{icon}</span>
       <div className="decision-card__body">
         <div className="decision-card__label">Bottom Line</div>
         <p className="decision-card__text">{text}</p>
