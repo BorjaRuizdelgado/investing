@@ -979,16 +979,6 @@ const GOOGLE_RSS_XML = `<?xml version="1.0" encoding="UTF-8"?>
 </item>
 </channel></rss>`
 
-const FINNHUB_NEWS = [
-  {
-    headline: 'Apple announces new product line',
-    url: 'https://example.com/fh-apple',
-    source: 'Finnhub',
-    datetime: 1700005000,
-    image: 'https://example.com/fh-img.jpg',
-  },
-]
-
 function mockFetchImplNews(url) {
   const u = typeof url === 'string' ? url : url.toString()
 
@@ -1007,10 +997,6 @@ function mockFetchImplNews(url) {
   // Google News RSS
   if (u.includes('news.google.com/rss'))
     return Promise.resolve(new Response(GOOGLE_RSS_XML, { status: 200 }))
-
-  // Finnhub
-  if (u.includes('finnhub.io'))
-    return Promise.resolve(new Response(JSON.stringify(FINNHUB_NEWS), { status: 200 }))
 
   return Promise.resolve(new Response('Not found', { status: 404 }))
 }
@@ -1067,7 +1053,7 @@ describe('Worker /api/news', () => {
       expect(article).toHaveProperty('feed')
       expect(article).toHaveProperty('sentiment')
       expect(['positive', 'neutral', 'negative']).toContain(article.sentiment)
-      expect(['yahoo', 'google', 'finnhub']).toContain(article.feed)
+      expect(['yahoo', 'google']).toContain(article.feed)
     }
   })
 
@@ -1083,12 +1069,11 @@ describe('Worker /api/news', () => {
     expect(titles).toContain('AAPL hits new all-time high')
   })
 
-  it('includes Google News and Finnhub articles', async () => {
+  it('includes Google News articles', async () => {
     const res = await callWorker('/api/news?ticker=AAPL')
     const data = await res.json()
     const feeds = new Set(data.articles.map((a) => a.feed))
     expect(feeds.has('google')).toBe(true)
-    expect(feeds.has('finnhub')).toBe(true)
   })
 
   it('parses Google RSS with CDATA and XML entities', async () => {
@@ -1155,18 +1140,5 @@ describe('Worker /api/news — all sources fail', () => {
   })
 })
 
-describe('Worker /api/news — crypto ticker', () => {
-  beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn(mockFetchImplNews))
-  })
 
-  it('skips Finnhub for crypto tickers', async () => {
-    const fetchSpy = vi.mocked(fetch)
-    await callWorker('/api/news?ticker=BTC')
-    const finnhubCalls = fetchSpy.mock.calls.filter(
-      (c) => c[0]?.toString().includes('finnhub.io')
-    )
-    expect(finnhubCalls.length).toBe(0)
-  })
-})
 

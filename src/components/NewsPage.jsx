@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { fetchNews } from '../lib/fetcher.js'
 
 const FILTERS = ['all', 'positive', 'neutral', 'negative']
-const FEED_LABELS = { yahoo: 'Yahoo Finance', google: 'Google News', finnhub: 'Finnhub' }
+const FEED_LABELS = { yahoo: 'Yahoo Finance', google: 'Google News' }
 
 function timeAgo(isoDate) {
   if (!isoDate) return ''
@@ -149,9 +149,7 @@ export default function NewsPage({ ticker }) {
       <section className="terminal-section">
         <div className="section-heading">
           <h2>News</h2>
-          <p>
-            {news?.count ?? 0} headlines from {news?.sources?.join(', ') || 'multiple sources'}
-          </p>
+            <p>Latest headlines and sentiment for {ticker} aggregated from Yahoo Finance, Google News, and Finnhub.</p>
         </div>
 
         {/* Sentiment summary bar */}
