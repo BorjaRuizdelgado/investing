@@ -5,14 +5,8 @@ import MarketSentimentCard from './MarketSentimentCard.jsx'
 import MetricTable from './MetricTable.jsx'
 import ReasonList from './ReasonList.jsx'
 import { METRIC_TIPS } from '../lib/metricTips.js'
+import { tone } from '../lib/scoring.js'
 import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, getColors, mobileMargin } from '../lib/theme.js'
-
-function tone(score) {
-  if (!Number.isFinite(score)) return 'neutral'
-  if (score >= 70) return 'positive'
-  if (score < 40) return 'negative'
-  return 'neutral'
-}
 
 function PriceBBChart({ indicators }) {
   const data = useMemo(() => {
@@ -94,7 +88,6 @@ function PriceBBChart({ indicators }) {
 
   return (
     <>
-      <div className="section-heading"><h2>Price &amp; Bollinger Bands</h2></div>
       <Plot data={data} layout={layout} config={PLOTLY_CONFIG} useResizeHandler style={{ width: '100%' }} />
     </>
   )
@@ -157,7 +150,6 @@ function RSIChart({ indicators }) {
 
   return (
     <>
-      <div className="section-heading"><h2>RSI</h2></div>
       <Plot data={data} layout={layout} config={PLOTLY_CONFIG} useResizeHandler style={{ width: '100%' }} />
     </>
   )
@@ -208,7 +200,6 @@ function MACDChart({ indicators }) {
 
   return (
     <>
-      <div className="section-heading"><h2>MACD</h2></div>
       <Plot data={data} layout={layout} config={PLOTLY_CONFIG} useResizeHandler style={{ width: '100%' }} />
     </>
   )
@@ -238,15 +229,24 @@ export default function TechnicalsPage({ research }) {
 
       {technicals.indicators && (
         <>
-          <section className="terminal-section">
-            <PriceBBChart indicators={technicals.indicators} />
-          </section>
-          <section className="terminal-section">
-            <RSIChart indicators={technicals.indicators} />
-          </section>
-          <section className="terminal-section">
-            <MACDChart indicators={technicals.indicators} />
-          </section>
+          <details className="expander" open>
+            <summary>Price &amp; Bollinger Bands</summary>
+            <div className="expander-body expander-body--chart">
+              <PriceBBChart indicators={technicals.indicators} />
+            </div>
+          </details>
+          <details className="expander">
+            <summary>RSI</summary>
+            <div className="expander-body expander-body--chart">
+              <RSIChart indicators={technicals.indicators} />
+            </div>
+          </details>
+          <details className="expander">
+            <summary>MACD</summary>
+            <div className="expander-body expander-body--chart">
+              <MACDChart indicators={technicals.indicators} />
+            </div>
+          </details>
         </>
       )}
 

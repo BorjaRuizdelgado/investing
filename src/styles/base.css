@@ -18,6 +18,17 @@
   --green-bg: rgba(61, 122, 90, 0.08);
   --red-bg: rgba(176, 80, 64, 0.08);
 
+  --accent-hover: #3d5a51;
+  --accent-subtle: rgba(77, 106, 97, 0.06);
+  --accent-muted: rgba(77, 106, 97, 0.05);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.04);
+  --shadow-card-strong: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --tooltip-bg: #2f2f2f;
+  --tooltip-text: #f0efeb;
+  --on-accent: #fff;
+  --error-bg: #fdf2f0;
+  --error-border: #e8c5bf;
+
   --font-serif: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
   --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
@@ -42,6 +53,17 @@
   --red: #f08070;
   --green-bg: rgba(122, 222, 158, 0.1);
   --red-bg: rgba(240, 128, 112, 0.1);
+
+  --accent-hover: #5a8a7e;
+  --accent-subtle: rgba(125, 179, 165, 0.06);
+  --accent-muted: rgba(125, 179, 165, 0.05);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-card-strong: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --tooltip-bg: #2f2f2f;
+  --tooltip-text: #f0efeb;
+  --on-accent: #fff;
+  --error-bg: rgba(208, 96, 80, 0.1);
+  --error-border: rgba(208, 96, 80, 0.3);
 }
 
 [data-theme='dark'] ::selection {
@@ -49,24 +71,44 @@
 }
 
 [data-theme='dark'] .error-box {
-  background: rgba(208, 96, 80, 0.1);
-  border-color: rgba(208, 96, 80, 0.3);
+  background: var(--error-bg);
+  border-color: var(--error-border);
 }
 
 [data-theme='dark'] .tip-icon {
-  background: #555;
+  background: var(--text-muted);
 }
 
 [data-theme='dark'] .app-header__search-btn:hover {
-  background: #5a8a7e;
+  background: var(--accent-hover);
 }
 
 [data-theme='dark'] .overlay-pill--active:hover {
-  background: #5a8a7e;
+  background: var(--accent-hover);
 }
 
 [data-theme='dark'] .tldr-banner {
-  background: rgba(125, 179, 165, 0.06);
+  background: var(--accent-subtle);
+}
+
+[data-theme='dark'] .decision-card {
+  background: var(--accent-subtle);
+}
+
+[data-theme='dark'] .fund-accordion-group {
+  border-color: var(--border);
+}
+
+[data-theme='dark'] .fund-accordion__header:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme='dark'] .fund-accordion__count {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'] .section-heading__count {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 [data-theme='dark'] .score-card--positive {
@@ -77,15 +119,6 @@
 [data-theme='dark'] .score-card--negative {
   border-color: var(--red);
   background: var(--red-bg);
-}
-
-[data-theme='dark'] .support-vault {
-  border-color: #444;
-  background: #2a2a2a;
-}
-
-[data-theme='dark'] .support-vault[open] {
-  background: #2e2e2e;
 }
 
 /* ---- Shared card surface ---- */

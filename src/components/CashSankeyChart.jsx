@@ -1,18 +1,13 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import Plot from 'react-plotly.js'
 import { getColors, chartHeight, hexToRgba } from '../lib/theme.js'
+import { fmtCompact } from '../lib/format.js'
 import Skeleton from './Skeleton.jsx'
 
-/** Compact label format for Sankey nodes — 1 decimal place to keep labels short. */
+/** Compact label for Sankey nodes — 1 decimal to keep labels short. Returns '' for invalid. */
 function fmtSankeyLabel(val) {
   if (val == null || !Number.isFinite(val)) return ''
-  const abs = Math.abs(val)
-  const sign = val < 0 ? '-' : ''
-  if (abs >= 1e12) return `${sign}$${(abs / 1e12).toFixed(1)}T`
-  if (abs >= 1e9)  return `${sign}$${(abs / 1e9).toFixed(1)}B`
-  if (abs >= 1e6)  return `${sign}$${(abs / 1e6).toFixed(1)}M`
-  if (abs >= 1e3)  return `${sign}$${(abs / 1e3).toFixed(0)}K`
-  return `${sign}$${Math.round(abs)}`
+  return fmtCompact(val, 1)
 }
 
 /**

@@ -76,12 +76,12 @@
 
 .screener-collection:hover {
   border-color: var(--accent);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-card);
 }
 
 .screener-collection--active {
   border-color: var(--accent);
-  background: rgba(77, 106, 97, 0.06);
+  background: var(--accent-subtle);
 }
 
 .screener-collection__icon {
@@ -177,7 +177,7 @@
 
 .screener-load-more__btn:hover {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 /* ---- Sector filter pills ---- */
@@ -226,12 +226,12 @@
 
 .screener-sort__btn--active {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border-color: var(--accent);
 }
 
 .screener-sort__btn--active:hover {
-  background: #3d5a51;
+  background: var(--accent-hover);
 }
 
 .screener-sort__arrow {
@@ -295,7 +295,7 @@
 
 .screener-card:hover {
   border-color: var(--accent);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-card-strong);
 }
 
 .screener-card--skeleton {
@@ -651,5 +651,8 @@
   }
   .screener-card__metrics {
     gap: 0.35rem;
+  }
+  .screener-card__range {
+    display: none;
   }
 }

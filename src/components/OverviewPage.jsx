@@ -1,10 +1,12 @@
 import React, { lazy, Suspense, useState, useMemo } from 'react'
 import { fmt, fmtCompact, fmtPct } from '../lib/format.js'
+import { tone } from '../lib/scoring.js'
 import ScoreCard from './ScoreCard.jsx'
 import ReasonList from './ReasonList.jsx'
 import Tooltip from './Tooltip.jsx'
 import ScenarioCard from './ScenarioCard.jsx'
 import MarketSentimentCard from './MarketSentimentCard.jsx'
+import DecisionCard from './DecisionCard.jsx'
 import { METRIC_TIPS } from '../lib/metricTips.js'
 
 // Lazy-load EarningsCalendar — it imports Plotly (~3 MB) for the EPS chart.
@@ -52,13 +54,6 @@ function DescriptionBlock({ text }) {
       </button>
     </div>
   )
-}
-
-function tone(score) {
-  if (!Number.isFinite(score)) return 'neutral'
-  if (score >= 70) return 'positive'
-  if (score < 40) return 'negative'
-  return 'neutral'
 }
 
 function VerdictCard({ label, value, caption, tooltip, onClick }) {
@@ -109,7 +104,7 @@ function availableScoreCards(research) {
   return [
     research?.opportunity?.hasData
       ? {
-          label: 'Opportunity',
+          label: 'Total Score',
           value: research.opportunity.score,
           detail: research.opportunity.label,
           tooltip: METRIC_TIPS.opportunityScore,
@@ -251,6 +246,14 @@ export default function OverviewPage({
 
   return (
     <>
+      {research?.opportunity?.hasData && (
+        <DecisionCard
+          ticker={ticker}
+          score={research.opportunity.score}
+          signals={research.signals}
+        />
+      )}
+
       <section className="terminal-hero">
         <div>
           <div className="hero-title-row">
@@ -339,7 +342,7 @@ export default function OverviewPage({
           <div className="section-heading">
             <h2>Fair Value Scenario</h2>
           </div>
-          <ScenarioCard fairValue={research.valuation.fairValue} />
+          <ScenarioCard fairValue={research.valuation.fairValue} spot={spot} />
         </section>
       )}
 

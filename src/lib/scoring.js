@@ -8,6 +8,17 @@ function safeNumber(value) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null
 }
 
+/**
+ * Map a 0-100 score to a CSS-class-friendly tone string.
+ * Default thresholds: >= 70 → 'positive', < 40 → 'negative', else 'neutral'.
+ */
+export function tone(score, posThreshold = 70, negThreshold = 40) {
+  if (!Number.isFinite(score)) return 'neutral'
+  if (score >= posThreshold) return 'positive'
+  if (score < negThreshold) return 'negative'
+  return 'neutral'
+}
+
 export function averageScore(parts) {
   const valid = parts.map(safeNumber).filter((v) => v != null)
   if (valid.length === 0) return null

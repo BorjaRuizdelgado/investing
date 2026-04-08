@@ -1,26 +1,45 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Tooltip from './Tooltip.jsx'
 import ScoreCard from './ScoreCard.jsx'
 import { fmt, fmtCompact, fmtPct, fmtRatio, fmtInt } from '../lib/format.js'
 import { metricSentiment, buildFundamentalsScore } from '../lib/scoring.js'
 import { METRIC_TIPS, FUNDAMENTAL_TIPS as TIPS } from '../lib/metricTips.js'
+import { buildSectorMedians, isLowerBetter } from '../lib/sectorMedians.js'
 
 function tsToDate(ts) {
   if (!ts) return null
   return new Date(ts * 1000).toLocaleDateString()
 }
 
-function FundamentalsTableSection({ title, items }) {
+function sectorCompare(key, rawValue, medians) {
+  if (!medians || rawValue == null || !Number.isFinite(rawValue)) return null
+  const median = medians[key]
+  if (median == null || !Number.isFinite(median)) return null
+  const lower = isLowerBetter(key)
+  const better = lower ? rawValue < median : rawValue > median
+  const worse = lower ? rawValue > median : rawValue < median
+  return { median, better, worse }
+}
+
+function FundamentalsTableSection({ title, items, defaultOpen, medians }) {
   const visible = items.filter(Boolean)
+  const [open, setOpen] = useState(!!defaultOpen)
   if (!visible.length) return null
 
   return (
-    <section className="terminal-section">
-      <div className="fundamentals-section-block">
-        <div className="section-heading">
-          <h2>{title}</h2>
-        </div>
-        <div className="terminal-card fundamentals-table-card">
+    <div className={`fund-accordion${open ? ' fund-accordion--open' : ''}`}>
+      <button
+        className="fund-accordion__header"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <svg className="fund-accordion__chevron" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span className="fund-accordion__title">{title}</span>
+        <span className="fund-accordion__count">{visible.length}</span>
+      </button>
+      {open && (
+        <div className="fund-accordion__body">
           <table className="data-table fundamentals-table">
             <thead>
               <tr>
@@ -34,6 +53,7 @@ function FundamentalsTableSection({ title, items }) {
                 const valueClass = sentiment
                   ? `fundamentals-table-value fund-${sentiment}`
                   : 'fundamentals-table-value'
+                const cmp = sectorCompare(item.key, item.rawValue, medians)
                 return (
                   <tr key={item.id}>
                     <td>
@@ -42,15 +62,22 @@ function FundamentalsTableSection({ title, items }) {
                         {item.tip && <Tooltip text={item.tip} />}
                       </span>
                     </td>
-                    <td className={valueClass}>{item.value}</td>
+                    <td className={valueClass}>
+                      {item.value}
+                      {cmp && (
+                        <span className={`fund-vs ${cmp.better ? 'fund-vs--better' : 'fund-vs--worse'}`}>
+                          {cmp.better ? '▲' : '▼'}
+                        </span>
+                      )}
+                    </td>
                   </tr>
                 )
               })}
             </tbody>
           </table>
         </div>
-      </div>
-    </section>
+      )}
+    </div>
   )
 }
 
@@ -517,6 +544,8 @@ export default function FundamentalsPanel({ fundamentals }) {
     ),
   ].filter(Boolean)
 
+  const medians = buildSectorMedians(f)
+
   return (
     <div className="fundamentals">
       <section className="terminal-section">
@@ -553,18 +582,19 @@ export default function FundamentalsPanel({ fundamentals }) {
         )}
       </section>
 
-      <div className="fundamentals-grid">
-        <FundamentalsTableSection title="Price" items={priceItems} />
-        <FundamentalsTableSection title="Valuation" items={valuationItems} />
+      <div className="fund-accordion-group">
+        <FundamentalsTableSection title="Price" items={priceItems} defaultOpen medians={medians} />
+        <FundamentalsTableSection title="Valuation" items={valuationItems} defaultOpen medians={medians} />
         <FundamentalsTableSection
           title="Profitability & Income Statement"
           items={profitabilityItems}
+          medians={medians}
         />
-        <FundamentalsTableSection title="Trading" items={tradingItems} />
-        <FundamentalsTableSection title="Balance Sheet & Cash Flow" items={balanceItems} />
-        <FundamentalsTableSection title="Analyst Estimates" items={analystItems} />
-        <FundamentalsTableSection title="Dividends" items={dividendItems} />
-        <FundamentalsTableSection title="Short Interest" items={shortInterestItems} />
+        <FundamentalsTableSection title="Trading" items={tradingItems} medians={medians} />
+        <FundamentalsTableSection title="Balance Sheet & Cash Flow" items={balanceItems} medians={medians} />
+        <FundamentalsTableSection title="Analyst Estimates" items={analystItems} medians={medians} />
+        <FundamentalsTableSection title="Dividends" items={dividendItems} medians={medians} />
+        <FundamentalsTableSection title="Short Interest" items={shortInterestItems} medians={medians} />
       </div>
     </div>
   )

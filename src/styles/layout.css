@@ -90,7 +90,7 @@
 .app-header__search-btn {
   padding: 0.5rem 1.1rem;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border: 1.2px solid var(--accent);
   font-family: var(--font-sans);
   font-size: 0.82rem;
@@ -103,7 +103,7 @@
 }
 
 .app-header__search-btn:hover {
-  background: #3d5a51;
+  background: var(--accent-hover);
 }
 
 .app-header__search-btn:disabled {
@@ -399,7 +399,7 @@
 
 .donations-copy-btn:hover {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 /* Toggle switch for multi-expiry computation */

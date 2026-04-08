@@ -166,7 +166,7 @@
 
 .watchlist-card:hover {
   border-color: var(--accent);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-card);
 }
 
 .watchlist-card--saved {

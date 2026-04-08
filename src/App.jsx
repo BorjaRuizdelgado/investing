@@ -325,7 +325,7 @@ export default function App() {
             </div>
 
             <div className="tab-content" key={theme}>
-              {activeTabTldr && <TldrBanner text={activeTabTldr.text} tone={activeTabTldr.tone} />}
+              {activeTabTldr && !(activeTab === 'overview' && research?.opportunity?.hasData) && <TldrBanner text={activeTabTldr.text} tone={activeTabTldr.tone} />}
               {activeTab === 'overview' && (
                 <ErrorBoundary name="OverviewPage">
                   <OverviewPage

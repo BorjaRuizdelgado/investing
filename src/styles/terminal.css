@@ -157,7 +157,7 @@
 
 .terminal-card--clickable:hover {
   border-color: var(--accent);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-card-strong);
 }
 
 .terminal-eyebrow {
@@ -246,6 +246,78 @@
   font-weight: 600;
 }
 
+/* Visual range bar for fair value */
+.scenario-range {
+  margin-top: 0.75rem;
+}
+
+.scenario-range__bar {
+  position: relative;
+  height: 8px;
+  background: var(--border-light);
+  border-radius: 4px;
+  overflow: visible;
+}
+
+.scenario-range__zone {
+  position: absolute;
+  left: 25%;
+  right: 25%;
+  top: 0;
+  bottom: 0;
+  background: rgba(46, 125, 50, 0.15);
+  border-radius: 4px;
+}
+
+.scenario-range__marker {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.scenario-range__labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.scenario-gap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  background: var(--accent-subtle);
+}
+
+.scenario-gap--positive {
+  background: var(--green-bg);
+  color: var(--green);
+}
+
+.scenario-gap--negative {
+  background: var(--red-bg);
+  color: var(--red);
+}
+
+.scenario-gap__price {
+  font-weight: 600;
+}
+
+.scenario-gap__text {
+  font-weight: 500;
+}
+
 .score-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -278,7 +350,7 @@
 
 .score-card--clickable:hover {
   border-color: var(--accent);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-card-strong);
 }
 
 .score-card--positive {
