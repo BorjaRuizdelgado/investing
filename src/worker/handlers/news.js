@@ -31,7 +31,18 @@ async function fetchYahooNews(ticker) {
       `/v1/finance/search?q=${encodeURIComponent(yfTicker)}&quotesCount=0&newsCount=20&enableFuzzyQuery=false&quotesQueryId=tss_match_phrase_query&newsQueryId=news_cie_ves498`
     )
     const items = data?.news || []
-    return items.map((n) => ({
+    // Filter to articles actually related to this ticker — Yahoo's search
+    // endpoint returns loosely-related news; relatedTickers + title check
+    // keeps only relevant headlines.
+    const norm = normalizeTicker(ticker).toUpperCase()
+    const relevant = items.filter((n) => {
+      const tickers = (n.relatedTickers || []).map((t) => t.toUpperCase())
+      if (tickers.includes(norm) || tickers.includes(yfTicker.toUpperCase())) return true
+      // Fallback: ticker symbol appears in the title
+      const titleUpper = (n.title || '').toUpperCase()
+      return titleUpper.includes(norm)
+    })
+    return relevant.map((n) => ({
       title: n.title || '',
       url: n.link || '',
       source: n.publisher || 'Yahoo Finance',
