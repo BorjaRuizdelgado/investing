@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useState, useMemo } from 'react'
 import { fmt, fmtCompact, fmtPct } from '../lib/format.js'
-import { tone } from '../lib/scoring.js'
+import { tone, buildFundamentalsScore } from '../lib/scoring.js'
 import ScoreCard from './ScoreCard.jsx'
 import ReasonList from './ReasonList.jsx'
 import Tooltip from './Tooltip.jsx'
@@ -98,9 +98,11 @@ const SCORE_TO_TAB = {
   Risk: 'risk',
   Technicals: 'technicals',
   Options: 'options',
+  Fundamentals: 'fundamentals',
 }
 
-function availableScoreCards(research) {
+function availableScoreCards(research, fundamentals) {
+  const fundScore = fundamentals ? buildFundamentalsScore(fundamentals) : null
   return [
     research?.opportunity?.hasData
       ? {
@@ -151,6 +153,14 @@ function availableScoreCards(research) {
           tooltip: METRIC_TIPS.optionsScore,
         }
       : null,
+    fundScore?.hasData
+      ? {
+          label: 'Fundamentals',
+          value: fundScore.score,
+          detail: fundScore.label,
+          tooltip: METRIC_TIPS.fundamentalsScore,
+        }
+      : null,
   ].filter(Boolean)
 }
 
@@ -198,7 +208,7 @@ export default function OverviewPage({
 }) {
   const title = fundamentals?.longName || fundamentals?.name || ticker
   const sectorLine = [fundamentals?.sector, fundamentals?.industry].filter(Boolean).join(' · ')
-  const scoreCards = useMemo(() => availableScoreCards(research), [research])
+  const scoreCards = useMemo(() => availableScoreCards(research, fundamentals), [research, fundamentals])
   const verdicts = useMemo(() => [
     research?.valuation?.hasData
       ? {
@@ -238,7 +248,7 @@ export default function OverviewPage({
   // Stable callback map so memoized children don't re-render due to new arrow functions
   const tabCallbacks = useMemo(() => {
     if (!onTabChange) return {}
-    const ids = ['value', 'quality', 'risk', 'technicals', 'options']
+    const ids = ['value', 'quality', 'risk', 'technicals', 'options', 'fundamentals']
     const map = {}
     for (const id of ids) map[id] = () => onTabChange(id)
     return map

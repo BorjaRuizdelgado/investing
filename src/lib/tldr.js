@@ -1,3 +1,5 @@
+import { buildFundamentalsScore } from './scoring.js'
+
 /**
  * Build plain-English TL;DR summaries for each analysis tab.
  * Every function returns { text, tone } or null if insufficient data.
@@ -55,18 +57,18 @@ export function valuationTldr(research, fundamentals) {
   if (score >= 70) {
     return {
       tone: 'positive',
-      text: `${ticker || 'This stock'} looks undervalued compared to sector peers. Most valuation metrics sit below the sector median.`,
+      text: `${ticker || 'This stock'} looks undervalued — the available valuation metrics suggest the price is cheap relative to earnings, cash flow, or book value.`,
     }
   }
   if (score >= 50) {
     return {
       tone: 'neutral',
-      text: `${ticker || 'This stock'} appears roughly fairly valued — not an obvious bargain, but not overpriced either.`,
+      text: `${ticker || 'This stock'} appears roughly fairly valued — not an obvious bargain, but not stretched either.`,
     }
   }
   return {
     tone: 'negative',
-    text: `${ticker || 'This stock'} looks expensive relative to the sector. You're paying a premium here — make sure the quality justifies it.`,
+    text: `${ticker || 'This stock'} looks expensive on the available metrics. You are paying a premium — make sure the business quality justifies it.`,
   }
 }
 
@@ -79,7 +81,7 @@ export function qualityTldr(research, fundamentals) {
   if (score >= 70) {
     return {
       tone: 'positive',
-      text: `${ticker || 'This company'} shows strong fundamentals — healthy margins, solid growth, and consistent cash generation.`,
+      text: `${ticker || 'This company'} shows strong business quality — healthy margins, solid returns on capital, and consistent cash generation.`,
     }
   }
   if (score >= 45) {
@@ -90,7 +92,7 @@ export function qualityTldr(research, fundamentals) {
   }
   return {
     tone: 'negative',
-    text: `${ticker || 'This company'} has weak business fundamentals. Margins, growth, or cash generation are lagging behind peers.`,
+    text: `${ticker || 'This company'} has weak business quality. Margins, returns, or cash generation are lagging.`,
   }
 }
 
@@ -126,18 +128,18 @@ export function technicalsTldr(research) {
   if (score >= 70) {
     return {
       tone: 'positive',
-      text: 'Price momentum is bullish — RSI, moving averages, and volume are all pointing upward.',
+      text: 'Price momentum leans bullish — the weight of RSI, moving averages, and volume signals is positive.',
     }
   }
   if (score >= 40) {
     return {
       tone: 'neutral',
-      text: 'Technical signals are mixed — no clear trend. Wait for confirmation before acting.',
+      text: 'Technical signals are mixed — no clear trend direction. Wait for confirmation before acting on momentum alone.',
     }
   }
   return {
     tone: 'negative',
-    text: 'Momentum is bearish — price is under pressure with weak technical signals across the board.',
+    text: 'Momentum leans bearish — price is under pressure with most technical signals pointing down.',
   }
 }
 
@@ -164,7 +166,7 @@ export function optionsTldr(analysis, fundamentals, ticker) {
   if (!analysis) {
     return {
       tone: 'neutral',
-      text: `${name} does not currently have usable listed options data here, so this tab is mainly a placeholder rather than a decision input.`,
+      text: `${name} does not have listed options data available. This tab requires actively traded options to generate forecasts.`,
     }
   }
 
@@ -185,9 +187,24 @@ export function fundamentalsTldr(fundamentals) {
   const name = fundamentals?.symbol || fundamentals?.shortName || 'This company'
   if (!fundamentals) return null
 
+  const { score } = buildFundamentalsScore(fundamentals)
+
+  if (Number.isFinite(score) && score >= 70) {
+    return {
+      tone: 'positive',
+      text: `${name} raw fundamentals look strong overall — most metrics sit in healthy territory relative to standard thresholds.`,
+    }
+  }
+  if (Number.isFinite(score) && score < 45) {
+    return {
+      tone: 'negative',
+      text: `${name} raw fundamentals flag some concerns. Review the sections below to see which specific metrics are lagging.`,
+    }
+  }
+
   return {
     tone: 'neutral',
-    text: `${name} raw fundamentals live here. Use this tab when you want the reference numbers behind the higher-level value, quality, and risk summaries.`,
+    text: `${name} raw fundamentals are mixed or average. Use the sections below to see the reference numbers behind the value, quality, and risk summaries.`,
   }
 }
 

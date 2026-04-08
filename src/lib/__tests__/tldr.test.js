@@ -243,7 +243,7 @@ describe('optionsTldr', () => {
   it('returns neutral when no analysis', () => {
     const res = optionsTldr(null, { symbol: 'AAPL' }, 'AAPL')
     expect(res.tone).toBe('neutral')
-    expect(res.text).toContain('placeholder')
+    expect(res.text).toContain('does not have listed options data')
   })
 
   it('returns neutral with expected move', () => {

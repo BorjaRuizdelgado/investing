@@ -47,7 +47,7 @@ export const METRIC_TIPS = {
   qualityScore:
     'Composite score from the available profitability, growth, and cash-generation inputs only.',
   riskScore:
-    'Composite score from the available leverage, liquidity, volatility, and event-risk inputs only.',
+    'Composite risk score from leverage, liquidity, volatility, and event-risk inputs. Lower means safer; higher means riskier.',
   optionsScore: 'Composite score from the available options-implied positioning inputs only.',
   fundamentalsScore: 'Composite score from the available raw fundamental fields only.',
   technicalsScore:
@@ -64,10 +64,10 @@ export const METRIC_TIPS = {
     'Relationship between 50-day and 200-day simple moving averages. Golden cross (50 > 200) is bullish; death cross is bearish.',
   volumeTrend:
     'Ratio of 5-day average volume to 20-day average volume. Above 1.5 suggests unusual activity.',
-  valuationVerdict: 'High-level interpretation of the current valuation inputs.',
-  qualityVerdict: 'High-level interpretation of the current business quality inputs.',
-  riskVerdict: 'High-level interpretation of the current risk inputs.',
-  fairValueRange: 'Scenario range based on the valuation methods available for this ticker.',
+  valuationVerdict: 'Overall valuation read based on P/E, P/S, FCF yield, and analyst targets. Undervalued means the price looks cheap relative to fundamentals.',
+  qualityVerdict: 'Overall business quality based on margins, returns on capital, and cash generation. Strong means the business earns and retains money efficiently.',
+  riskVerdict: 'Overall risk read from leverage, liquidity, volatility, and short interest. Safe means the balance sheet and market positioning look resilient.',
+  fairValueRange: 'Bear/base/bull fair value range derived from P/E, forward EPS, FCF yield, and analyst targets when available.',
 }
 
 /** Per-field tooltips for the raw fundamentals reference panel. */

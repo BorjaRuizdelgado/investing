@@ -35,7 +35,7 @@
   display: flex;
   gap: 0.65rem;
   overflow-x: auto;
-  padding: 0;
+  padding: 0.25rem 0;
   margin-bottom: 2rem;
   width: 100%;
   -webkit-overflow-scrolling: touch;
@@ -52,7 +52,7 @@
 }
 .screener-collections::-webkit-scrollbar-thumb {
   background: var(--border-light);
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
 }
 
 .screener-collection {
@@ -66,17 +66,17 @@
   text-align: center;
   padding: 0.75rem 1.1rem;
   border: 1.2px solid var(--border-light);
+  border-radius: var(--radius-md);
   background: var(--bg);
   cursor: pointer;
   transition:
-    border-color 0.35s var(--ease),
-    box-shadow 0.35s var(--ease),
-    background 0.35s var(--ease);
+    border-color 0.25s var(--ease),
+    background 0.25s var(--ease);
 }
 
 .screener-collection:hover {
   border-color: var(--accent);
-  box-shadow: var(--shadow-card);
+  background: color-mix(in srgb, var(--accent) 4%, var(--bg));
 }
 
 .screener-collection--active {
@@ -123,6 +123,7 @@
   width: 100%;
   padding: 0.6rem 2rem 0.6rem 0.95rem;
   border: 1.2px solid var(--border);
+  border-radius: var(--radius-sm);
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
@@ -167,6 +168,7 @@
   padding: 0.6rem 2rem;
   background: none;
   border: 1.2px solid var(--accent);
+  border-radius: var(--radius-sm);
   color: var(--accent);
   font-family: var(--font-sans);
   font-size: 0.85rem;
@@ -213,7 +215,7 @@
   padding: 0.2rem 0.6rem;
   color: var(--text-muted);
   border: 1.2px solid var(--border-light);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   transition: all 0.2s var(--ease);
   user-select: none;
@@ -286,16 +288,19 @@
   min-width: 0;
   padding: 0.95rem 1rem;
   border: 1.2px solid var(--border-light);
+  border-radius: var(--radius-md);
   background: var(--bg);
   cursor: pointer;
   transition:
     border-color 0.35s var(--ease),
-    box-shadow 0.35s var(--ease);
+    box-shadow 0.35s var(--ease),
+    transform 0.35s var(--ease);
 }
 
 .screener-card:hover {
   border-color: var(--accent);
-  box-shadow: var(--shadow-card-strong);
+  box-shadow: var(--shadow-elevated);
+  transform: translateY(-2px);
 }
 
 .screener-card--skeleton {
@@ -315,7 +320,7 @@
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .screener-card--skeleton .skeleton-line--short {
@@ -351,7 +356,7 @@
   letter-spacing: 0.05em;
   padding: 0.1rem 0.45rem;
   border: 1px solid var(--border-light);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   white-space: nowrap;
 }
 
@@ -459,7 +464,7 @@
 .screener-card__range-bar {
   height: 4px;
   background: var(--border-light);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   position: relative;
   overflow: hidden;
 }
@@ -471,7 +476,7 @@
   bottom: 0;
   width: var(--pos, 0%);
   background: var(--accent);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   transition: width 0.5s var(--ease);
 }
 
@@ -500,6 +505,7 @@
   width: 100%;
   padding: 0.65rem 0.85rem;
   border: 1.2px solid var(--border-light);
+  border-radius: var(--radius-sm);
   background: var(--bg);
   cursor: pointer;
   transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
@@ -508,7 +514,7 @@
 
 .screener-api-result:hover {
   border-color: var(--accent);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-subtle);
 }
 
 .screener-api-result__symbol {
@@ -534,7 +540,7 @@
   letter-spacing: 0.05em;
   padding: 0.1rem 0.4rem;
   border: 1px solid var(--border-light);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   flex-shrink: 0;
 }
 

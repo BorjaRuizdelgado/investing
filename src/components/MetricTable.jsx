@@ -81,7 +81,7 @@ export default function MetricTable({ title, metrics = [], sectorMedians }) {
             <tr>
               <th>Metric</th>
               <th>Value</th>
-              {hasSector && <th>Market</th>}
+              {hasSector && <th>Sector</th>}
             </tr>
           </thead>
           <tbody>

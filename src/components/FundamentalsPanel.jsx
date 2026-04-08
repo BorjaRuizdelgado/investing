@@ -31,12 +31,13 @@ function FundamentalsTableSection({ title, items, defaultOpen, medians }) {
       <button
         className="fund-accordion__header"
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
       >
+        <span className="fund-accordion__title">{title}</span>
+        <span className="fund-accordion__count">{visible.length}</span>
         <svg className="fund-accordion__chevron" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
           <path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        <span className="fund-accordion__title">{title}</span>
-        <span className="fund-accordion__count">{visible.length}</span>
       </button>
       {open && (
         <div className="fund-accordion__body">
@@ -104,7 +105,6 @@ function buildMetric(id, label, value, rawValue, tip) {
 export default function FundamentalsPanel({ fundamentals }) {
   if (!fundamentals) return null
   const f = fundamentals
-  const title = f.longName || f.name || 'Analysis'
   const score = buildFundamentalsScore(f)
 
   const fiftyTwoWeek =
@@ -550,7 +550,7 @@ export default function FundamentalsPanel({ fundamentals }) {
     <div className="fundamentals">
       <section className="terminal-section">
         <div className="section-heading">
-          <h2>{title} Fundamentals</h2>
+          <h2>Fundamentals Analysis</h2>
           <p className="fundamentals-meta">
             {[f.sector, f.industry, f.exchange].filter(Boolean).join(' · ')}
           </p>
@@ -584,7 +584,7 @@ export default function FundamentalsPanel({ fundamentals }) {
 
       <div className="fund-accordion-group">
         <FundamentalsTableSection title="Price" items={priceItems} defaultOpen medians={medians} />
-        <FundamentalsTableSection title="Valuation" items={valuationItems} defaultOpen medians={medians} />
+        <FundamentalsTableSection title="Valuation" items={valuationItems} medians={medians} />
         <FundamentalsTableSection
           title="Profitability & Income Statement"
           items={profitabilityItems}

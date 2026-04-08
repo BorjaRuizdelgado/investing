@@ -12,6 +12,8 @@
 .shortcut-modal {
   background: var(--bg);
   border: 1.2px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-float);
   padding: 1.5rem;
   width: 340px;
   max-width: 90vw;
@@ -58,7 +60,7 @@
   padding: 0.15rem 0.5rem;
   background: var(--bg-alt);
   border: 1px solid var(--border);
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   font-family: var(--font-sans);
   font-size: 0.82rem;
   color: var(--text-light);
@@ -223,10 +225,12 @@
   gap: 0.15rem;
   padding: 0.85rem 1rem;
   border: 1.2px solid var(--border-light);
+  border-radius: var(--radius-md);
   background: var(--bg);
   transition:
     border-color 0.35s var(--ease),
-    box-shadow 0.35s var(--ease);
+    box-shadow 0.35s var(--ease),
+    transform 0.35s var(--ease);
 }
 
 .trending-card.ticker-summary-card__button {
@@ -235,7 +239,8 @@
 
 .trending-card:hover {
   border-color: var(--accent);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-elevated);
+  transform: translateY(-2px);
 }
 
 .trending-card:focus-visible {
@@ -298,6 +303,7 @@
   max-width: 720px;
   margin: 1.5rem auto;
   border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
   background: var(--bg-alt);
   box-shadow: var(--shadow-card);
 }
@@ -438,7 +444,7 @@
   padding: 2rem;
   text-align: center;
   border: 1.2px dashed var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--bg-alt);
   margin: 1rem 0;
 }
@@ -455,7 +461,7 @@
   font-size: 0.85rem;
   padding: 0.45rem 1.2rem;
   border: 1.2px solid var(--accent);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--accent);
   cursor: pointer;

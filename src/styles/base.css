@@ -34,8 +34,24 @@
 
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --transition: 0.3s var(--ease);
+  --transition-fast: 0.15s var(--ease);
   --container: clamp(320px, 90vw, 1120px);
   --section-gap: 112px;
+
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  --shadow-subtle: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-elevated: 0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-float: 0 12px 40px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+
+  --focus-ring: 0 0 0 3px rgba(77,106,97,0.08);
+
+  --gradient-card: linear-gradient(135deg, var(--bg) 0%, color-mix(in srgb, var(--bg-alt) 40%, var(--bg)) 100%);
+  --gradient-score: linear-gradient(90deg, var(--accent) 0%, color-mix(in srgb, var(--accent-warm) 50%, var(--accent)) 100%);
 }
 
 /* ---- Dark theme ---- */
@@ -59,11 +75,16 @@
   --accent-muted: rgba(125, 179, 165, 0.05);
   --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.12);
   --shadow-card-strong: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --shadow-subtle: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+  --shadow-elevated: 0 4px 20px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.12);
+  --shadow-float: 0 12px 40px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.15);
+  --gradient-card: linear-gradient(135deg, var(--bg) 0%, color-mix(in srgb, var(--bg-alt) 30%, var(--bg)) 100%);
   --tooltip-bg: #2f2f2f;
   --tooltip-text: #f0efeb;
   --on-accent: #fff;
   --error-bg: rgba(208, 96, 80, 0.1);
   --error-border: rgba(208, 96, 80, 0.3);
+  --focus-ring: 0 0 0 3px rgba(125,179,165,0.12);
 }
 
 [data-theme='dark'] ::selection {
@@ -95,8 +116,9 @@
   background: var(--accent-subtle);
 }
 
-[data-theme='dark'] .fund-accordion-group {
+[data-theme='dark'] .fund-accordion {
   border-color: var(--border);
+  background: var(--bg-alt);
 }
 
 [data-theme='dark'] .fund-accordion__header:hover {
@@ -129,6 +151,7 @@
 .support-vault__wallet {
   border: 1.2px solid var(--border-light);
   background: var(--bg);
+  border-radius: var(--radius-sm);
 }
 
 /* ---- Reset ---- */
@@ -153,7 +176,7 @@ textarea:focus-visible {
 }
 
 html {
-  font-size: 17.5px;
+  font-size: 18.5px;
   scroll-behavior: smooth;
   /* account for sticky header (60px) + sticky tab bar (44px) */
   scroll-padding-top: 112px;
@@ -161,9 +184,15 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 body {
   font-family: var(--font-sans);
   background: var(--bg);
+  background-image: radial-gradient(ellipse at 20% 50%, color-mix(in srgb, var(--accent) 2%, transparent), transparent 70%);
   color: var(--text);
   line-height: 1.7;
   overflow-x: clip;

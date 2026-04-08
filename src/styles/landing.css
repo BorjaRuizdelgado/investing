@@ -10,6 +10,7 @@
   min-height: 48vh;
   text-align: center;
   padding: 2rem 0;
+  animation: fadeInUp 0.4s var(--ease);
 }
 
 .landing h1 {
@@ -42,10 +43,19 @@
   gap: 0.5rem;
   padding: 0.55rem 1rem;
   border: 1.2px solid var(--border);
+  border-radius: var(--radius-md);
   background: var(--bg);
+  box-shadow: var(--shadow-subtle);
   font-size: 0.88rem;
   color: var(--text-light);
   white-space: nowrap;
+  transition: all 0.25s var(--ease);
+}
+
+.landing-step:hover {
+  box-shadow: var(--shadow-elevated);
+  transform: translateY(-2px);
+  border-color: var(--accent);
 }
 
 .landing-step__num {
@@ -95,6 +105,7 @@
   align-items: center;
   gap: 1rem 1.5rem;
   padding: 1rem 1.1rem;
+  border-radius: var(--radius-md);
 }
 
 .options-controls .field {
@@ -115,6 +126,7 @@
   width: 100%;
   padding: 0.65rem 0.8rem;
   border: 1.2px solid var(--border);
+  border-radius: var(--radius-sm);
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
@@ -127,7 +139,11 @@
 
 .options-controls select:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(77, 106, 97, 0.08);
+  box-shadow: var(--focus-ring);
+}
+
+.options-controls select:focus-visible {
+  outline: none;
 }
 
 .options-toggle {

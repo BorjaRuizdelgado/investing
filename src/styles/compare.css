@@ -54,6 +54,7 @@
   width: 100%;
   padding: 0.6rem 0.85rem;
   border: 1.2px solid var(--border);
+  border-radius: var(--radius-sm);
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
@@ -79,6 +80,7 @@
   background: var(--accent);
   color: var(--on-accent);
   border: 1.2px solid var(--accent);
+  border-radius: var(--radius-sm);
   font-family: var(--font-sans);
   font-size: 0.85rem;
   font-weight: 500;
@@ -145,6 +147,7 @@
   padding: 0.5rem 1.2rem;
   background: none;
   border: 1.2px solid var(--border);
+  border-radius: var(--radius-sm);
   color: var(--text);
   font-family: var(--font-sans);
   font-size: 0.85rem;
@@ -157,6 +160,8 @@
 .compare-suggestion:hover {
   border-color: var(--accent);
   color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-subtle);
 }
 
 /* ---------- Shared ---------- */
@@ -190,7 +195,7 @@
   display: flex;
   flex-direction: column;
   border: 1.2px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--bg-alt) 74%, transparent), transparent),
     var(--bg);
@@ -253,7 +258,7 @@
   justify-content: center;
   text-align: center;
   border: 1.2px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 1.4rem 1rem;
   background: var(--bg);
 }
@@ -291,7 +296,7 @@
 .compare-battle__pill {
   padding: 0.4rem 0.72rem;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.82rem;
   color: var(--text-light);
 }
@@ -383,7 +388,7 @@
 .compare-scoreboard__track {
   position: relative;
   height: 0.55rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 12%, var(--bg-alt)), var(--bg-alt), color-mix(in srgb, var(--accent-warm) 15%, var(--bg-alt)));
   margin: 0.25rem 0;
 }
@@ -393,7 +398,7 @@
   top: 50%;
   width: 0.95rem;
   height: 0.95rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 2px solid var(--bg);
   transform: translate(-50%, -50%);
 }
@@ -509,7 +514,7 @@
   position: relative;
   height: 0.5rem;
   background: var(--bg-alt);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
@@ -526,8 +531,8 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  border-radius: 999px;
-  transition: width 0.3s ease;
+  border-radius: var(--radius-pill);
+  transition: width var(--transition);
 }
 
 .compare-metric__fill--left {
