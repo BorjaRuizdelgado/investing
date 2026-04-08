@@ -9,6 +9,7 @@ const chunks = [
   () => import('../components/OptionsPage.jsx'),
   () => import('../components/FundamentalsPanel.jsx'),
   () => import('../components/EarningsCalendar.jsx'),
+  () => import('../components/NewsPage.jsx'),
   () => import('../components/ComparePage.jsx'),
   () => import('../components/WatchlistPage.jsx'),
 ]

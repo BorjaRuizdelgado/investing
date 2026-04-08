@@ -226,6 +226,11 @@ export function tabTldr({ activeTab, research, fundamentals, analysis, ticker })
       return optionsTldr(analysis, fundamentals, ticker)
     case 'fundamentals':
       return fundamentalsTldr(fundamentals)
+    case 'news':
+      return {
+        tone: 'neutral',
+        text: `Latest headlines and sentiment for ${ticker || 'this ticker'} aggregated from Yahoo Finance, Google News, and Finnhub.`,
+      }
     default:
       return null
   }

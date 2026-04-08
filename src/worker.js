@@ -26,6 +26,7 @@ import { handleSentiment } from './worker/handlers/sentiment.js'
 import { handleTrending } from './worker/handlers/trending.js'
 import { handleScreener } from './worker/handlers/screener.js'
 import { handleSearch } from './worker/handlers/search.js'
+import { handleNews } from './worker/handlers/news.js'
 import { isCrawler, fetchQuickQuote, buildCrawlerHtml, buildCompareCrawlerHtml } from './worker/seo.js'
 import { buildSitemap } from './worker/sitemap.js'
 
@@ -227,6 +228,14 @@ export default {
         } catch (e) {
           return jsonResp({ error: e.message }, 500)
         }
+      }
+
+      if (url.pathname === '/api/news') {
+        const rawN = url.searchParams.get('ticker')
+        if (!rawN) return jsonResp({ error: 'ticker required' }, 400)
+        const nTicker = validateTicker(rawN)
+        if (!nTicker) return jsonResp({ error: 'Invalid ticker' }, 400)
+        return await handleNews(nTicker)
       }
 
       if (url.pathname === '/api/search') {

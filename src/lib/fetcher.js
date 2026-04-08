@@ -61,6 +61,14 @@ export async function fetchSentiment(ticker) {
 }
 
 /**
+ * Fetch news headlines for a ticker from multiple sources.
+ * Returns { ticker, count, sources, articles: [{ title, url, source, published, thumbnail, feed, sentiment }] }
+ */
+export async function fetchNews(ticker) {
+  return get(`${API}/news`, { ticker })
+}
+
+/**
  * Fetch trending tickers for the landing page.
  * Returns { stocks: [...], crypto: [...] }
  */

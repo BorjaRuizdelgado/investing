@@ -16,6 +16,7 @@ const TechnicalsPage = lazy(() => import('./components/TechnicalsPage.jsx'))
 const BusinessPage = lazy(() => import('./components/BusinessPage.jsx'))
 const OptionsPage = lazy(() => import('./components/OptionsPage.jsx'))
 const FundamentalsPanel = lazy(() => import('./components/FundamentalsPanel.jsx'))
+const NewsPage = lazy(() => import('./components/NewsPage.jsx'))
 const DisclaimerPage = lazy(() => import('./components/DisclaimerPage.jsx'))
 const DonationsPage = lazy(() => import('./components/DonationsPage.jsx'))
 const WatchlistPage = lazy(() => import('./components/WatchlistPage.jsx'))
@@ -54,6 +55,7 @@ const TABS = [
   { id: 'business', label: 'Business', caption: 'Financial trends' },
   { id: 'options', label: 'Options Forecasting', caption: 'Market pricing' },
   { id: 'fundamentals', label: 'Fundamentals', caption: 'Raw reference' },
+  { id: 'news', label: 'News', caption: 'Headlines & sentiment' },
 ]
 
 export default function App() {
@@ -412,6 +414,13 @@ export default function App() {
                       Fundamental data isn't available for this ticker yet. Try a stock listed on a major exchange (NYSE, NASDAQ).
                     </div>
                   )}
+                </ErrorBoundary>
+              )}
+              {activeTab === 'news' && (
+                <ErrorBoundary name="NewsPage">
+                  <Suspense fallback={<ChartSkeleton />}>
+                    <NewsPage ticker={ticker} />
+                  </Suspense>
                 </ErrorBoundary>
               )}
 
