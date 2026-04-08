@@ -149,10 +149,11 @@ function PriceTarget({ fundamentals, fairValue, spot, onClick }) {
             <span className={recBadgeClass(rec)}>{REC_LABELS[rec]}</span>
           )}
           {analysts > 0 && (
-            <span className="price-target__analysts">{analysts} analyst{analysts !== 1 ? 's' : ''}</span>
+            <span className="price-target__analysts">{analysts} ANALYST{analysts !== 1 ? 'S' : ''} REVIEWED THIS STOCK</span>
           )}
         </div>
         <div className="price-target__rows">
+          <p></p>
           {rows.map((row) => (
             <div key={row.label} className="price-target__row">
               <span className="price-target__label">{row.label}</span>
