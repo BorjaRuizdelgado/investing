@@ -50,6 +50,7 @@ function deriveResearch(fundamentals, analysis, spot, historyBars = null, market
     technicals: Boolean(technicals?.hasData),
     options: Boolean(analysis),
     fundamentals: fundamentalsHasData,
+    news: true,
   }
 
   return {

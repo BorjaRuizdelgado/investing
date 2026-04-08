@@ -930,3 +930,215 @@ describe('Worker /api/chain — null result guard', () => {
   })
 })
 
+// ---------------------------------------------------------------------------
+// News handler
+// ---------------------------------------------------------------------------
+
+const YF_NEWS_SEARCH = {
+  news: [
+    {
+      title: 'Apple surges on strong earnings',
+      link: 'https://example.com/apple-surges',
+      publisher: 'Reuters',
+      providerPublishTime: 1700000000,
+      thumbnail: { resolutions: [{ url: 'https://example.com/img.jpg' }] },
+      relatedTickers: ['AAPL'],
+    },
+    {
+      title: 'Tech sector overview for the week',
+      link: 'https://example.com/tech-overview',
+      publisher: 'Bloomberg',
+      providerPublishTime: 1699990000,
+      thumbnail: null,
+      relatedTickers: ['MSFT', 'GOOGL'],
+    },
+    {
+      title: 'AAPL hits new all-time high',
+      link: 'https://example.com/aapl-high',
+      publisher: 'CNBC',
+      providerPublishTime: 1700010000,
+      thumbnail: null,
+      relatedTickers: [],
+    },
+  ],
+}
+
+const GOOGLE_RSS_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<rss><channel>
+<item>
+  <title>Apple stock forecast rises amid demand - MarketWatch</title>
+  <link>https://example.com/gn-apple</link>
+  <pubDate>Mon, 13 Nov 2023 12:00:00 GMT</pubDate>
+  <source url="https://marketwatch.com">MarketWatch</source>
+</item>
+<item>
+  <title><![CDATA[Apple reports record quarter &amp; raises guidance]]></title>
+  <link>https://example.com/gn-apple2</link>
+  <pubDate>Sun, 12 Nov 2023 10:00:00 GMT</pubDate>
+  <source url="https://wsj.com">WSJ</source>
+</item>
+</channel></rss>`
+
+function mockFetchImplNews(url) {
+  const u = typeof url === 'string' ? url : url.toString()
+
+  // Auth flow
+  if (u.includes('fc.yahoo.com'))
+    return Promise.resolve(
+      new Response('', { status: 302, headers: { 'set-cookie': 'A3=d=test; path=/' } }),
+    )
+  if (u.includes('getcrumb'))
+    return Promise.resolve(new Response(CRUMB_TEXT, { status: 200 }))
+
+  // Yahoo news search
+  if (u.includes('/v1/finance/search'))
+    return Promise.resolve(new Response(JSON.stringify(YF_NEWS_SEARCH), { status: 200 }))
+
+  // Google News RSS
+  if (u.includes('news.google.com/rss'))
+    return Promise.resolve(new Response(GOOGLE_RSS_XML, { status: 200 }))
+
+  return Promise.resolve(new Response('Not found', { status: 404 }))
+}
+
+function mockFetchImplNewsAllFail(url) {
+  const u = typeof url === 'string' ? url : url.toString()
+  if (u.includes('fc.yahoo.com'))
+    return Promise.resolve(
+      new Response('', { status: 302, headers: { 'set-cookie': 'A3=d=test; path=/' } }),
+    )
+  if (u.includes('getcrumb'))
+    return Promise.resolve(new Response(CRUMB_TEXT, { status: 200 }))
+  // All news sources fail
+  return Promise.resolve(new Response('Server Error', { status: 500 }))
+}
+
+describe('Worker /api/news', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn(mockFetchImplNews))
+  })
+
+  it('requires ticker parameter', async () => {
+    const res = await callWorker('/api/news')
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toMatch(/ticker required/i)
+  })
+
+  it('rejects invalid ticker', async () => {
+    const res = await callWorker('/api/news?ticker=!!!!')
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toMatch(/invalid ticker/i)
+  })
+
+  it('returns aggregated articles from all sources', async () => {
+    const res = await callWorker('/api/news?ticker=AAPL')
+    expect(res.status).toBe(200)
+    const data = await res.json()
+    expect(data.ticker).toBe('AAPL')
+    expect(data.articles).toBeInstanceOf(Array)
+    expect(data.articles.length).toBeGreaterThan(0)
+    expect(data.count).toBe(data.articles.length)
+    expect(data.sources).toBeInstanceOf(Array)
+  })
+
+  it('each article has required fields', async () => {
+    const res = await callWorker('/api/news?ticker=AAPL')
+    const data = await res.json()
+    for (const article of data.articles) {
+      expect(article).toHaveProperty('title')
+      expect(article).toHaveProperty('url')
+      expect(article).toHaveProperty('source')
+      expect(article).toHaveProperty('feed')
+      expect(article).toHaveProperty('sentiment')
+      expect(['positive', 'neutral', 'negative']).toContain(article.sentiment)
+      expect(['yahoo', 'google']).toContain(article.feed)
+    }
+  })
+
+  it('filters Yahoo results to relevant articles only', async () => {
+    const res = await callWorker('/api/news?ticker=AAPL')
+    const data = await res.json()
+    const yahooArticles = data.articles.filter((a) => a.feed === 'yahoo')
+    // 'Tech sector overview' should be excluded — not related to AAPL
+    const titles = yahooArticles.map((a) => a.title)
+    expect(titles).not.toContain('Tech sector overview for the week')
+    // Articles with AAPL in relatedTickers or title should be included
+    expect(titles).toContain('Apple surges on strong earnings')
+    expect(titles).toContain('AAPL hits new all-time high')
+  })
+
+  it('includes Google News articles', async () => {
+    const res = await callWorker('/api/news?ticker=AAPL')
+    const data = await res.json()
+    const feeds = new Set(data.articles.map((a) => a.feed))
+    expect(feeds.has('google')).toBe(true)
+  })
+
+  it('parses Google RSS with CDATA and XML entities', async () => {
+    const res = await callWorker('/api/news?ticker=AAPL')
+    const data = await res.json()
+    const googleArticles = data.articles.filter((a) => a.feed === 'google')
+    const cdataArticle = googleArticles.find((a) => a.title.includes('record quarter'))
+    expect(cdataArticle).toBeDefined()
+    expect(cdataArticle.title).toContain('&')
+    expect(cdataArticle.title).not.toContain('&amp;')
+  })
+
+  it('deduplicates articles with similar titles', async () => {
+    const res = await callWorker('/api/news?ticker=AAPL')
+    const data = await res.json()
+    const titles = data.articles.map((a) =>
+      a.title.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim()
+    )
+    const unique = new Set(titles)
+    expect(titles.length).toBe(unique.size)
+  })
+
+  it('sorts articles newest first', async () => {
+    const res = await callWorker('/api/news?ticker=AAPL')
+    const data = await res.json()
+    const withDates = data.articles.filter((a) => a.published)
+    for (let i = 1; i < withDates.length; i++) {
+      expect(new Date(withDates[i - 1].published).getTime())
+        .toBeGreaterThanOrEqual(new Date(withDates[i].published).getTime())
+    }
+  })
+
+  it('tags sentiment using AFINN-165 lexicon', async () => {
+    const res = await callWorker('/api/news?ticker=AAPL')
+    const data = await res.json()
+    // "Apple surges on strong earnings" should be positive
+    const surgeArticle = data.articles.find((a) => a.title.includes('surges'))
+    expect(surgeArticle?.sentiment).toBe('positive')
+  })
+
+  it('has CORS headers', async () => {
+    const res = await callWorker('/api/news?ticker=AAPL')
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*')
+  })
+
+  it('has cache headers', async () => {
+    const res = await callWorker('/api/news?ticker=AAPL')
+    const cc = res.headers.get('Cache-Control')
+    expect(cc).toMatch(/max-age=300/)
+  })
+})
+
+describe('Worker /api/news — all sources fail', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn(mockFetchImplNewsAllFail))
+  })
+
+  it('returns empty articles when all feeds fail', async () => {
+    const res = await callWorker('/api/news?ticker=ZZZZ')
+    expect(res.status).toBe(200)
+    const data = await res.json()
+    expect(data.articles).toEqual([])
+    expect(data.count).toBe(0)
+  })
+})
+
+
+
