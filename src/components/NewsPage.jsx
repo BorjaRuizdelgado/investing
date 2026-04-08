@@ -149,7 +149,7 @@ export default function NewsPage({ ticker }) {
       <section className="terminal-section">
         <div className="section-heading">
           <h2>News</h2>
-            <p>Latest headlines and sentiment for {ticker} aggregated from Yahoo Finance, Google News, and Finnhub.</p>
+            <p>Latest headlines and sentiment for {ticker} aggregated from Yahoo Finance and Google News.</p>
         </div>
 
         {/* Sentiment summary bar */}
