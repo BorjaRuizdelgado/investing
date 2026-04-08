@@ -355,7 +355,7 @@ export default function App() {
               )}
               {activeTab === 'value' && (
                 <ErrorBoundary name="ValuePage">
-                  <ValuePage research={research} fundamentals={fundamentals} />
+                  <ValuePage research={research} fundamentals={fundamentals} spot={spot ?? analysis?.spot} />
                 </ErrorBoundary>
               )}
               {activeTab === 'quality' && (

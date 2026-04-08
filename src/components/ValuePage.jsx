@@ -6,7 +6,7 @@ import ScenarioCard from './ScenarioCard.jsx'
 import { METRIC_TIPS } from '../lib/metricTips.js'
 import { buildSectorMedians } from '../lib/sectorMedians.js'
 
-export default function ValuePage({ research, fundamentals }) {
+export default function ValuePage({ research, fundamentals, spot }) {
   // useMemo must come before any conditional return (Rules of Hooks)
   const sectorMedians = React.useMemo(() => buildSectorMedians(fundamentals), [fundamentals])
 
@@ -33,7 +33,7 @@ export default function ValuePage({ research, fundamentals }) {
             tooltip={METRIC_TIPS.valuationScore}
           />
           {research?.valuation?.fairValue ? (
-            <ScenarioCard fairValue={research.valuation.fairValue} />
+            <ScenarioCard fairValue={research.valuation.fairValue} spot={spot} />
           ) : (
             <div className="terminal-card">
               <div className="terminal-eyebrow">Fair Value Range</div>
