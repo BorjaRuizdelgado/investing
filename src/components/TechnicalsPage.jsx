@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import Plot from 'react-plotly.js'
+import ChartFrame from './ChartFrame.jsx'
 import ScoreCard from './ScoreCard.jsx'
 import MarketSentimentCard from './MarketSentimentCard.jsx'
 import MetricTable from './MetricTable.jsx'
@@ -88,7 +88,7 @@ function PriceBBChart({ indicators }) {
 
   return (
     <>
-      <Plot data={data} layout={layout} config={PLOTLY_CONFIG} useResizeHandler style={{ width: '100%' }} />
+      <ChartFrame data={data} layout={layout} config={PLOTLY_CONFIG} style={{ width: '100%' }} />
     </>
   )
 }
@@ -150,7 +150,7 @@ function RSIChart({ indicators }) {
 
   return (
     <>
-      <Plot data={data} layout={layout} config={PLOTLY_CONFIG} useResizeHandler style={{ width: '100%' }} />
+      <ChartFrame data={data} layout={layout} config={PLOTLY_CONFIG} style={{ width: '100%' }} />
     </>
   )
 }
@@ -200,7 +200,7 @@ function MACDChart({ indicators }) {
 
   return (
     <>
-      <Plot data={data} layout={layout} config={PLOTLY_CONFIG} useResizeHandler style={{ width: '100%' }} />
+      <ChartFrame data={data} layout={layout} config={PLOTLY_CONFIG} style={{ width: '100%' }} />
     </>
   )
 }

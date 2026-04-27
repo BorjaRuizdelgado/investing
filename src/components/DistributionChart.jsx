@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import Plot from 'react-plotly.js'
+import ChartFrame from './ChartFrame.jsx'
 import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, legendBg, mobileMargin } from '../lib/theme.js'
 
 export default function DistributionChart({ dist, spot, pctiles, mp }) {
@@ -234,11 +234,10 @@ export default function DistributionChart({ dist, spot, pctiles, mp }) {
 
   return (
     <div className="chart-section">
-      <Plot
+      <ChartFrame
         data={data}
         layout={layout}
         config={PLOTLY_CONFIG}
-        useResizeHandler
         style={{ width: '100%', height: '100%' }}
       />
     </div>

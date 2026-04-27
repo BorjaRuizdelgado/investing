@@ -1,7 +1,7 @@
 import React from 'react'
-import Plot from 'react-plotly.js'
 import { fmtCompact } from '../lib/format.js'
 import { getColors, chartHeight } from '../lib/theme.js'
+import ChartFrame from './ChartFrame.jsx'
 import EarningsCalendar from './EarningsCalendar.jsx'
 import CashSankeyChart from './CashSankeyChart.jsx'
 
@@ -14,7 +14,7 @@ function StatementChart({ title, series = [], keys = [], colors = [] }) {
   return (
     <div className="terminal-card">
       <div className="terminal-eyebrow">{title}</div>
-      <Plot
+      <ChartFrame
         data={visibleKeys.map((key, index) => ({
           type: 'bar',
           name: key.label,
@@ -41,7 +41,8 @@ function StatementChart({ title, series = [], keys = [], colors = [] }) {
         }}
         config={{ displayModeBar: false, responsive: true }}
         style={{ width: '100%' }}
-        useResizeHandler
+        showControls={false}
+        defaultInteractive={false}
       />
     </div>
   )

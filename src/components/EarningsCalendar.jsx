@@ -1,6 +1,6 @@
 import React from 'react'
-import Plot from 'react-plotly.js'
 import { getColors } from '../lib/theme.js'
+import ChartFrame from './ChartFrame.jsx'
 
 function formatDate(ts) {
   if (!ts) return null
@@ -57,7 +57,7 @@ export default function EarningsCalendar({ fundamentals }) {
         {epsHistory.length > 0 ? (
           <div className="terminal-card">
             <div className="terminal-eyebrow">EPS History (Last {epsHistory.length} Quarters)</div>
-            <Plot
+            <ChartFrame
               data={[
                 {
                   type: 'bar',
@@ -99,7 +99,8 @@ export default function EarningsCalendar({ fundamentals }) {
               }}
               config={{ displayModeBar: false, responsive: true }}
               style={{ width: '100%', height: '230px' }}
-              useResizeHandler
+              showControls={false}
+              defaultInteractive={false}
             />
           </div>
         ) : (

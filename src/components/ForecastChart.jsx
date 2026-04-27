@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import Plot from 'react-plotly.js'
+import ChartFrame from './ChartFrame.jsx'
 import { COLORS, LAYOUT_DEFAULTS, axisStyle, PLOTLY_CONFIG, chartHeight, legendBg, mobileMargin } from '../lib/theme.js'
 import { buildMaTracesAndAnnotations } from '../lib/ma.js'
 
@@ -293,11 +293,10 @@ export default function ForecastChart({
 
   return (
     <div className="chart-section">
-      <Plot
+      <ChartFrame
         data={data}
         layout={layout}
         config={PLOTLY_CONFIG}
-        useResizeHandler
         style={{ width: '100%', height: '100%' }}
       />
     </div>

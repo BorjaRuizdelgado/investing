@@ -1,12 +1,24 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { fetchNews } from '../lib/fetcher.js'
 
 const FILTERS = ['all', 'positive', 'neutral', 'negative']
 const FEED_LABELS = { yahoo: 'Yahoo Finance', google: 'Google News' }
+const DEFAULT_COUNTS = { positive: 0, neutral: 0, negative: 0 }
+const SENTIMENTS = new Set(['positive', 'neutral', 'negative'])
 
-function timeAgo(isoDate) {
+function safeText(value, fallback = '') {
+  return typeof value === 'string' && value.trim() ? value.trim() : fallback
+}
+
+function normalizeSentiment(sentiment) {
+  return SENTIMENTS.has(sentiment) ? sentiment : 'neutral'
+}
+
+export function timeAgo(isoDate, now = Date.now()) {
   if (!isoDate) return ''
-  const diff = Date.now() - new Date(isoDate).getTime()
+  const timestamp = new Date(isoDate).getTime()
+  if (!Number.isFinite(timestamp)) return ''
+  const diff = now - timestamp
   const mins = Math.floor(diff / 60000)
   if (mins < 1) return 'just now'
   if (mins < 60) return `${mins}m ago`
@@ -17,34 +29,80 @@ function timeAgo(isoDate) {
   return new Date(isoDate).toLocaleDateString()
 }
 
+export function normalizeArticles(articles = []) {
+  if (!Array.isArray(articles)) return []
+
+  return articles.map((article, index) => {
+    const title = safeText(article?.title, 'Untitled headline')
+    const source = safeText(article?.source, 'Unknown source')
+    const feed = safeText(article?.feed, 'unknown')
+    const published = safeText(article?.published, '')
+    const url = safeText(article?.url, '')
+
+    return {
+      title,
+      source,
+      feed,
+      published,
+      url,
+      thumbnail: safeText(article?.thumbnail, ''),
+      sentiment: normalizeSentiment(article?.sentiment),
+      id: url || `${feed}-${source}-${title}-${published}-${index}`,
+    }
+  })
+}
+
+export function filterArticles(articles, filter, searchQuery) {
+  let items = articles
+  if (filter !== 'all') {
+    items = items.filter((article) => article.sentiment === filter)
+  }
+
+  const query = searchQuery.trim().toLowerCase()
+  if (query) {
+    items = items.filter(
+      (article) =>
+        article.title.toLowerCase().includes(query) || article.source.toLowerCase().includes(query),
+    )
+  }
+
+  return items
+}
+
+export function countSentiments(articles) {
+  const counts = { ...DEFAULT_COUNTS }
+  for (const article of articles) {
+    if (counts[article.sentiment] !== undefined) counts[article.sentiment] += 1
+  }
+  return counts
+}
+
 function SentimentBadge({ sentiment }) {
   return (
     <span className={`news-sentiment news-sentiment--${sentiment}`}>
-      {sentiment === 'positive' ? '▲' : sentiment === 'negative' ? '▼' : '—'}{' '}
-      {sentiment}
+      {sentiment === 'positive' ? '▲' : sentiment === 'negative' ? '▼' : '—'} {sentiment}
     </span>
   )
 }
 
 function FeedBadge({ feed }) {
-  return <span className={`news-feed-badge news-feed-badge--${feed}`}>{FEED_LABELS[feed] || feed}</span>
+  return (
+    <span className={`news-feed-badge news-feed-badge--${feed}`}>{FEED_LABELS[feed] || feed}</span>
+  )
 }
 
 function NewsArticle({ article }) {
-  return (
-    <a
-      href={article.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="news-article"
-    >
+  const content = (
+    <>
       {article.thumbnail && (
         <div className="news-article__thumb">
           <img
             src={article.thumbnail}
             alt=""
             loading="lazy"
-            onError={(e) => { e.target.style.display = 'none' }}
+            onError={(e) => {
+              e.currentTarget.style.display = 'none'
+            }}
           />
         </div>
       )}
@@ -57,11 +115,22 @@ function NewsArticle({ article }) {
           <FeedBadge feed={article.feed} />
         </div>
       </div>
+    </>
+  )
+
+  if (!article.url) {
+    return <article className="news-article">{content}</article>
+  }
+
+  return (
+    <a href={article.url} target="_blank" rel="noopener noreferrer" className="news-article">
+      {content}
     </a>
   )
 }
 
 export default function NewsPage({ ticker }) {
+  const requestIdRef = useRef(0)
   const [news, setNews] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -69,53 +138,54 @@ export default function NewsPage({ ticker }) {
   const [searchQuery, setSearchQuery] = useState('')
 
   const loadNews = useCallback(async () => {
-    if (!ticker) return
+    const requestId = requestIdRef.current + 1
+    requestIdRef.current = requestId
+    const nextTicker = safeText(ticker)
+
+    if (!nextTicker) {
+      setNews(null)
+      setError(null)
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
     setError(null)
     try {
-      const data = await fetchNews(ticker)
-      setNews(data)
+      const data = await fetchNews(nextTicker)
+      if (requestIdRef.current === requestId) setNews(data)
     } catch (err) {
-      setError(err.message || 'Failed to load news')
+      if (requestIdRef.current === requestId) {
+        setError(err.message || 'Failed to load news')
+      }
     } finally {
-      setLoading(false)
+      if (requestIdRef.current === requestId) setLoading(false)
     }
   }, [ticker])
 
   useEffect(() => {
     loadNews()
+    return () => {
+      requestIdRef.current += 1
+    }
   }, [loadNews])
 
-  const filtered = useMemo(() => {
-    if (!news?.articles) return []
-    let items = news.articles
-    if (filter !== 'all') {
-      items = items.filter((a) => a.sentiment === filter)
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase()
-      items = items.filter(
-        (a) =>
-          a.title.toLowerCase().includes(q) ||
-          a.source.toLowerCase().includes(q),
-      )
-    }
-    return items
-  }, [news, filter, searchQuery])
+  const articles = useMemo(() => normalizeArticles(news?.articles), [news])
+  const filtered = useMemo(
+    () => filterArticles(articles, filter, searchQuery),
+    [articles, filter, searchQuery],
+  )
+  const sentimentCounts = useMemo(() => countSentiments(articles), [articles])
 
-  const sentimentCounts = useMemo(() => {
-    if (!news?.articles) return { positive: 0, neutral: 0, negative: 0 }
-    const counts = { positive: 0, neutral: 0, negative: 0 }
-    for (const a of news.articles) {
-      if (counts[a.sentiment] !== undefined) counts[a.sentiment]++
-    }
-    return counts
-  }, [news])
+  const sentimentTotal =
+    sentimentCounts.positive + sentimentCounts.neutral + sentimentCounts.negative
 
   if (loading) {
     return (
       <section className="terminal-section">
-        <div className="section-heading"><h2>News</h2></div>
+        <div className="section-heading">
+          <h2>News</h2>
+        </div>
         <div className="news-loading">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="news-skeleton">
@@ -131,12 +201,14 @@ export default function NewsPage({ ticker }) {
   if (error) {
     return (
       <section className="terminal-section">
-        <div className="section-heading"><h2>News</h2></div>
+        <div className="section-heading">
+          <h2>News</h2>
+        </div>
         <div className="terminal-card">
           <p className="terminal-copy" style={{ color: 'var(--red)' }}>
             {error}
           </p>
-          <button className="news-retry-btn" onClick={loadNews}>
+          <button type="button" className="news-retry-btn" onClick={loadNews}>
             Retry
           </button>
         </div>
@@ -149,45 +221,47 @@ export default function NewsPage({ ticker }) {
       <section className="terminal-section">
         <div className="section-heading">
           <h2>News</h2>
-            <p>Latest headlines and sentiment for {ticker} aggregated from Yahoo Finance and Google News.</p>
+          <p>
+            Latest headlines and sentiment for {ticker} aggregated from Yahoo Finance and Google
+            News.
+          </p>
         </div>
 
-        {/* Sentiment summary bar */}
-        <div className="news-sentiment-bar">
-          <div className="news-sentiment-bar__segment news-sentiment-bar__segment--positive"
-            style={{ flex: sentimentCounts.positive || 0 }}>
-            {sentimentCounts.positive > 0 && (
-              <span>▲ {sentimentCounts.positive}</span>
-            )}
+        {sentimentTotal > 0 && (
+          <div className="news-sentiment-bar">
+            <div
+              className="news-sentiment-bar__segment news-sentiment-bar__segment--positive"
+              style={{ flex: sentimentCounts.positive || 0 }}
+            >
+              {sentimentCounts.positive > 0 && <span>▲ {sentimentCounts.positive}</span>}
+            </div>
+            <div
+              className="news-sentiment-bar__segment news-sentiment-bar__segment--neutral"
+              style={{ flex: sentimentCounts.neutral || 0 }}
+            >
+              {sentimentCounts.neutral > 0 && <span>— {sentimentCounts.neutral}</span>}
+            </div>
+            <div
+              className="news-sentiment-bar__segment news-sentiment-bar__segment--negative"
+              style={{ flex: sentimentCounts.negative || 0 }}
+            >
+              {sentimentCounts.negative > 0 && <span>▼ {sentimentCounts.negative}</span>}
+            </div>
           </div>
-          <div className="news-sentiment-bar__segment news-sentiment-bar__segment--neutral"
-            style={{ flex: sentimentCounts.neutral || 0 }}>
-            {sentimentCounts.neutral > 0 && (
-              <span>— {sentimentCounts.neutral}</span>
-            )}
-          </div>
-          <div className="news-sentiment-bar__segment news-sentiment-bar__segment--negative"
-            style={{ flex: sentimentCounts.negative || 0 }}>
-            {sentimentCounts.negative > 0 && (
-              <span>▼ {sentimentCounts.negative}</span>
-            )}
-          </div>
-        </div>
+        )}
 
-        {/* Filter controls */}
         <div className="news-controls">
           <div className="news-filters">
             {FILTERS.map((f) => (
               <button
                 key={f}
+                type="button"
                 className={`news-filter-btn${filter === f ? ' news-filter-btn--active' : ''}`}
                 onClick={() => setFilter(f)}
               >
                 {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
                 {f !== 'all' && (
-                  <span className="news-filter-btn__count">
-                    {sentimentCounts[f] ?? 0}
-                  </span>
+                  <span className="news-filter-btn__count">{sentimentCounts[f] ?? 0}</span>
                 )}
               </button>
             ))}
@@ -202,20 +276,20 @@ export default function NewsPage({ ticker }) {
         </div>
       </section>
 
-      {/* Article list */}
       <section className="terminal-section">
         {filtered.length === 0 ? (
           <div className="terminal-card">
-            <p className="terminal-copy" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-              {news?.articles?.length
-                ? 'No headlines match your filter.'
-                : `No news found for ${ticker}.`}
+            <p
+              className="terminal-copy"
+              style={{ textAlign: 'center', color: 'var(--text-muted)' }}
+            >
+              {articles.length ? 'No headlines match your filter.' : `No news found for ${ticker}.`}
             </p>
           </div>
         ) : (
           <div className="news-list">
-            {filtered.map((article, i) => (
-              <NewsArticle key={`${article.feed}-${i}`} article={article} />
+            {filtered.map((article) => (
+              <NewsArticle key={article.id} article={article} />
             ))}
           </div>
         )}

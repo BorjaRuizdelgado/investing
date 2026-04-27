@@ -113,6 +113,55 @@
     grid-template-columns: 1fr;
   }
 
+  .chart-frame__toolbar {
+    justify-content: stretch;
+    gap: 0.3rem;
+    padding: 0;
+    margin-bottom: 0.25rem;
+  }
+
+  .chart-frame__mode-group {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .chart-frame__mode-group .chart-frame__button {
+    flex: 1 1 0;
+  }
+
+  .chart-frame__button {
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    padding: 0.45rem;
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  .chart-frame__button svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .chart-frame__button span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .chart-frame__button--reset {
+    flex: 0 0 2.25rem;
+  }
+
+  .expander-body--chart .chart-frame {
+    padding-inline: 0.35rem;
+  }
+
   .strategy-grid {
     grid-template-columns: 1fr;
   }
