@@ -1,8 +1,8 @@
 import React from 'react'
-import Plot from 'react-plotly.js'
 import { fmtPct } from '../../lib/format.js'
 import { getColors, mobileMargin } from '../../lib/theme.js'
 import { getHistoryWindow, indexHistory, trailingReturn } from '../../lib/compare.js'
+import ChartFrame from '../ChartFrame.jsx'
 
 const RANGE_TO_BARS = {
   '1M': 22,
@@ -51,7 +51,7 @@ export default function ComparePerformanceChart({ left, right, range, onRangeCha
       </div>
 
       <div className="terminal-card">
-        <Plot
+        <ChartFrame
           data={[
             {
               type: 'scatter',
@@ -88,7 +88,8 @@ export default function ComparePerformanceChart({ left, right, range, onRangeCha
           }}
           config={{ displayModeBar: false, responsive: true }}
           style={{ width: '100%' }}
-          useResizeHandler
+          showControls={false}
+          defaultInteractive={false}
         />
 
         <div className="compare-return-grid">

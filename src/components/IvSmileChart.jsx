@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import Plot from 'react-plotly.js'
+import ChartFrame from './ChartFrame.jsx'
 import {
   COLORS,
   LAYOUT_DEFAULTS,
@@ -120,11 +120,10 @@ export default function IvSmileChart({ ivData, spot }) {
 
   return (
     <div className="chart-section">
-      <Plot
+      <ChartFrame
         data={data}
         layout={layout}
         config={PLOTLY_CONFIG_SMALL}
-        useResizeHandler
         style={{ width: '100%', height: '100%' }}
       />
     </div>

@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react'
-import Plot from 'react-plotly.js'
 import { getColors, chartHeight, hexToRgba } from '../lib/theme.js'
 import { fmtCompact } from '../lib/format.js'
+import ChartFrame from './ChartFrame.jsx'
 import Skeleton from './Skeleton.jsx'
 
 /** Compact label for Sankey nodes — 1 decimal to keep labels short. Returns '' for invalid. */
@@ -272,12 +272,13 @@ export default function CashSankeyChart({ ticker }) {
         Cash Flow Breakdown{period ? ` — FY ${period.slice(0, 4)}` : ''}
       </div>
       <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <Plot
+        <ChartFrame
           data={data}
           layout={layout}
           config={{ displayModeBar: false, responsive: true }}
           style={{ width: '100%', minWidth: 1200 }}
-          useResizeHandler
+          showControls={false}
+          defaultInteractive={false}
         />
       </div>
     </div>
