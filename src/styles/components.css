@@ -419,12 +419,6 @@
   touch-action: pan-y;
 }
 
-.chart-frame--locked.chart-frame--touch .js-plotly-plot,
-.chart-frame--locked.chart-frame--touch .plot-container,
-.chart-frame--locked.chart-frame--touch .svg-container {
-  touch-action: pan-y pinch-zoom;
-}
-
 .chart-frame--interactive .js-plotly-plot,
 .chart-frame--interactive .plot-container,
 .chart-frame--interactive .svg-container {
